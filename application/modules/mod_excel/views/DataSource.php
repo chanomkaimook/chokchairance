@@ -27,13 +27,13 @@ class DataSource
     const DATABASENAME = 'farmchokchai_steakhouse';*/
 	
 	//	ใช้ชั่วคราว
-	const USERNAME = 'farmadmin';
+	/* const USERNAME = 'farmadmin';
     const PASSWORD = 'Farm2018@';
-    const DATABASENAME = 'farmchokchai_regis';
-	
-	/*	const USERNAME = 'root';
+    const DATABASENAME = 'farmchokchai_regis'; */
+
+	const USERNAME = 'root';
     const PASSWORD = '';
-    const DATABASENAME = 'farmchokchai_steakhouse';*/
+    const DATABASENAME = 'shop_ummilk';
 
     private $conn;
 

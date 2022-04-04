@@ -69,10 +69,6 @@
 				$array[$x] = $datainsert;
 				$array_id[$x] = $datainsert[$spreadSheetAry[0][0]];
 
-				/* echo "<pre>";
-				print_r($array);
-				echo "</pre>"; */
-				// exit;
 				if (isset($datainsert)) {
 				}
 				$x++;
@@ -82,7 +78,9 @@
 			$idkey = array_unique($array_id);
 			if ($idkey) {
 				foreach ($idkey as $key => $val) {
-					$group[$val] = array_keys(array_column($array, 'No.'), $val);
+					if (array_column($array, 'code')) {
+						$group[$val] = array_keys(array_column($array, 'code'), $val);
+					}
 				}
 			}
 
@@ -92,140 +90,27 @@
 			$countgroup = 0;
 			if (count($group)) {
 				$countgroup = count($group);
-				
 				foreach ($group as $groupkey => $groupval) {
 					$result_group[$groupkey] = 1;	//	if result = 0 not find data
 					$arraydetail = array();
 					foreach ($groupval as $groupsubval) {
-						//	แบบ codemac หา
-						$item = $array[$groupsubval]['Item Code'];
-						$sqlgroup = $ci->db->select('*')
-							->from('retail_productlist')
-							// ->where('codemac',$item);
-							->where('id', $item);
-						$qgroup = $sqlgroup->get();
-						$numgroup = $qgroup->num_rows();
-
-						if ($numgroup) {
-
-							if ($result_group[$groupkey]) {
-								$rowgroup = $qgroup->row();
-								$arraydetail[] = $array[$groupsubval];
-							}
-						} else {
-							$array_error[$groupkey]['Item Code'] = $array[$groupsubval]['Item Code'];
-							$result_group[$groupkey] = 0;
-						}
-
-						//	find code ref
-						if ($result_group[$groupkey] == 1) {
-							$ref = trim($array[$groupsubval]['No.']);
-
-							$sqlref = $ci->db->select('*')
-								->from('retail_bill')
-								->where('MATCH(ref) AGAINST("' . $ref . '")')
-
-								// ->where('status_complete', 2)
-								->where('status', 1);
-							$qref = $sqlref->get();
-							$numref = $qref->num_rows();
-
-							if ($numref) {
-								$array_error[$groupkey]['No.'] = "มีในระบบแล้ว : " . $array[$groupsubval]['No.'];
-								$result_group[$groupkey] = 0;
-							}
-						}
-
-						//	find delivery
-						if ($result_group[$groupkey] == 1) {
-							$explode = explode(" ", trim($array[$groupsubval]['Shipping Option']));
-
-							if (strpos(trim($explode[0]), "SCG") !== false) {
-								$result_group[$groupkey] = 1;
-							} else if (strpos(trim($explode[0]), "Food") !== false) {
-								$result_group[$groupkey] = 1;
-							} else if (strpos(trim($explode[0]), "Inter") !== false) {
-								$result_group[$groupkey] = 1;
-							} else if (strpos(trim($explode[0]), "DHL") !== false) {
-								$result_group[$groupkey] = 1;
-							} else if (strpos(trim($explode[0]), "Kerry") !== false) {
-								$result_group[$groupkey] = 1;
-							} else {
-								$array_error[$groupkey]['Shipping Option'] = $array[$groupsubval]['Shipping Option'];
-								$result_group[$groupkey] = 0;
-							}
-						}
-
-						//	find Payment Provider
-						if ($result_group[$groupkey] == 1) {
-							$custprovider = trim($array[$groupsubval]['Payment Provider']);
-							if ($custprovider == null || strlen($custprovider) < 1) {
-								$array_error[$groupkey]['Payment Provider'] = "ไม่สามารถตรวจสอบการชำระได้ " . $array[$groupsubval]['Payment Provider'];
-								$result_group[$groupkey] = 0;
-							}
-						}
-						
-						//	find name
-						if ($result_group[$groupkey] == 1) {
-							$custname = trim($array[$groupsubval]['Customer Name']);
-							if ($custname == null || strlen($custname) < 1) {
-								$array_error[$groupkey]['Customer Name'] = $array[$groupsubval]['Customer Name'];
-								$result_group[$groupkey] = 0;
-							}
-						}
-
-						//	find phone
-						if ($result_group[$groupkey] == 1) {
-							$custphone = trim($array[$groupsubval]['Customer Phone']);
-							if ($custphone == null || strlen($custphone) <= 5) {
-								$array_error[$groupkey]['Customer Phone'] = $array[$groupsubval]['Customer Phone'];
-								$result_group[$groupkey] = 0;
-							}
-						}
-
-						//	find address
-						if ($result_group[$groupkey] == 1) {
-							$custaddress = trim($array[$groupsubval]['Customer Address']);
-							$substr_address = substr($custaddress, -6, 1);
-							if ($substr_address == null) {
-								$array_error[$groupkey]['Customer Address'] = $array[$groupsubval]['Customer Address'];
-								$result_group[$groupkey] = 0;
-							}
-						}
-
-						//	find zipcode
-						if ($result_group[$groupkey] == 1) {
-							// $custzipcode = wordText(trim($array[$groupsubval]['Customer Address']));
-							$custzipcode = preg_replace('/[^a-z0-9\_\- ]/i', '', trim($array[$groupsubval]['Customer Address']));
-							$substr_zipcode = substr($custzipcode, -6, 1);
-
-							if ($substr_zipcode != " ") {
-								$array_error[$groupkey]['Customer Address'] = "error zipcode " . $array[$groupsubval]['Customer Address'];
-								$result_group[$groupkey] = 0;
-							}
-						}
-						
-						//	find code account name
-						if($result_group[$groupkey] == 1){
-							$custname = trim($array[$groupsubval]['Account Name']);
-							if($custname == null || strlen($custname) < 1){
-								$array_error[$groupkey]['Account Name'] = "ต้องไม่ใช่ค่าว่าง (อาจต้องใส่คำ cod กรณีเก็บเงินปลายทางเเต่ค่าไม่แสดง) ".$array[$groupsubval]['Account Name'];
-								$result_group[$groupkey] = 0;
-							}
-						
-						}
+						$arraydetail[] = $array[$groupsubval];
 					}
-
-
-					if ($result_group[$groupkey] == 1) {
-						$array_complete[$groupkey] = $arraydetail;
-					}
+					$array_complete[$groupkey] = $arraydetail;
 				}
 			}
+			/* echo "<pre>";
+			// print_r($group);
+			echo "===================";
+			print_r($array_complete);
+			echo "</pre>";
+			exit; */
 
 			//	running program
 			if (count($array_error) < 1) {
-				$create_bill = $ci->mdl_excel->create_bill($array_complete);
+				// echo "running";
+				// $create_bill = $ci->mdl_excel->create_bill($array_complete);
+				$create_bill = $ci->mdl_excel->create_row($array_complete);
 				$total_table = $create_bill['total'];
 			}
 
@@ -334,7 +219,7 @@
 					<div class="container-fluid">
 						<div class="row mb-2">
 							<div class="col-sm-6">
-								<h1><?php echo $mainmenu; ?></h1>
+								<h1>รายงาน</h1>
 							</div>
 							<div class="col-sm-6">
 								<ol class="breadcrumb float-sm-right">
@@ -357,7 +242,7 @@
 								<!-- Custom tabs (Charts with tabs)-->
 								<div class="card">
 									<div class="card-header">
-										<h3 class="card-title"> <i class="fa fa-bars" aria-hidden="true"></i> <?php echo "Manage " . $mainmenu; ?> </h3>
+										<h3 class="card-title"> <i class="fa fa-bars" aria-hidden="true"></i> รายงานจากเครื่อง POS (BU2) </h3>
 									</div>
 									<div class="card-body">
 

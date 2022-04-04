@@ -43,6 +43,8 @@ class Ctl_dashboard extends CI_Controller {
 		// if(chkPermiss() == 1){
 			// redirect('mod_admin/ctl_login');
 		// }
+
+		
 		
 		$data = array (
 			'mainmenu' 		=> 'retail',

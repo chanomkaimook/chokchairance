@@ -15,7 +15,93 @@ class Mdl_excel extends CI_Model {
 							
 		
 	}
-	
+	//
+	//	เฉพาะอัพโหลดสินค้าเข้า
+	//	@param	array		@array = array[ id=>array[codemacitem1,codemacitem2] ]
+	//	
+	function create_row($array){
+		$result = array();
+		//
+		//	array
+		if($array){
+			$i = 0;
+			foreach($array as $key => $row){
+				
+				$code = trim($array[$key][0]['code']);
+
+				$arraytocheck = array(
+					'product_main'		=> trim($array[$key][0]['main'])
+				);
+				$promain_id = $this->mdl_excel->getID_fromName($arraytocheck);
+
+
+				$arraytocheck = array(
+					'product_submain'		=> trim($array[$key][0]['submain'])
+				);
+				$prosubmain_id = $this->mdl_excel->getID_fromName($arraytocheck);
+
+
+				$arraytocheck = array(
+					'product_type'		=> trim($array[$key][0]['type'])
+				);
+				$protype_id = $this->mdl_excel->getID_fromName($arraytocheck);
+
+
+				$arraytocheck = array(
+					'product_category'		=> trim($array[$key][0]['cat'])
+				);
+				$procate_id = $this->mdl_excel->getID_fromName($arraytocheck);
+
+				$name_th = trim($array[$key][0]['name']);
+				
+				$datainsert = array(
+					'code'	=> $code,
+					'promain_id'	=> $promain_id,
+					'prosubmain_id'	=> $prosubmain_id,
+					'protype_id'	=> $protype_id,
+					'procate_id'	=> $procate_id,
+					'name_th'	=> $name_th,
+
+					'user_starts'	=> '00001'	//	page365
+				);
+
+				$this->db->insert('retail_productlist',$datainsert);
+				$id = $this->db->insert_id();
+				if($id){
+					$i++;
+				}
+			}
+			$result = array(
+				'total'	=> $i
+			);
+		}
+
+		return $result;
+	}
+
+	//
+	// @param	array = [key => value] key=table, value=name  
+	// 
+	function getID_fromName($array = array()) {
+		$result = "";
+		if(count($array)){
+			foreach($array as $key => $val){
+				if($val){
+					$sql = $this->db->select('ID')
+					->from($key)
+					->where('name_th',trim($val));
+					$q = $sql->get();
+					$num = $q->num_rows();
+					if($num){
+						$row = $q->row();
+						$result = $row->ID;
+					}
+				}
+			}
+		}
+
+		return $result;
+	}
 	//
 	//	@param	array		@array = array[ id=>array[codemacitem1,codemacitem2] ]
 	//
@@ -258,4 +344,3 @@ class Mdl_excel extends CI_Model {
 		return $codeDB;
 	}
 }
-?>

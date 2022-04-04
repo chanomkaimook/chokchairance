@@ -145,6 +145,13 @@ $permisspage = $this->permiss->get_PagePermiss($this->session->userdata('useradm
 							</a>
 						</li>
 
+						<li id="reportexcel" class="nav-item">
+							<a href="<?php echo site_url('mod_excel') ?>/ctl_excel/report" class="nav-link">
+								<i class="nav-icon fa fa-bar-chart " aria-hidden="true"></i>
+								<p>รายงานนำเข้า</p>
+							</a>
+						</li>
+
 						<li id="staff" class="nav-item">
 							<a href="<?php echo site_url('mod_staff/ctl_staff/staff') ?>" class="nav-link">
 								<i class="nav-icon fa fa-user" aria-hidden="true"></i>

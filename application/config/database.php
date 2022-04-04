@@ -80,7 +80,7 @@ $db['default'] = array(
 	'hostname' => 'localhost',
 	'username' => 'root',
 	'password' => '',
-	'database' => 'um_db',
+	'database' => 'shop_ummilk',
 
 	/* 'username' => 'um_user',
 	'password' => '5zi1u5E#',

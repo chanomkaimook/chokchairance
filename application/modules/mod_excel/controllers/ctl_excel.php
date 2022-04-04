@@ -46,33 +46,21 @@ class Ctl_excel extends CI_Controller
 	}
 	public function index()
 	{
-		redirect(site_url('mod_excel/ctl_excel/page365'));
+		redirect(site_url('mod_excel/ctl_excel/report'));
 	}
-	public function page365()
+	public function report()
 	{
 		$data = array(
 			'mainmenu' 		=> 'retail',
-			'submenu' 		=> 'excel',
+			'submenu' 		=> 'reportexcel',
 			'importvalue' 		=> ($_REQUEST['page'] ? $_REQUEST['page'] : 'page365')
 		);
 
 		$data['base_bn'] = base_url() . BASE_BN;
 		$data['basepic'] = base_url() . BASE_PIC;
-		$this->load->view('page365', $data);
+		$this->load->view('report', $data);
 	}
-	public function shopee()
-	{
-		$data = array(
-			'mainmenu' 		=> 'retail',
-			'submenu' 		=> 'excel',
-			'importvalue' 		=> ($_REQUEST['page'] ? $_REQUEST['page'] : 'shopee')
-		);
-
-		$data['base_bn'] = base_url() . BASE_BN;
-		$data['basepic'] = base_url() . BASE_PIC;
-		$this->load->view('shopee', $data);
-	}
-
+	
 	public function get_dataImport()
 	{
 		$request = $_REQUEST;
