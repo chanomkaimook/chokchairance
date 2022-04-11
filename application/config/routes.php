@@ -58,10 +58,14 @@ $route['translate_uri_dashes'] = FALSE;
 $route['dash/dashboard'] = 'mod_retaildashboard/ctl_dashboard/dashboard';
 $route['api/staff'] = 'mod_staff/authdatastaff/user';
 $route['api/staff/add'] = 'mod_staff/authdatastaff/user';
-// $route['api/staff/edit'] = 'mod_staff/authdatastaff/user';
-// $route['api/staff/delete'] = 'mod_staff/authdatastaff/user';
 $route['api/staff/edit/(:any)'] = 'mod_staff/authdatastaff/user/$1';
 $route['api/staff/delete/(:any)'] = 'mod_staff/authdatastaff/user/$1';
+
+$route['api/product/main/edit/(:any)'] = 'api_product/product/$1';
+$route['api/product/main/delete/(:any)'] = 'api_product/product/$1';
+/* $route['api/staff/add'] = 'mod_staff/authdatastaff/user';
+$route['api/staff/edit/(:any)'] = 'mod_staff/authdatastaff/user/$1';
+$route['api/staff/delete/(:any)'] = 'mod_staff/authdatastaff/user/$1'; */
 
 //  เพราะไม่สามารถจัดการกับ error 405 not allow method ได้ ต้องลบ wabDAV จาก server ซึ่งเสี่ยงที่โดเมนตัวอื่นจะพังตาม
 //  Ref:

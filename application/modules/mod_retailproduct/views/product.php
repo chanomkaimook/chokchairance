@@ -4,6 +4,7 @@
 <head>
     <?php include("structer/backend/head.php"); ?>
     <link rel="stylesheet" href="<?php echo $base_bn; ?>frontend/bootstrap-select/css/bootstrap-select.css">
+
     <style>
         .selectstyle {
             height: calc(1.25rem + 2px);
@@ -68,15 +69,24 @@
                                             $pm_insertmain = chkPermissPage('product_insertmain');
                                             if ($pm_insertmain == 1) :
                                             ?>
-                                                <a href="<?php echo site_url('mod_retailproduct') ?>/ctl_retailproduct/product_insertmain" class="btn btn-primary btn-sm">
-                                                    <li class="fa fa-plus-square-o "></li> จัดการเมนูหลัก
+                                                <a href=# class="btn_menumain btn btn-info btn-sm" data-type="main" data-toggle="modal" data-target=".modal-product">
+                                                    <li class="fa fa-plus-square-o "></li> ข้อมูลกลุ่ม
+                                                </a>
+                                                <a href=# class="btn_menumain btn btn-info btn-sm" data-type="submain" data-toggle="modal" data-target=".modal-product">
+                                                    <li class="fa fa-plus-square-o "></li> ข้อมูลหมวดหมู่
+                                                </a>
+                                                <a href=# class="btn_menumain btn btn-info btn-sm" data-type="type" data-toggle="modal" data-target=".modal-product">
+                                                    <li class="fa fa-plus-square-o "></li> ข้อมูลรูปแบบ
+                                                </a>
+                                                <a href=# class="btn_menumain btn btn-info btn-sm" data-type="category" data-toggle="modal" data-target=".modal-product">
+                                                    <li class="fa fa-plus-square-o "></li> ข้อมูล catalog
                                                 </a>
                                             <?php
                                             endif;
                                             $pm_insertlist = chkPermissPage('product_insertlist');
                                             if ($pm_insertlist == 1) :
                                             ?>
-                                                <a href="<?php echo site_url('mod_retailproduct') ?>/ctl_retailproduct/product_insertlist" class="btn btn-primary btn-sm">
+                                                <a href="<?php echo site_url('mod_retailproduct') ?>/ctl_retailproduct/product_insertlist" class="btn btn-info btn-sm">
                                                     <li class="fa fa-plus-square-o "></li> เพิ่มรายการเมนู
                                                 </a>
                                             <?php
@@ -162,19 +172,106 @@
                                         </div>
                                     </div>
 
-                                </div>
-                            </div>
-                        </section>
 
+                                </div>
+
+                            </div>
                     </div>
-                </div>
             </section>
 
+            <style>
+                .modal-content {
+                    padding: inherit;
+                }
+            </style>
+            <!-- // ========== Modal ============ // -->
+            <div class="modal fade modal-product bd-example-modal-lg" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title text-info">Extra Large Modal</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="">
+                                <!-- เพิ่ม -->
+                                <div class="row d-flex justify-content-center">
+                                    <div class="col-8 ">
+                                        <div class="card ">
+                                            <div class="card-header bg-success">
+                                                <h3 class="card-title">เพิ่มข้อมูล</h3>
+                                            </div>
+                                            <form id="frmmodal_add" name="frmmodal_add">
+                                                <div class="card-body">
+                                                    <div class="form-group">
+                                                        <label for="name_th">ชื่อ</label>
+                                                        <input type="text" class="form-control" id="name_th" name="name_th" placeholder="Enter name">
+                                                    </div>
+                                                </div>
+
+                                                <div class="card-footer text-right">
+                                                    <button type="button" id="btn_modal_addproduct" class="btn btn-primary">เพิ่มข้อมูล</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <!-- เพิ่ม -->
+                                <div class="row d-flex justify-content-center">
+                                    <div class="col-8 ">
+                                        <div class="card ">
+                                            <div class="card-header bg-warning">
+                                                <h3 class="card-title">แก้ไขข้อมูล</h3>
+                                            </div>
+                                            <form id="frmmodal_edit" name="frmmodal_edit">
+                                                <div class="card-body">
+                                                    <div class="form-group">
+                                                        <label for="selectproduct">เลือกรายชื่อ</label>
+                                                        <select id="selectproduct" name="selectproduct" class="form-control select2" style="width:100%">
+                                                            <option selected="">เลือก</option>
+                                                        </select>
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label for="name_th">แก้ไขชื่อ</label>
+                                                        <input type="text" class="form-control" id="edit_name_th" name="edit_name_th" placeholder="Enter name">
+                                                    </div>
+                                                </div>
+
+                                                <div class="card-footer text-right">
+                                                    <button type="button" id="btn_modal_editproduct" class="btn btn-primary mx-2 w-25">บันทึก</button>
+                                                    <button type="button" id="btn_modal_delproduct" class="btn btn-danger">ลบ</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times-circle-o" aria-hidden="true"></i> ปิด</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
         </div>
-        <?php include("structer/backend/footer.php"); ?>
-        <?php include("structer/backend/script.php"); ?>
-        <script src="<?php echo $base_bn; ?>frontend/bootstrap-select/js/bootstrap-select.js"></script>
-        <script src="<?php echo $base_bn; ?>plugins/sweetalert2/sweetalert2.min.js"></script>
+    </div>
+    </section>
+
+    </div>
+    <?php include("structer/backend/footer.php"); ?>
+    <?php include("structer/backend/script.php"); ?>
+    <script src="<?php echo $base_bn; ?>frontend/bootstrap-select/js/bootstrap-select.js"></script>
+    <script src="<?php echo $base_bn; ?>plugins/sweetalert2/sweetalert2.min.js"></script>
+    <!-- Select2 -->
+    <script src="<?php echo $base_bn; ?>plugins/select2/js/select2.full.min.js"></script>
     </div>
     <script>
         $(function() {
@@ -184,6 +281,9 @@
                 showConfirmButton: false,
                 timer: 3000
             });
+
+            //Initialize Select2 Elements
+            $('.select2').select2()
 
             productlist();
             $(document).on('click', '[data-toggle="lightbox"]', function(event) {
@@ -199,24 +299,24 @@
             });
 
             // list promotion reference
-            $(document).on('click','.btn_promotionref', function() {
+            $(document).on('click', '.btn_promotionref', function() {
                 var data = new FormData();
                 // data.append('sku', $('.btn_promotionref').attr('id'));
                 // console.log($(this).attr('data-id'));
-                let url = 'get_listPromotionRef?sku='+$(this).attr('data-id');
-                 fetch(url)
-                 .then(res => res.json())
-                 .then((resp) => {
-                     let html ="";
-                     $.each(resp,function(key,value){
-                        key++;
-                        html += key+" "+value+"<br>";
-                     })
-                     $('#resultproref').html(html);
-                 })
-                 .catch((error) => {
-                     console.log(`error :${error}`);
-                 })
+                let url = 'get_listPromotionRef?sku=' + $(this).attr('data-id');
+                fetch(url)
+                    .then(res => res.json())
+                    .then((resp) => {
+                        let html = "";
+                        $.each(resp, function(key, value) {
+                            key++;
+                            html += key + " " + value + "<br>";
+                        })
+                        $('#resultproref').html(html);
+                    })
+                    .catch((error) => {
+                        console.log(`error :${error}`);
+                    })
             });
 
             //----------------------------filter--------------------------//
@@ -283,6 +383,252 @@
                         "orderable": false,
                     }, ],
                 });
+            }
+            //
+            // Button function
+            //
+            var modalProduct = $('.modal-product');
+            $(document).on('click', '.btn_menumain', function() {
+                let element = $(this);
+                let type = element.attr('data-type');
+                let btn_name = element.text().trim();
+
+                //  style modal
+                let title = btn_name;
+                $('.modal-product').find('.modal-title').html(title);
+
+                async_getData(type);
+
+            })
+
+            let htmlSelect = "";
+
+            function onSelectProduct(e) {
+                htmlSelect = itemId
+            }
+            $(document).on('change', '#selectproduct', function() {
+                let element = $('#edit_name_th');
+                element.val($('option:selected', this).attr('data-name'));
+                htmlSelect = $('option:selected', this).val();
+            })
+
+            $(document).on('click', '#btn_n', function() {
+                getData('main')
+            })
+
+
+            // 
+            //  click delete 
+            $(document).on('click', '#btn_modal_editproduct', function() {
+
+                var itemid = $('option:selected', '#selectproduct').val();
+                if (itemid == "") {
+                    Swal.fire({
+                        type: 'warning',
+                        title: 'โปรดเลือกรายชื่อ',
+                        text: '',
+                        timer: 2000
+                    })
+
+                    return false;
+                }
+
+                let form = $('form#frmmodal_edit').serializeArray();
+
+                let url = '../../api/product/main/edit/' + itemid;
+
+                Swal.fire({
+                    title: 'Wait ...',
+                    allowOutsideClick: false,
+                    async onOpen(result) {
+                        fetch(
+                                url, {
+
+                                    headers: {
+                                        'API-KEY': 'XOGgx6vzY2yIj7li4tS1PMrqckh8dmE5FVQRZGeL',
+                                    },
+                                    method: 'POST',
+                                    body: JSON.stringify(form)
+                                })
+                            .then(async (response) => {
+                                let result = await response.json();
+
+                                swal.close();
+
+                                if (!response.ok) {
+                                    throw new Error("HTTP status " + response.status);
+                                } else {
+
+                                    if (result.error_code) {
+                                        Swal.fire({
+                                            type: 'warning',
+                                            title: 'ข้อมูลไม่ถูกต้อง',
+                                            text: result.data,
+                                        }).then((response) => {
+                                            if (response) {
+                                                $('#edit_name_th').addClass('is-invalid').focus();
+                                            }
+                                        })
+
+                                        return false;
+                                    }
+                                    //
+                                    //  success
+                                    Swal.fire({
+                                        type: 'success',
+                                        title: 'รายการสำเร็จ',
+                                        text: 'แก้ไขผู้ใช้งานสำเร็จ',
+                                        timer: 2000,
+                                    }).then(async (resolve) => {
+                                        let doing1 = await new Promise((resolve, reject) => {
+                                            resolve(
+                                                    getData('main')
+                                                )
+                                        });
+
+                                    })
+                                }
+                            })
+                            .catch(function(error) {
+                                alert(`${error}`);
+                            })
+                    },
+                    onBeforeOpen() {
+                        Swal.showLoading()
+                    }
+                })
+
+            })
+
+            $(document).on('keypress', '#edit_name_th', function() {
+                $(this).removeClass('is-invalid');
+                $(this).addClass('is-valid');
+            })
+
+            // 
+            //  click delete 
+            $(document).on('click', '#btn_modal_delproduct', function() {
+                var itemid = $('option:selected', '#selectproduct').val();
+                if (itemid == "") {
+                    Swal.fire({
+                        type: 'warning',
+                        title: 'โปรดเลือกรายชื่อ',
+                        text: '',
+                        timer: 2000
+                    })
+
+                    return false;
+                }
+
+                Swal.fire({
+                    type: 'warning',
+                    title: 'ลบข้อมูล',
+                    // timer: 2000,
+                    showConfirmButton: true,
+                    confirmButtonText: "ยืนยัน",
+                    showCancelButton: true,
+                    cancelButtonText: "ยกเลิก",
+                    text: 'ต้องการลบข้อมูลนี้',
+                }).then((response) => {
+                    //
+                    //  confirm
+                    if (response.value) {
+                        Swal.fire({
+                            title: 'Wait ...',
+                            allowOutsideClick: false,
+                            async onOpen(result) {
+                                fetch(
+                                        '../../api/product/main/delete/' + itemid, {
+
+                                            headers: {
+                                                'API-KEY': 'XOGgx6vzY2yIj7li4tS1PMrqckh8dmE5FVQRZGeL',
+                                            },
+                                            method: 'POST'
+                                        })
+                                    .then(async (response) => {
+                                        let result = await response.json();
+
+                                        swal.close();
+
+                                        if (!response.ok) {
+                                            throw new Error("HTTP status " + response.status);
+                                        } else {
+
+                                            if (result.error_code) {
+                                                Swal.fire({
+                                                    type: 'warning',
+                                                    title: 'ข้อมูลไม่ถูกต้อง',
+                                                    text: result.data,
+                                                })
+
+                                                return false;
+                                            }
+                                            //
+                                            //  success
+                                            Swal.fire({
+                                                type: 'success',
+                                                title: 'รายการสำเร็จ',
+                                                text: 'ลบผู้ใช้งานสำเร็จ',
+                                                timer: 2000,
+                                            }).then(
+                                                modalProduct.modal('hide')
+                                            )
+                                        }
+                                    })
+                                    .catch(function(error) {
+                                        alert(`${error}`);
+                                    })
+                            },
+                            onBeforeOpen() {
+                                Swal.showLoading()
+                            }
+                        })
+                    }
+
+                })
+            })
+
+            modalProduct.on('hide.bs.modal', function() {
+                document.frmmodal_add.reset();
+                document.frmmodal_edit.reset();
+                htmlSelect = "";
+            })
+
+            async function async_getData(type) {
+                let result1 = await new Promise((resolve, reject) => {
+                    return resolve(
+                        getData(type)
+                    )
+                })
+            }
+
+            function getData(type) {
+
+                let url = '../ctl_retailproduct/getdata';
+                fetch(url + '?' + new URLSearchParams({
+                        ptype: type
+                    }))
+                    .then(res => res.json())
+                    .then((resp) => {
+                        return htmlSelectOption(resp);
+                    })
+                    .catch(function(error) {
+                        alert(error);
+                    })
+
+            }
+
+            //
+            //  @param  resp    @array = [id=list ID,name=name_th]
+            //
+            function htmlSelectOption(resp) {
+                let option = '<option value="">เลือก</option>';
+                $.each(resp, function(key, item) {
+
+                    option += '<option value="' + item.id + '" data-name="' + item.name + '" ' + (htmlSelect == item.id ? 'selected' : '') + '>' + item.name + '(' + item.count + ')</option>';
+                })
+
+                $('#selectproduct').html(option);
             }
         })
     </script>

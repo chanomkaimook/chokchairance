@@ -2,8 +2,8 @@
 	ini_set('max_execution_time', 0);
 	ini_set('memory_limit', "100M");
 
-	use Mpdf\Tag\I;
 	use Phppot\DataSource;
+	use PhpOffice\PhpSpreadsheet\Reader\Xls;
 	use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 
 	require_once 'DataSource.php';
@@ -17,9 +17,8 @@
 	#	**	table
 	($importvalue ? $selected = 'selected' : $selected = "");
 
-	$select = "<select id='seltable' name='seltable' class='form-control col-4' >";
-	$select .= "<option value='page365' " . ($importvalue == 'page365' ? 'selected' : "") . " >Page 365</option>";
-	$select .= "<option value='shopee' " . ($importvalue == 'shopee' ? 'selected' : "") . " >Shopee</option>";
+	$select = "<select id='seltable' name='seltable' class='form-control' >";
+	$select .= "<option value='bu2' " . ($importvalue == 'bu2' ? 'selected' : "") . " >BU2</option>";
 	$select .= "</select>";
 	$tablemain = $select;
 	#
@@ -43,6 +42,11 @@
 
 			$Reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
 
+			//	for file *.xls
+			if ($_FILES["file"]["type"] == 'application/vnd.ms-excel') {
+				$Reader = new \PhpOffice\PhpSpreadsheet\Reader\Xls();
+			}
+
 			$spreadSheet = $Reader->load($targetPath);
 			$excelSheet = $spreadSheet->getActiveSheet();
 			$spreadSheetAry = $excelSheet->toArray();
@@ -57,52 +61,184 @@
 
 			$x = 0;
 			$array = array();
-			$array_error = array();
 			$array_complete = array();
+			$array_error = array();
+			$endpoint = "";					//	จุดที่มาร์คให้ระบบรู้ว่าจบการเก็บข้อมูลที่บรรทัดไหน	
 
-			for ($i = 1; $i < $sheetCount; $i++) {
+			//	setting
+			$array['bill'] = array();		//	ชื่อ bill
 
-				foreach ($spreadSheetAry[$i] as $key => $value) {
-					$datainsert[$spreadSheetAry[0][$key]] = get_valueNullToNull($value);
+			//	เพื่อตรวจสอบว่าข้อมูลนี้คือชุดแถวข้อมูลเริ่มต้นของบิล หรือไม่ เพื่อจะต่อข้อมูลบิลไปเรื่อยๆกับชุดข้อมูลถัดไป
+			$identify = "";
+
+			for ($i = 0; $i < $sheetCount; $i++) {
+
+				$start_bill = "";
+				$result_group[$i] = 1;	//	if result = 0 not find data
+
+				if (is_numeric(array_search('รวมวันที่', $spreadSheetAry[$i]))) {
+					$endpoint = $i;
 				}
+				/* echo $i." = ".is_numeric(array_search('รวมเครื่องที่', $spreadSheetAry[$i]))." - ".$endpoint."<br>";
+if(!is_numeric(array_search('รวมเครื่องที่', $spreadSheetAry[$i]))){
+echo "boot<br>";
+}else{
+	echo "not running<br>";
+} */
+				//	เช็คว่าเป็นบรรทัดสรูปยอดหรือไม่ หากใช่ ให้ข้ามไป
+				if (!is_numeric(array_search('รวมเครื่องที่', $spreadSheetAry[$i])) && $endpoint == "") {
 
-				$array[$x] = $datainsert;
-				$array_id[$x] = $datainsert[$spreadSheetAry[0][0]];
+					foreach ($spreadSheetAry[$i] as $key => $value) {
 
-				if (isset($datainsert)) {
-				}
+						$datainsert[$spreadSheetAry[$i][$key]] = get_valueNullToNull($value);
+
+						//	ชื่อ booth
+						if ($i == 2 && $key == 4) {
+							$booth_name = trim($datainsert[$spreadSheetAry[$i][$key]]);
+
+							//	select id booth
+							$sql = $this->db->select('ID')
+								->from('retail_methodorder')
+								->where('topic', $booth_name);
+							$q = $sql->get();
+							$num = $q->num_rows();
+							if ($num) {
+								$row = $q->row();
+								$booth_id = $row->ID;
+							} else {
+								$err_i = $i+1;
+								$err_key = $key+1;
+
+								$result_group[$i] = 0;
+								$array_error[$i][$key] = 'ไม่พบชื่อบูธ value = '.$booth_name.' [row=' . $err_i . '][col=' . $err_key . ']';
+							}
+						}
+
+						//	เนื้อหาที่ต้องใช้ (ข้ามส่วนหัวเอกสาร)
+						if ($i > 6) {
+
+							//	หาวันที่
+							if ($key == 0 && $value) {
+								$array['bill']['date'] = $datainsert[$spreadSheetAry[$i][$key]];
+								$start_bill = 1;
+
+								//	สำหรับเรียงลำดับสินค้าภายในบิล
+								$item_no = 0;
+								$array_item = array();			//	reset รายการสินค้าในบิล
+								$array['bill']['net'] = 0;		//	reset ราคารวม
+							}
+
+							if ($start_bill) {
+
+								//	หาเลขเครื่อง POS
+								if ($key == 1 && $value) {
+									$array['bill']['pos_id'] = $datainsert[$spreadSheetAry[$i][$key]];
+								}
+
+								//	หาเลขที่ใบเสร็จ
+								if ($key == 2 && $value) {
+									$array['bill']['code'] = $datainsert[$spreadSheetAry[$i][$key]];
+
+									//	คีย์ array สำหรับสร้างบิล
+									$identify = $datainsert[$spreadSheetAry[$i][$key]];
+
+									//	check error
+									$sqlcheck = $this->db->select('ID')
+										->from('retail_bill')
+										->where('code', $identify);
+									$qcheck = $sqlcheck->get();
+									$numcheck = $qcheck->num_rows();
+									if ($numcheck) {
+										$err_i = $i+1;
+										$err_key = $key+1;
+
+										$result_group[$i] = 0;
+										$array_error[$i][$key] = 'มีรายการบิลซ้ำในระบบ value = '.$identify.' [row=' . $err_i . '][col=' . $err_key . ']';
+									}
+								}
+
+								//	หายอดก่อน vat
+								if ($key == 7 && $value) {
+									$array['bill']['price'] = sprintf('%0.2f', preg_replace("/([^0-9\\.])/i", "", $datainsert[$spreadSheetAry[$i][$key]]));
+								}
+
+								//	หายอด vat
+								if ($key == 9 && $value) {
+									$array['bill']['vat'] = sprintf('%0.2f', preg_replace("/([^0-9\\.])/i", "", $datainsert[$spreadSheetAry[$i][$key]]));
+								}
+							} else {		//	รายการสินค้าต่อมาของบิลนั้น ( $key[0] จะไม่มีค่า )
+
+								//	หารหัสสินค้า
+								if ($key == 1 && $value) {
+									$array_item[$item_no]['code'] = $datainsert[$spreadSheetAry[$i][$key]];
+
+									//	check error
+									$sqlcheck = $this->db->select('ID')
+										->from('retail_productlist')
+										->where('code', $array_item[$item_no]['code']);
+									$qcheck = $sqlcheck->get();
+									$numcheck = $qcheck->num_rows();
+									if (!$numcheck) {
+										$err_i = $i+1;
+										$err_key = $key+1;
+										
+										$result_group[$i] = 0;
+										$array_error[$i][$key] = 'ไม่พบรหัสสินค้า value = '.$array_item[$item_no]['code'].' [row=' . $err_i . '][col=' . $err_key . ']';
+									}
+								}
+
+								//	หาชื่อสินค้า
+								if ($key == 5 && $value) {
+									$array_item[$item_no]['name'] = $datainsert[$spreadSheetAry[$i][$key]];
+								}
+
+								//	หาหน่วยสินค้า
+								if ($key == 8 && $value) {
+									$array_item[$item_no]['unit'] = $datainsert[$spreadSheetAry[$i][$key]];
+								}
+
+								//	หาหน่วยสินค้า
+								if ($key == 10 && $value) {
+									$array_item[$item_no]['total'] = $datainsert[$spreadSheetAry[$i][$key]];
+								}
+
+								//	หาราคาสินค้า
+								if ($key == 11 && $value) {
+									$array_item[$item_no]['price'] = sprintf('%0.2f', preg_replace("/([^0-9\\.])/i", "", $datainsert[$spreadSheetAry[$i][$key]]));
+
+									//	หายอด ราคารวมทั้งหมด
+									$array['bill']['net'] += $array_item[$item_no]['price'];
+								}
+							}
+						}
+					}	//	end foreach วนลูปคอลัมด้านใน
+
+
+					if ($identify && $result_group[$i] == 1) {
+
+						$array['bill']['booth_id'] = $booth_id;
+						$array['bill']['booth_name'] = $booth_name;
+						$array_complete[$identify] = $array;
+					}
+
+					if ($array_item && $result_group[$i] == 1) {
+						$item_no++;	//	เริ่มเรียงลำดับรายการสินค้าเมื่อระบบมีการกำหนดเลข bill แล้ว (identify)
+
+						$array_complete[$identify]['bill']['net'] = sprintf('%0.2f', $array['bill']['net']);
+						$array_complete[$identify]['bill_item'] = $array_item;
+					}
+				}	//	end for วนลูปชูดแถวข้อมูล
+
 				$x++;
 			}
 
-			//	group key
-			$idkey = array_unique($array_id);
-			if ($idkey) {
-				foreach ($idkey as $key => $val) {
-					if (array_column($array, 'code')) {
-						$group[$val] = array_keys(array_column($array, 'code'), $val);
-					}
-				}
-			}
-
-			$json_group = json_encode($group);
-
-			//	check error
-			$countgroup = 0;
-			if (count($group)) {
-				$countgroup = count($group);
-				foreach ($group as $groupkey => $groupval) {
-					$result_group[$groupkey] = 1;	//	if result = 0 not find data
-					$arraydetail = array();
-					foreach ($groupval as $groupsubval) {
-						$arraydetail[] = $array[$groupsubval];
-					}
-					$array_complete[$groupkey] = $arraydetail;
-				}
-			}
 			/* echo "<pre>";
 			// print_r($group);
+			print_r($array_complete); 
+			echo "====<br>";
+			print_r($spreadSheetAry);
 			echo "===================";
-			print_r($array_complete);
+
 			echo "</pre>";
 			exit; */
 
@@ -110,33 +246,15 @@
 			if (count($array_error) < 1) {
 				// echo "running";
 				// $create_bill = $ci->mdl_excel->create_bill($array_complete);
-				$create_bill = $ci->mdl_excel->create_row($array_complete);
+				$create_bill = $ci->mdl_excel->create_bill($array_complete);
 				$total_table = $create_bill['total'];
 			}
-
-			/* echo "<pre>";
-			echo "******";
-			print_r($group);
-			echo "complete===";
-			print_r($array_complete);
-			echo "error===";
-			print_r($array_error);
-			echo "===ARRAY===";
-			print_r($array);
-			echo "</pre>";
-			exit(); */
 		} else {
 			$type = "error";
 			$message = "Invalid File Type. Upload Excel File.";
 		}
-
-		// exit;
 	}
 
-	//	test
-	/* $test[2855] = array('0' => 0, '1' => 1);
-	$test[3134] = array('0' => 2, '1' => 3, '3' => 4);
-	$json_group = json_encode($test); */
 	?>
 
 	<!DOCTYPE html>
@@ -249,18 +367,31 @@
 										<div class="row">
 											<div class="col-sm-12">
 												<div class="card-body">
-													<h4 class="head-title">Table : <?php echo $tablemain; ?></h4>
-													<label>Import Excel File into MySQL Database using PHP <span class="text-info">**ถ้ายกเลิกให้ status 0, status_complete 3</span></label>
-													<div class="outer-container">
-														<form action="<?php $_SERVER['PHP_SELF']; ?>" method="post" name="frmExcelImport" id="frmExcelImport" enctype="multipart/form-data">
-															<input id="import" name="import" type="hidden" value="<?php echo $importvalue; ?>">
-															<div>
-																<label>Choose Excel File</label> <input type="file" name="file" id="file" accept=".xls,.xlsx">
 
-																<button id="btnsubmit" name="btnsubmit" type="button" class="btn-submit">Import</button>
+
+													<div class="row">
+														<div class="form-group col-sm-6 col-xs-12">
+															<label for="bu">เลือก BU</label>
+															<div class="">
+																<?php
+																echo $tablemain;
+																?>
 															</div>
+														</div>
+														<div class="form-group col-sm-6 col-xs-12">
+															<label for="upload">อัพโหลดไฟล์ excel</label>
+															<div class="">
+																<form action="<?php $_SERVER['PHP_SELF']; ?>" method="post" name="frmExcelImport" id="frmExcelImport" enctype="multipart/form-data">
+																	<input id="import" name="import" type="hidden" value="<?php echo $importvalue; ?>">
+																	<div>
+																		<label>Choose Excel File</label> <input type="file" name="file" id="file" accept=".xls,.xlsx">
 
-														</form>
+																		<button id="btnsubmit" name="btnsubmit" type="button" class="btn-submit">Import</button>
+																	</div>
+
+																</form>
+															</div>
+														</div>
 													</div>
 												</div>
 
@@ -290,9 +421,11 @@
 															$resultrow = "จำนวนบิลทั้งหมด " . $countgroup . "<br>";
 															$resultrow .= "<span class='text-info'> จำนวนบิลที่พร้อมเข้าระบบ " . count($array_complete) . " </span><br><hr>";
 															if (count($array_error)) {
+																$i=1;
 																foreach ($array_error as $key => $row) {
 																	foreach ($row as $keyin => $valin) {
-																		$resultrow .= "<span class='text-danger'>error No. " . $key . " - data[ " . $keyin . " ] = " . $valin . "</span><br>";
+																		$resultrow .= "<span class='text-danger'>error No. " . $i . "  = " . $valin . "</span><br>";
+																		$i++;
 																	}
 																}
 															} else {

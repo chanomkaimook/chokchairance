@@ -103,7 +103,34 @@ class Mdl_excel extends CI_Model {
 		return $result;
 	}
 	//
-	//	@param	array		@array = array[ id=>array[codemacitem1,codemacitem2] ]
+	//	@param	array		@array = [1005704064] => Array
+    /*   (
+            [bill] => Array
+                (
+                    [date] => 27/3/2022
+                    [net] => 7.00
+                    [pos_id] => 005
+                    [code] => 1005704064
+                    [price] => 6.54
+                    [vat] => 0.46
+                    [booth_name] => BOOTH 1
+                )
+
+            [bill_item] => Array
+                (
+                    [0] => Array
+                        (
+                            [code] => 2001
+                            [name] => น้ำดื่มโชคชัย
+                            [unit] => ขวด
+                            [total] => 1
+                            [price] => 7.00
+                        )
+
+                )
+
+        )
+	*/
 	//
 	function create_bill($array){
 		//	setting
@@ -120,100 +147,36 @@ class Mdl_excel extends CI_Model {
 			$i = 0;
 			foreach($array as $key => $row){
 				//	generate code
-				$code = $this->mdl_excel->gencode();
-				$explode = explode(" ",trim($array[$key][0]['Shipping Option']));
-
+				$code = trim($key);
+				
 				//	delivery form
-				$array_delivery_formid = strpos(trim($explode[0]),"SCG");
-				if($array_delivery_formid !== false){
-					$delivery_formid = 5;
-				}
-				
-				$array_delivery_formid = strpos(trim($explode[0]),"Inter");
-				if($array_delivery_formid !== false){
-					$delivery_formid = 6;
-				}
-				
-				$array_delivery_formid = strpos(trim($explode[0]),"Food");
-				if($array_delivery_formid !== false){
-					$delivery_formid = 6;
-				}
-
-				$array_delivery_formid = strpos(trim($explode[0]),"DHL");
-				if($array_delivery_formid !== false){
-					$delivery_formid = 4;
-				}
-				
-				$array_delivery_formid = strpos(trim($explode[0]),"Kerry");
-				if($array_delivery_formid !== false){
-					$delivery_formid = 1;
-				}
+				$delivery_formid = 2;		//	BU 2
 
 				//	methodorder
-				$methodorder_id = 2;
+				$methodorder_id = trim($array[$key]['bill']['booth_id']);		// booth id
 
 				//	customer
-				$name = trim($array[$key][0]['Customer Name']);
-
-				//	address
-				$phone_number = substr(trim($array[$key][0]['Customer Phone']),1);
-				$address = trim($array[$key][0]['Customer Address']);
-				$substr_address = substr($address,-5);
-				$zipcode = $substr_address;
+				$name = "N/A";
 
 				//	price total
-				$total_price = trim($array[$key][0]['Subtotal']);
-				$delivery_fee = trim($array[$key][0]['Shipping Cost']);
-				$discount_price = trim($array[$key][0]['Discount']);
-				$net_total = trim($array[$key][0]['Total']);
+				$total_price = sprintf('%0.2f',preg_replace("/([^0-9\\.])/i", "", $array[$key]['bill']['price']));
+				$tax = sprintf('%0.2f',preg_replace("/([^0-9\\.])/i", "", $array[$key]['bill']['vat']));
+				$net_total = sprintf('%0.2f',preg_replace("/([^0-9\\.])/i", "", $array[$key]['bill']['net']));
 
-				$provider = trim($array[$key][0]['Payment Provider']);
-
-				//	transfer paid
-				$array_paidat = trim($array[$key][0]['Paid At']);
-				$explode_paidat = explode(" ",$array_paidat);
-				$paidat = $explode_paidat[0]." ".$explode_paidat[1];
-
-				//	transfer amount
-				$transfered_amount = trim($array[$key][0]['Paid Amount']);
-
-				//	transfer remark
-				$transfered_remark = trim($array[$key][0]['Note']);
-
-				//
-				$transfered_banik_id = null;
-				$transfered_daytime = null;
-				// $transfered_amount = null;
-				$transfered_remark = null;
-				
-				if($provider == 'scb'){
-					$transfered_banik_id = 1;
-					$transfered_daytime = $paidat;
-					$transfered_amount = $transfered_amount;
-					$transfered_remark = $transfered_remark;
-					
-					$status_complete = 2;
-					$status_approve1 = 1;
-				}else{
-					$status_complete = 5;
-					$status_approve1 = 0;
-				}
+				$booth_name = trim($array[$key]['bill']['booth_name']);
 				
 				$status_complete = 2;
 				$status_approve1 = 1;
+				$status_approve2 = 1;
+				
 
 				//bill status
 				$billstatus = "T";
-				if($provider == 'cod'){
-					$billstatus = "C";
-				}
-				
-				$ref = $key;
+
+				$pos = trim($array[$key]['bill']['pos_id']);
 
 				//date starts
-				$array_date_starts = trim($array[$key][0]['Created At']);
-				$explode_date_starts = explode(" ",$array_date_starts);
-				$date_starts = $explode_date_starts[0]." ".$explode_date_starts[1];
+				$date_starts = trim($array[$key]['bill']['date']);
 
 				$datainsert = array(
 					'code'	=> $code,
@@ -221,40 +184,36 @@ class Mdl_excel extends CI_Model {
 					'delivery_formid'	=> $delivery_formid,
 					'methodorder_id'	=> $methodorder_id,
 
-					'name'			=> $name,
-					'phone_number'		=> $phone_number,
-					'address'		=> $address,
-					'zipcode'		=> $zipcode,
+					'name'				=> $name,
 
 					'total_price'		=> $total_price,
-					'delivery_fee'		=> $delivery_fee,
-					'discount_price'	=> $discount_price,
+					'tax'				=> $tax,
 					'net_total'			=> $net_total,
 
-					'transfered_banik_id'	=> $transfered_banik_id,
-					'transfered_daytime'	=> $transfered_daytime,
-					'transfered_amount'	=> $transfered_amount,
-					'transfered_remark'	=> $transfered_remark,
-
 					'status_approve1'	=> $status_approve1,
-					'status_approve2'	=> 1,
+					'status_approve2'	=> $status_approve2,
 					'status_complete'	=> $status_complete,
 					'billstatus'	=> $billstatus,
-					'ref'			=> $ref,
-					'date_starts'	=> date('Y-m-d H:i:s'),
-					'user_starts'	=> '00041',	//	page365
+					'pos'			=> $pos,
+					'station_name'			=> $booth_name,
+					'date_starts'	=> $date_starts,
+					'user_starts'	=> '00002',	//	dumpfile
 				);
 				$this->db->insert($retail_bill,$datainsert);
 				$id = $this->db->insert_id();
-				if($id){
+				// if($id){
 					$i++;	// count 
-					foreach($row as $keydetail => $subdetail){
-						$array_product = $subdetail['Item Code'];
+					foreach($array[$key]['bill_item'] as $keydetail => $subdetail){
+						$item_code = ($array[$key]['bill_item'][$keydetail]['code'] ? $array[$key]['bill_item'][$keydetail]['code'] : "" );
+						$item_name = ($array[$key]['bill_item'][$keydetail]['name'] ? $array[$key]['bill_item'][$keydetail]['name'] : "" );
+						$item_total = ($array[$key]['bill_item'][$keydetail]['total'] ? $array[$key]['bill_item'][$keydetail]['total'] : "" );
+						$item_unit = ($array[$key]['bill_item'][$keydetail]['unit'] ? $array[$key]['bill_item'][$keydetail]['unit'] : "" );
+						$item_price = ($array[$key]['bill_item'][$keydetail]['price'] ? sprintf('%0.2f',preg_replace("/([^0-9\\.])/i", "", $array[$key]['bill_item'][$keydetail]['price'])) : "" );
 
 						//	แบบเทียบจาก codemac
 						$sqlgroup = $this->db->select('*')
 						->from('retail_productlist')
-						->where('id',$array_product);
+						->where('code',$item_code);
 						// ->where('codemac',$array_product);
 						$qgroup = $sqlgroup->get();
 						$numgroup = $qgroup->num_rows();
@@ -268,24 +227,28 @@ class Mdl_excel extends CI_Model {
 							}
 
 							$datainsertdetail = array(
-								'code'	=> $code,
+								'code'		=> $code,
 								'bill_id'	=> $id,
 
 								'promain_id'	=> $rowgroup->PROMAIN_ID,
+								'prosubmain_id'	=> $rowgroup->PROSUBMAIN_ID,
+								'protype_id'	=> $rowgroup->PROTYPE_ID,
+								'procate_id'	=> $rowgroup->PROCATE_ID,
 								'prolist_id'	=> $rowgroup->ID,
 								'list_id'		=> $list_id,
-								'quantity'		=> $subdetail['Item Qty'],
-								'total_price'	=> get_valueNullTozero($subdetail['Item Subtotal']),
+								'quantity'		=> $item_total,
+								'total_price'	=> $item_price,
+								'prounit'		=> $item_unit,
 
-								'date_starts'	=> date('Y-m-d H:i:s'),
-								'user_starts'	=> '00041',	//	page365
+								'date_starts'	=> $date_starts,
+								'user_starts'	=> '00002',	//	dumpfile
 							);
 							$this->db->insert($retail_billdetail,$datainsertdetail);
 						}
 
 					}
 					
-				}
+				// }
 
 				
 			}	/* END INSERT RETAIL_BILL */
@@ -293,7 +256,7 @@ class Mdl_excel extends CI_Model {
 			// ============== Log_Detail ============== //
 			$log_query = $this->db->last_query();
 			$last_id = $this->session->userdata('log_id');
-			$detail = "Insert dump bill page365 Code : ".$this->session->userdata('useradminid')." Name : ".$this->session->userdata('useradminname');
+			$detail = "Insert dump bill Code : ".$this->session->userdata('useradminid')." Name : ".$this->session->userdata('useradminname');
 			$type = "Insert";
 			$arraylog = array(
 				'log_id'  		 => $last_id,

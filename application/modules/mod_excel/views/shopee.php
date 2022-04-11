@@ -68,7 +68,6 @@
 					$array_id[$x] = $datainsert[$spreadSheetAry[0][0]];
 				}
 
-
 				if (isset($datainsert)) {
 				}
 				$x++;

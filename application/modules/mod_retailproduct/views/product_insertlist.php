@@ -67,7 +67,7 @@
                                         <div class="titel text-left"> <i class="fa fa-database" aria-hidden="true"></i> Data Management </div>
                                         <div class="form-row">
 
-                                            <label class="form-group col-md-3 text-right" for="name_th"> เลือกเมนูหลัก </label>
+                                            <label class="form-group col-md-3 text-right" for="name_th"> เลือกกลุ่มสินค้า </label>
                                             <div class="form-group col-md-9 ">
                                                 <select id="select-productmain" name="select-productmain" class="selectpicker" data-live-search="true">
 
@@ -84,7 +84,7 @@
                                                                     } ?> value="<?php echo $row->ID ?>"><?php echo $row->NAME_TH; ?></option>
                                                         <?php   }
                                                     } else {
-                                                        echo ' <option  value=""> -- โปรดเลือกเมนู -- </option>';
+                                                        echo ' <option  value=""> -- เลือก -- </option>';
                                                         foreach ($Query_productmain->result() as $row) {
 
                                                         ?>
@@ -98,9 +98,7 @@
                                             if ($setlist == "on") {
                                                 $sql = $this->db->select('id,codemac,name_th')
                                                     ->from('retail_productlist')
-                                                    ->where('status', 1)
-                                                    ->where('promain_id not in (6,12,14,15,16)')
-                                                    ->where('id not in(279,278,277)');
+                                                    ->where('status', 1);
                                                 $q = $sql->get();
                                                 $num = $q->num_rows();
                                             ?>
@@ -109,19 +107,19 @@
                                                     <select id="select-listid" name="select-listid" class="selectpicker" data-live-search="true">
                                                         <option value="">เลือกสินค้าผูกกับโปร</option>
                                                         <?php
-                                                        if ($num) {    
+                                                        if ($num) {
                                                             foreach ($q->result() as $r) {
 
                                                                 $selected_listid = "";
-                                                                if($UPproductlist->LIST_ID == $r->id){
+                                                                if ($UPproductlist->LIST_ID == $r->id) {
                                                                     $selected_listid = "selected=selected";
                                                                 }
 
                                                                 //  name
-                                                                if($r->codemac ? $codemac = "(".$r->codemac.")" : $codemac = "");
-                                                                $name = $r->name_th."".$codemac;
+                                                                if ($r->codemac ? $codemac = "(" . $r->codemac . ")" : $codemac = "");
+                                                                $name = $r->name_th . "" . $codemac;
                                                         ?>
-                                                                <option value="<?php echo $r->id; ?>" <?php echo $selected_listid; ?> ><?php echo $name; ?></option>
+                                                                <option value="<?php echo $r->id; ?>" <?php echo $selected_listid; ?>><?php echo $name; ?></option>
                                                         <?php
                                                             }
                                                         }
@@ -131,13 +129,75 @@
                                                         <li><span>บิลที่เปิดด้วยรายการสินค้านี้จะเปลี่ยนแปลงรายการที่ผูกให้อัตโนมัติ</span></li>
                                                         <li><span>หากบิลที่มีรายการสินค้านี้ถูกเปิดใบลดหนี้ หรือใบส่งของไปแล้ว จะไม่มีการเปลี่ยนแปลงรายการที่ผูกภายในบิล</span></li>
                                                     </ul>
-                                                        
-                                                    
-                                                    
+
+
+
                                                 </div>
                                             <?php
                                             }
                                             ?>
+
+                                            <label class="form-group col-md-3 text-right" for="prosubmain"> เลือกหมวดหมู่ </label>
+                                            <div class="form-group col-md-9 ">
+                                                <select id="select-productsubmain" name="select-productsubmain" class="selectpicker" data-live-search="true">
+                                                    <?php
+                                                    if ($UPproductlist->ID) {
+                                                        foreach ($Query_productsubmain->result() as $row) { ?>
+                                                            <option <?php if ($UPproductlist->PROSUBMAIN_ID == $row->ID) {
+                                                                        echo 'selected';
+                                                                    } ?> value="<?php echo $row->ID ?>"><?php echo $row->NAME_TH; ?></option>
+                                                        <?php   }
+                                                    } else {
+                                                        echo ' <option  value=""> -- เลือก -- </option>';
+                                                        foreach ($Query_productsubmain->result() as $row) {
+                                                        ?>
+                                                            <option value="<?php echo $row->ID ?>"><?php echo $row->NAME_TH; ?></option>
+                                                    <?php
+                                                        }
+                                                    } ?>
+                                                </select>
+                                            </div>
+                                            <label class="form-group col-md-3 text-right" for="protype"> เลือกรูปแบบ </label>
+                                            <div class="form-group col-md-9 ">
+                                                <select id="select-producttype" name="select-producttype" class="selectpicker" data-live-search="true">
+                                                    <?php
+                                                    if ($UPproductlist->ID) {
+                                                        foreach ($Query_producttype->result() as $row) { ?>
+                                                            <option <?php if ($UPproductlist->PROTYPE_ID == $row->ID) {
+                                                                        echo 'selected';
+                                                                    } ?> value="<?php echo $row->ID ?>"><?php echo $row->NAME_TH; ?></option>
+                                                        <?php   }
+                                                    } else {
+                                                        echo ' <option  value=""> -- เลือก -- </option>';
+                                                        foreach ($Query_producttype->result() as $row) {
+                                                        ?>
+                                                            <option value="<?php echo $row->ID ?>"><?php echo $row->NAME_TH; ?></option>
+                                                    <?php
+                                                        }
+                                                    } ?>
+                                                </select>
+                                            </div>
+                                            <label class="form-group col-md-3 text-right" for="procatagory"> Catagory </label>
+                                            <div class="form-group col-md-9 ">
+                                                <select id="select-productcatagory" name="select-productcatagory" class="selectpicker" data-live-search="true">
+                                                    <?php
+                                                    if ($UPproductlist->ID) {
+                                                        foreach ($Query_productcate->result() as $row) { ?>
+                                                            <option <?php if ($UPproductlist->PROSUBMAIN_ID == $row->ID) {
+                                                                        echo 'selected';
+                                                                    } ?> value="<?php echo $row->ID ?>"><?php echo $row->NAME_TH; ?></option>
+                                                        <?php   }
+                                                    } else {
+                                                        echo ' <option  value=""> -- เลือก -- </option>';
+                                                        foreach ($Query_productcate->result() as $row) {
+                                                        ?>
+                                                            <option value="<?php echo $row->ID ?>"><?php echo $row->NAME_TH; ?></option>
+                                                    <?php
+                                                        }
+                                                    } ?>
+                                                </select>
+                                            </div>
+
                                             <label class="form-group col-md-3 text-right" for="code"> Code </label>
                                             <div class="form-group col-md-9 ">
                                                 <input type="text" class="form-control " name="code" id="code" placeholder="กำหนดชื่อ code" value="<?php echo $UPproductlist->CODE; ?>">
@@ -232,7 +292,7 @@
             });
 
             $("#Save").on("click", function(e) {
-                var result = ["name_th", "name_us"];
+                var result = ["code", "name_th", "select-productmain", "select-productsubmain", "select-producttype", "select-productcatagory"];
                 for (var x = 0; x < result.length; x++) {
                     if (document.forms["demo2"][result[x]].value == '') {
                         swal("เกิดข้อผิดผลาด", "กรอกข้อมูลให้ครบถ้วน / please insert data", "warning");
@@ -263,18 +323,22 @@
                 data.append("name_th", d.getElementById('name_th').value);
                 data.append("name_us", d.getElementById('name_us').value);
                 data.append("promain_id", d.getElementById('select-productmain').value);
+                data.append("prosubmain_id", d.getElementById('select-productsubmain').value);
+                data.append("protype_id", d.getElementById('select-producttype').value);
+                data.append("procate_id", d.getElementById('select-productcatagory').value);
                 data.append("price", d.getElementById('price').value);
                 data.append("code", d.getElementById('code').value);
 
                 let select_listid = $('#select-listid');
-                if(select_listid.length){
-                    if(select_listid.val() == ""){
+                if (select_listid.length) {
+                    if (select_listid.val() == "") {
                         swal("ผิดผลาด", "กรุณาระบุช่องผูกสินค้า", "warning");
 
                         return false;
                     }
                     data.append("listid", select_listid.val());
                 }
+
 
                 data.append("status", status);
 

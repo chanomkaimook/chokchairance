@@ -50,10 +50,12 @@ class Ctl_excel extends CI_Controller
 	}
 	public function report()
 	{
+
+						
 		$data = array(
 			'mainmenu' 		=> 'retail',
 			'submenu' 		=> 'reportexcel',
-			'importvalue' 		=> ($_REQUEST['page'] ? $_REQUEST['page'] : 'page365')
+			'importvalue' 		=> ($_REQUEST['page'] ? $_REQUEST['page'] : 'bu2')
 		);
 
 		$data['base_bn'] = base_url() . BASE_BN;

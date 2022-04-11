@@ -8,8 +8,8 @@
     <div class="col-12">
         <div class="mt-2">
             <select name="" id="sel_dataupdate" class="form-control form-control-sm" style="width:150px">
-                <option value="page365">page365</option>
-                <option value="shopee">shopee</option>
+                <!-- <option value="bu1">BU1</option> -->
+                <option value="bu2">BU2</option>
             </select>
         </div>
     </div>

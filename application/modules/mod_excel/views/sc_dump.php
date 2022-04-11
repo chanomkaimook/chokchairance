@@ -3,6 +3,7 @@
 
         $(document).ready(function() {
             let page = $('input#import').val();
+            console.log(page);
             $('#sel_dataupdate').val(page);
         })
 

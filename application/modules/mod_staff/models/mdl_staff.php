@@ -224,7 +224,7 @@ class Mdl_staff extends CI_Model
         $datainfo['token'] = $tokenDataInfo;
 
         // ============== Log_Detail ============== //
-       /*  $log_query = $this->db->last_query();
+        $log_query = $this->db->last_query();
         $last_id = $this->session->userdata('log_id');
         $detail = "Update Staff Code : " . $this->session->userdata('useradminid') . " Name : " . $this->session->userdata('useradminname');
         $type = "Update";
@@ -235,7 +235,7 @@ class Mdl_staff extends CI_Model
             'type'               => $type,
             'date_starts'    => date('Y-m-d H:i:s')
         );
-        updateLog($arraylog); */
+        updateLog($arraylog);
 
         if($this->db->affected_rows()){
             $result = array(

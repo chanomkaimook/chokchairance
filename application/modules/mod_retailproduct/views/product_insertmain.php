@@ -163,7 +163,7 @@
                 }); 
                  
                 $("#Save").on("click", function (e) {
-                        var result = ["name_th", "name_us"];
+                        var result = ["name_th"];
                         for(var x=0;x<result.length;x++){
                             if(document.forms["demo2"][result[x]].value == ''){
                                 swal("เกิดข้อผิดผลาด", "กรอกข้อมูลให้ครบถ้วน / please insert data", "warning"); 
