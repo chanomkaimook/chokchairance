@@ -35,10 +35,6 @@ class Mdl_createorder extends CI_Model {
                 $this->db->where('retail_bill.STATUS_COMPLETE in (0,1,5)');
             }
         }
-		
-		if($this->session->userdata('franshine')){
-			$this->db->where('retail_bill.METHODORDER_ID', $this->session->userdata('franshine')); 
-		}
 
         if(!empty($_POST["search"]["value"])) {  
            $this->db->like("retail_bill.CODE", $_POST["search"]["value"]);  
@@ -194,9 +190,13 @@ class Mdl_createorder extends CI_Model {
 
     function ajaxdataform(){
 		$this->load->library('order');
-
+	
+	/* echo "<pre>";
+	print_r($this->input->post());
+	echo "</pre>";
+	exit; */
+	
         /* echo "<pre>";
-        print_r($_REQUEST);
         print_r($this->input->post('orderlist'));
         echo "remark :: ";
         print_r($this->input->post('remark_order'));
@@ -234,6 +234,34 @@ class Mdl_createorder extends CI_Model {
                             $StatusComplete = $Result->STATUS_COMPLETE;
                             $BILLSTATUS = $Result->BILLSTATUS;
                         }  
+                        $databill = array(
+                           
+                            'TRANSFERED_BANIK_ID'   => trim($this->input->post('bankID')) ,
+                            'TRANSFERED_DAYTIME'    => $TRANSFEREDDAYTIME,
+                            'TRANSFERED_AMOUNT'     => trim($this->input->post('Amount')) ,
+                            'TRANSFERED_REMARK'     => trim($this->input->post('TransferedRemark')) ,
+    
+                            'DATE_UPDATE'       => get_valueNullToNull(trim($this->input->post('order_date').' '.date('H:i:s')))  ,
+                            'USER_UPDATE' 	    => $this->session->userdata('useradminid'),
+                            'STATUS' 		    => 1
+                        );
+                      
+                        $this->db->where('id', $this->input->post('bill_id'));
+                        $this->db->update('retail_bill', $databill);
+                         
+                        // ============== Log_Detail ============== //
+                        $log_query = $this->db->last_query();
+                        $last_id = $this->session->userdata('log_id');
+                        $detail = "Update Retail Bill Code : ".$this->session->userdata('useradminid')." Name : ".$this->session->userdata('useradminname');
+                        $type = "Update";
+                        $arraylog = array(
+                            'log_id'  	 	 => $last_id,
+                            'detail'  		 => $detail,
+                            'logquery'       => $log_query,
+                            'type'     	 	 => $type,
+                            'date_starts'    => date('Y-m-d H:i:s')
+                        );
+                        updateLog($arraylog);
                         
                         // =========== DELETE TBL BD =========== //
 						$dataups = array(
@@ -262,7 +290,7 @@ class Mdl_createorder extends CI_Model {
                                 'LIST_ID'    	=> get_valueNullToNull($listid['productid']),
                                 
 								'QUANTITY'      => get_valueNullToNull($row['proqty']),
-                                'TOTAL_PRICE'   => "",
+                                'TOTAL_PRICE'   => ($row['totalprice']),
     
                                 'DATE_UPDATE'   => get_valueNullToNull(trim($this->input->post('order_date').' '.date('H:i:s')))  ,
                                 'USER_UPDATE' 	=> $this->session->userdata('useradminid'),
@@ -272,20 +300,13 @@ class Mdl_createorder extends CI_Model {
                             $this->db->insert('retail_billdetail', $databilldetail);
                             // ================================= //
                         }
-
-                        // ============== Log_Detail ============== //
-                        $log_query = $this->db->last_query();
-                        $last_id = $this->session->userdata('log_id');
-                        $detail = "Update Retail Bill Code : ".$this->session->userdata('useradminid')." Name : ".$this->session->userdata('useradminname');
-                        $type = "Update";
-                        $arraylog = array(
-                            'log_id'  	 	 => $last_id,
-                            'detail'  		 => $detail,
-                            'logquery'       => $log_query,
-                            'type'     	 	 => $type,
-                            'date_starts'    => date('Y-m-d H:i:s')
-                        );
-                        updateLog($arraylog);
+						
+						//
+                        //  if creat bill free success system will to creat lot for cut stock
+                        $last_bill = $this->input->post('bill_id');
+                        if($last_bill){
+                            $this->mdl_createorder->editOrderToLot($last_bill);
+                        }
                     }
                      
                     $error = 0;
@@ -304,12 +325,8 @@ class Mdl_createorder extends CI_Model {
                     // Update bill //
                     if($count > 0){
                         // $NET_TOTAL =  ($this->input->post('TBLtotalprice') + ($this->input->post('total-Shippingcost') + $this->input->post('total-Parcelcost') + $this->input->post('shor_money') + $this->input->post('tax')) - $this->input->post('discount'));
-                        $NET_TOTAL =  ($this->input->post('TBLtotalprice') + ($this->input->post('total-Shippingcost') + $this->input->post('total-Parcelcost') + $this->input->post('shor_money') + $this->input->post('tax')) + $this->input->post('discount'));
-                        if($this->input->post('transferedDate') == '' && $this->input->post('transferedTime') == ''){
-                            $TRANSFEREDDAYTIME = null;
-                        } else {
-                            $TRANSFEREDDAYTIME = $this->input->post('transferedDate').' '.$this->input->post('transferedTime').":00";
-                        }
+                        $NET_TOTAL =  ($this->input->post('TBLtotalprice') +  $this->input->post('tax'));
+
                         if($this->input->post('StatusComplete') == 5){ 
                             $Approve1 = 1; 
                             $Approve2 = 0; 
@@ -332,7 +349,7 @@ class Mdl_createorder extends CI_Model {
                             $Approve1 = $Result->STATUS_APPROVE1;
                             $Approve2 = 0; 
                             $StatusComplete = $Result->STATUS_COMPLETE;
-                            $TBLtotalprice = $this->input->post('TBLtotalprice');
+
                             $BILLSTATUS = $Result->BILLSTATUS;
                         }  
                         $databill = array(
@@ -345,11 +362,14 @@ class Mdl_createorder extends CI_Model {
                             'REMARK_ORDER'      => trim($this->input->post('remark_order')) ,
                             'TEXT_NUMBER'       => trim($this->input->post('text_nameber')) ,
                             'METHODORDER_ID'    => trim($this->input->post('method_order')) ,
-        
-                            'TRANSFERED_BANIK_ID'   => trim($this->input->post('bankID')) ,
-                            'TRANSFERED_DAYTIME'    => $TRANSFEREDDAYTIME,
-                            'TRANSFERED_AMOUNT'     => trim($this->input->post('Amount')) ,
-                            'TRANSFERED_REMARK'     => trim($this->input->post('TransferedRemark')) ,
+    
+                            'TOTAL_PRICE'       => trim($TBLtotalprice)  ,
+                            'PARCEL_COST'       => trim($this->input->post('total-Parcelcost')) ,
+                            'DELIVERY_FEE'      => trim($this->input->post('total-Shippingcost')) ,
+                            'DISCOUNT_PRICE'    => trim($this->input->post('discount')) ,
+                            'SHOR_MONEY'        => trim($this->input->post('shor_money'))  ,
+                            'TAX'               => trim($this->input->post('tax'))  ,
+                            'NET_TOTAL'         => trim($NET_TOTAL)  ,
     
                             'STATUS_APPROVE1'       => trim($Approve1) ,
                             'STATUS_APPROVE2'       => trim($Approve2) ,
@@ -407,8 +427,8 @@ class Mdl_createorder extends CI_Model {
 								'LIST_ID'    	=> get_valueNullToNull($listid['productid']),
 								
 								'QUANTITY'      => get_valueNullToNull($row['proqty']),
-                                'TOTAL_PRICE'   => "",
-                                
+                                'TOTAL_PRICE'   => 0,
+    
                                 'DATE_STARTS'   => $Result->DATE_STARTS ,
 								'USER_STARTS'   => $Result->USER_STARTS ,
                                 'DATE_UPDATE'   => get_valueNullToNull(trim($this->input->post('order_date').' '.date('H:i:s')))  ,
@@ -425,9 +445,9 @@ class Mdl_createorder extends CI_Model {
 								'LIST_ID'    	=> get_valueNullToNull($listid['productid']),
 								
                                 'QUANTITY'      => get_valueNullToNull($row['proqty']),
-                                'TOTAL_PRICE'   => "",
-    
-                                'DATE_STARTS'   => $Result->DATE_STARTS ,
+                                'TOTAL_PRICE'   => ($row['totalprice']),
+		
+								'DATE_STARTS'   => $Result->DATE_STARTS ,
 								'USER_STARTS'   => $Result->USER_STARTS ,
                                 'DATE_UPDATE'   => get_valueNullToNull(trim($this->input->post('order_date').' '.date('H:i:s')))  ,
                                 'USER_UPDATE' 	=> $this->session->userdata('useradminid'),
@@ -451,67 +471,31 @@ class Mdl_createorder extends CI_Model {
                     $txt = "แก้ไขรายการสำเร็จ";
                     $getid = $this->input->post('bill_id');
                 }
-
-
-
-
-
             } else {    //  END IF UPDATE
-
-                //  generate code bill
-                $table = 'retail_bill';
-                $codebill = 'TR2';
-
-                $yearthai = date('Y') + 543;
-                $year = substr($yearthai,2);
-                $month = date('m');
-                $param = $codebill."".$year."".$month;
-
-                $sqlcode = $this->db->select('code')
-                    ->from($table)
-                    ->where($table . '.code is not null')
-                    ->where($table . '.code like "' . $param . '%"')	// Ex. 202111
-                    ->order_by($table . '.id','desc');
-                $numbercode = $sqlcode->count_all_results(null, false);
-                $qcode = $sqlcode->get();
-                if($numbercode > 0){
-                    $rcode = $qcode->row();
-                    $numbernext = substr($rcode->code,7) + 1;
-                    $new_number = str_pad($numbernext, 4, '0', STR_PAD_LEFT);
-
-                    $gencode = $param.$new_number;
-                    $codeDB = $gencode;
-                }else{
-                    $gencode = $param . "0001";
-                    $codeDB = $gencode;
-                }
  
-                /* $this->db->select('retail_bill.CODE AS codemax');
+                $this->db->select('retail_bill.CODE AS codemax');
                 $this->db->from("retail_bill");
                 $this->db->order_by('retail_bill.ID', 'DESC');  
                 $Query_Max = $this->db->get();
                 $num = $Query_Max->num_rows($Query_Max);
                 $RowMax = $Query_Max->row();
                 if($num > 0){
-                    $str = explode("_", $RowMax->codemax);
-                     
-                     $codeDB = '';
-                     $dateY = (date('Y') + 543);
-
-                     $code = $str[1];
-                     $codeyear = $str[2];
-                     if($codeyear == $dateY){
-                         $count = $code + 1;
-                         $codeDB = $str[0].'_'.$count.'_'.$codeyear;
-                     } else {
-                         $code = 0;
-                         $count = $code + 1;
-                         $codeDB = $str[0].'_'.$count.'_'.$dateY;
-                     }
-                 } else {
-                     $dateY = (date('Y') + 543);
-                     $codeDB = 'um_1_'.$dateY;
-                 } */
+                    $str = explode(" ", $RowMax->codemax);
+                    $Code = explode("_", $str[1]);
+                    $codeDB = '';
+                    $dateY = (date('Y') + 543);
+                    if($Code[1] == $dateY){
+                        $count = $Code[0] + 1;
+                        $codeDB = $str[0].' '.$count.'_'.$Code[1];
+                    } else {
+                        $Code[0] = 0;
+                        $count = $Code[0] + 1;
+                        $codeDB = $str[0].' '.$count.'_'.$dateY;
+                    }
+                } else {
+                    $dateY = (date('Y') + 543);
+                    $codeDB = 'Jerky 1_'.$dateY;
+                }
                 
                 // Insert bill //
                 // $NET_TOTAL =  ($this->input->post('TBLtotalprice') + ($this->input->post('total-Shippingcost') + $this->input->post('total-Parcelcost') + $this->input->post('shor_money') + $this->input->post('tax')) - $this->input->post('discount'));
@@ -532,18 +516,6 @@ class Mdl_createorder extends CI_Model {
                     $Approve1 = 1;
                     $Approve2 = 1; 
                     $BILLSTATUS = 'F';
-					
-                    // $TBLtotalprice = 0;	
-                    // $NET_TOTAL = ($NET_TOTAL-$this->input->post('TBLtotalprice'));
-					$TBLtotalprice = 0;
-                    $NET_TOTAL = 0;
-					
-					$TRANSFEREDDAYTIME = date('Y-m-d H:i:s');
-                } else if($this->input->post('StatusComplete') == 1){
-                    $StatusComplete = 1; 
-                    $Approve1 = 1;
-                    $Approve2 = 0; 
-                    $BILLSTATUS = 'T';
 					
                     // $TBLtotalprice = 0;	
                     // $NET_TOTAL = ($NET_TOTAL-$this->input->post('TBLtotalprice'));
@@ -668,7 +640,7 @@ class Mdl_createorder extends CI_Model {
 							'LIST_ID'    	=> get_valueNullToNull($listid['productid']),
 							
                             'QUANTITY'      => get_valueNullToNull($row['proqty']),
-                            'TOTAL_PRICE'   => "",
+                            'TOTAL_PRICE'   => 0,
     
                             'DATE_STARTS'   => date('Y-m-d H:i:s')  ,
                             'USER_STARTS' 	=> $this->session->userdata('useradminid'),
@@ -684,7 +656,7 @@ class Mdl_createorder extends CI_Model {
 							'LIST_ID'    	=> get_valueNullToNull($listid['productid']),
 							
                             'QUANTITY'      => get_valueNullToNull($row['proqty']),
-                            'TOTAL_PRICE'   => "",
+                            'TOTAL_PRICE'   => ($row['totalprice']),
     
                             'DATE_STARTS'   => date('Y-m-d H:i:s')  ,
                             'USER_STARTS' 	=> $this->session->userdata('useradminid'),
@@ -739,8 +711,8 @@ class Mdl_createorder extends CI_Model {
             retail_bill.TRANSFERED_BANIK_ID AS BANIKID, bank.NAME_TH AS BANIKNAME, retail_bill.TRANSFERED_DAYTIME AS TRANSFEREDDAYTIME, 
             retail_bill.TRANSFERED_AMOUNT AS TRANSFEREDAMOUNT, retail_bill.TRANSFERED_REMARK AS TRANSFEREDREMARK,
             retail_billimg.ID AS IMGID, retail_billimg.IMGNAME AS IMGNAME,
-
-            retail_productlist.codemac AS PRO_CODEMAC,
+			
+			retail_productlist.codemac AS PRO_CODEMAC,
 
             retail_bill.BILLSTATUS AS BillStatus_Collect, retail_bill.TextCode as TextCode
         ');
@@ -852,7 +824,7 @@ class Mdl_createorder extends CI_Model {
             $items['billist'][$row->PRONAME_MAINID]['PRONAME_MAIN'] = $row->PRONAME_MAIN;
             $items['billist'][$row->PRONAME_MAINID]['PRONAME_LIST'][$row->PRONAME_LISTID.'-'.$row->BD_ID]['BILLDETAIL_BILLID'] = $row->BD_BILLID;
             $items['billist'][$row->PRONAME_MAINID]['PRONAME_LIST'][$row->PRONAME_LISTID.'-'.$row->BD_ID]['BILLDETAIL_ID'] = $row->BD_ID;
-            $items['billist'][$row->PRONAME_MAINID]['PRONAME_LIST'][$row->PRONAME_LISTID.'-'.$row->BD_ID]['PRO_CODEMAC'] = $row->PRO_CODEMAC;
+			$items['billist'][$row->PRONAME_MAINID]['PRONAME_LIST'][$row->PRONAME_LISTID.'-'.$row->BD_ID]['PRO_CODEMAC'] = $row->PRO_CODEMAC;
             $items['billist'][$row->PRONAME_MAINID]['PRONAME_LIST'][$row->PRONAME_LISTID.'-'.$row->BD_ID]['PRONAME_LISTID'] = $row->PRONAME_LISTID;
             $items['billist'][$row->PRONAME_MAINID]['PRONAME_LIST'][$row->PRONAME_LISTID.'-'.$row->BD_ID]['PRONAME_LIST'] = $row->PRONAME_LIST;
             $items['billist'][$row->PRONAME_MAINID]['PRONAME_LIST'][$row->PRONAME_LISTID.'-'.$row->BD_ID]['PRICE'] =  number_format($row->PRICE, 2);
@@ -1079,7 +1051,7 @@ class Mdl_createorder extends CI_Model {
 								'USER_UPDATE' 	=> $this->session->userdata('useradminid'),
 							);
 						}
-						$txt = 'ตรวจสอบรายการสำเร็จ';
+						$txt = 'ตรวจสอบรายการออเดอร์สำเร็จ';
 					}
 				}
 

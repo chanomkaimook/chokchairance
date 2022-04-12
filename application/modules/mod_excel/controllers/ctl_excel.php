@@ -111,21 +111,18 @@ class Ctl_excel extends CI_Controller
 		$method = $request['method'];
 
 		switch ($method) {
-			case 'page365':
-				$usercodeid = '00041';
-				break;
-			case 'shopee':
-				$usercodeid = '00042';
+			case 'bu2':
+				$usercodeid = '00002';
 				break;
 		}
 
 		$sql = $this->db->select('
-			sum(retail_bill.total_price) as sumtotal
+			sum(retail_bill.net_total) as sumtotal
 
 		')
 			->from('retail_bill')
 			->where('retail_bill.status', 1)
-			->where('date(retail_bill.date_starts)', date('Y-m-d'))
+			->where('date(retail_bill.date_upload)', date('Y-m-d'))
 			->where('retail_bill.user_starts', $usercodeid);
 		$q = $sql->get();
 		$r = $q->row();
@@ -152,11 +149,8 @@ class Ctl_excel extends CI_Controller
 		$method = $request['method'];
 
 		switch ($method) {
-			case 'page365':
-				$usercodeid = '00041';
-				break;
-			case 'shopee':
-				$usercodeid = '00042';
+			case 'bu2':
+				$usercodeid = '00002';
 				break;
 		}
 
@@ -164,11 +158,12 @@ class Ctl_excel extends CI_Controller
 			retail_bill.id as rt_id,
 			retail_bill.code,
 			retail_bill.billstatus,
-			retail_bill.ref,
+	
 			retail_bill.total_price,
 			retail_bill.shor_money,
 			retail_bill.net_total,
 			retail_bill.name as custname,
+			retail_bill.date_starts as bill_date_starts,
 
 			retail_billdetail.id as rtd_id,
 			retail_billdetail.total_price as rtd_total,
@@ -186,7 +181,7 @@ class Ctl_excel extends CI_Controller
 			->join('delivery', 'retail_bill.delivery_formid=delivery.id', 'left')
 			->join('retail_productlist', 'retail_billdetail.prolist_id=retail_productlist.id', 'left')
 			->where('retail_bill.status', 1)
-			->where('date(retail_bill.date_starts)', date('Y-m-d'))
+			->where('date(retail_bill.date_upload)', date('Y-m-d'))
 			->where('retail_bill.user_starts', $usercodeid);
 
 		$data = array();
@@ -203,6 +198,7 @@ class Ctl_excel extends CI_Controller
 				$subarray[] = array(
 					'id' 	=> $row->rt_id,
 					'code' 	=> $row->code,
+					'date_starts' 	=> $row->bill_date_starts,
 					'ref' 	=> $row->ref,
 					'total_price' 	=> $row->total_price,
 					'net_total' 	=> $row->net_total,
@@ -253,6 +249,7 @@ class Ctl_excel extends CI_Controller
 				$data[] = array(
 					'id' 	=> $subarray[$key]['id'],
 					'code' 	=> $subarray[$key]['code'],
+					'date_starts' 	=> date('d-m-Y',strtotime($subarray[$key]['date_starts'])),
 					'ref' 	=> $subarray[$key]['ref'],
 					'total_price' 	=> $subarray[$key]['total_price'],
 					'net_total' 	=> $subarray[$key]['net_total'],
@@ -296,18 +293,15 @@ class Ctl_excel extends CI_Controller
 			$type = $request['type'];
 
 			switch ($page) {
-				case 'page365':
-					$usercodeid = '00041';
-					break;
-				case 'shopee':
-					$usercodeid = '00042';
+				case 'bu2':
+					$usercodeid = '00002';
 					break;
 			}
 
 			//	process
 			if ($type == 'all') {
 				$sql = $this->db->from('retail_bill')
-					->where('date(date_starts)', date('Y-m-d'))
+					->where('date(date_upload)', date('Y-m-d'))
 					->where('user_starts', $usercodeid)
 					->where('status', 1);
 			}else{
@@ -326,7 +320,7 @@ class Ctl_excel extends CI_Controller
 					'status'			=> 0
 				);
 				if ($type == 'all') {
-					$this->db->where(array('date(date_starts)' => date('Y-m-d') , 'user_starts' => $usercodeid));
+					$this->db->where(array('date(date_upload)' => date('Y-m-d') , 'user_starts' => $usercodeid));
 					$this->db->update('retail_bill',$dataupdate);
 				}else{
 					$this->db->where(array('id' => $id));

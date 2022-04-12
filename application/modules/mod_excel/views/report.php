@@ -119,7 +119,8 @@ echo "boot<br>";
 
 							//	หาวันที่
 							if ($key == 0 && $value) {
-								$array['bill']['date'] = $datainsert[$spreadSheetAry[$i][$key]];
+								$newDate = preg_replace("/(\d+)\D+(\d+)\D+(\d+)/","$3-$2-$1",$datainsert[$spreadSheetAry[$i][$key]]);
+								$array['bill']['date'] = date('Y-m-d',strtotime($newDate));
 								$start_bill = 1;
 
 								//	สำหรับเรียงลำดับสินค้าภายในบิล
@@ -145,7 +146,8 @@ echo "boot<br>";
 									//	check error
 									$sqlcheck = $this->db->select('ID')
 										->from('retail_bill')
-										->where('code', $identify);
+										->where('code', $identify)
+										->where('status', 1);
 									$qcheck = $sqlcheck->get();
 									$numcheck = $qcheck->num_rows();
 									if ($numcheck) {

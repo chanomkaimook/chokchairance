@@ -54,31 +54,17 @@
                     border: 1px solid #ff5434;
                 }
                 .div-bottom {border: 1px solid #333; padding: 1rem;}
-                
-                #swal2-title{
-                    font-weight: 300;
-                    padding: 1.5rem 0.5rem;
-                    font-size: 1.5rem;
-                    color: #333;
-                    text-align: center;
-                }
-                
-                .is-invalid {
-                    border: 1px solid #ff5434;
-                }
                 .is-required{
                     margin-left: 10px;
                     font-size: 0.7rem;
                     color: #f00;
-                    
                 }
                 .text-ImgMultiple {
                     font-size: 0.7rem;
                     font-weight: 100;
                     color: #F44336;
                 }
-                .img-pay001 { width: 20%; }
-                .displays-Col {display: table-column;}
+                .img-pay001 { width: 30%; }
                 @media screen and (max-width: 991px){
                     .img-pay001 { width: 100%; }
                 }
@@ -122,75 +108,55 @@
 								<div class="card-body">
                                     <form id="demo2" name="demo2" class="demo"  enctype="multipart/form-data" accept-charset="utf-8"  method="post">
                                             <input type="hidden" id="bill_update" name="bill_update" value="Y">
-                                            <input type="hidden" id="bill_id" name="bill_id" value="<?php echo $this->input->get('id'); ?>">
+                                            <input type="hidden" id="claim_remark" name="claim_remark" value="<?php echo $this->input->post('claim_remark'); ?>">
+                                            <input type="hidden" id="bill_id" name="bill_id" value="<?php echo $this->input->post('hdfclaimorder'); ?>">
                                             <input type="hidden" id="TBLtotalprice" name="TBLtotalprice" value="<?php echo $Query_billdetil['TOTALPRICE_LANG']; ?>">
                                             <input type="hidden" id="StatusComplete" name="StatusComplete" value="<?php echo $Query_billdetil['STATUSCOMPLETE']; ?>">
                                             <input type="hidden" id="BillStatus" name="BillStatus" value="<?php echo $Query_billdetil['BillStatus_Collect']; ?>">
-                                            <input type="hidden" id="CheckStatus" name="CheckStatus" value="<?php echo $this->input->get('Check'); ?>">
-							
-                                            <?php if($this->input->get('Check') == 'Dis'){ $disabled = 'disabled'; } else{ $disabled = '';} ?> 
-                                            <div class="titel text-left"> <i class="fa fa-file-o" aria-hidden="true"></i> แก้ไขรายการออเดอร์ </div>
-                                            <div class="form-row">
-                                                
-                                                <div class="form-group col-md-6">
-                                                    <div class="">
-                                                        <?php if($Query_billdetil['STATUSCOMPLETE'] == 5){  ?>
-                                                        <ul class="nav nav-pills pull-left mb-1">
-                                                            <li class="nav-item" style="background-color: #33333317;border-radius: 5px;margin: 0.1rem;">
-                                                                <button type="button" class="btn btn-defaultnl btn-sm nav-link active" data-toggle="tab" value="5" id="statustransfere"> กรณีเก็บเงินที่หลัง </button>
-                                                            </li>
-                                                        </ul>
-                                                        <?php } ?>
+
+                                            <div class="titel text-left" style="margin-bottom: 0px;"> <i class="fa fa-archive" aria-hidden="true"></i> หมายเหตุการเคลม </div>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="div-bottom">
+                                                        <div class="row">
+                                                            <div class="col-md-12 col-xl-12 text-center">
+                                                                <h4> <?php echo 'หมายเหตุ : '.$this->input->post('claim_remark'); ?> </h4>
+                                                            </div>
+                                                            <div class="form-group col-md-12">
+                                                                <label class="">อธิบายข้อผิดผลาด : </label>
+                                                                <textarea class="form-control" rows="3" name="claim_remark2" id="claim_remark2" placeholder="คำอธิบาย..."></textarea>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
+                                            </div>
+                                            <br>
+                                            <div class="titel text-left"> <i class="fa fa-file-o" aria-hidden="true"></i> แก้ไขรายการออเดอร์ </div>
+                                             
+                                            <div class="form-row">
+                                                <label class="form-group col-md-6 text-right" for="order_date"> </label>
                                                 <div class="form-group col-md-3">
                                                     <label class="">เลือกการส่ง</label>
                                                     <span class="is-required">(* กรุณาระบุข้อมูล)</span>
-                                                    <div class="input-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text"><i class="fa fa-cubes"></i></span>
-                                                        </div>
-                                                        <select class="custom-select " name="deliveryid" id="deliveryid" <?php echo $disabled; ?>>
-                                                            <option <?php if( $Query_billdetil['DELIVERY_FORM'] == ''){ echo 'selected';} ?> value=""> เลือกรูปแบบการจัดส่ง </option>
-															<?php
-																$sql = $this->db->select('*')
-																->from('delivery')
-																->where('status',1)
-																->get();
-																foreach($sql->result() as $row){
-																	if($Query_billdetil['DELIVERY_FORM'] == $row->ID){
-																		$selected = "selected";
-																	}else{
-																		$selected = "";
-																	}
-																	
-																	echo '<option value="'.$row->ID.'" '.$selected.'> '.$row->NAME_US.' </option>';
-																}
-															?>
-                                                        </select>
-                                                    </div>
+                                                    <select class="custom-select " name="deliveryid" id="deliveryid">
+                                                        <option <?php if($Query_billdetil['DELIVERY_FORM'] == ''){ echo 'selected';} ?> value=""> เลือกรูปแบบการจัดส่ง </option>
+                                                        <option <?php if($Query_billdetil['DELIVERY_FORM'] == 1){ echo 'selected';} ?> value="1"> KERRY </option>
+                                                        <option <?php if($Query_billdetil['DELIVERY_FORM'] == 2){ echo 'selected';} ?> value="2"> EMS </option>
+                                                        <option <?php if($Query_billdetil['DELIVERY_FORM'] == 3){ echo 'selected';} ?> value="3"> FLASH </option>
+                                                        <option <?php if($Query_billdetil['DELIVERY_FORM'] == 4){ echo 'selected';} ?> value="4"> DHL </option>
+                                                        <option <?php if($Query_billdetil['DELIVERY_FORM'] == 5){ echo 'selected';} ?> value="5"> SCG </option>
+                                                    </select>
                                                 </div>
                                                 <div class="form-group col-md-3">
                                                     <label class="">วันที่</label>
                                                     <span class="is-required">(* กรุณาระบุข้อมูล)</span>
-                                                    <div class="input-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
-                                                        </div>
-                                                        <input type="date" class="form-control " name="order_date" id="order_date" value="<?php echo date('Y-m-d',strtotime($Query_billdetil['DATE_STARTS_strtotime'])); ?>" <?php echo ($disabled ? "readonly=readonly" : ""); ?>>
-                                                
-                                                    </div>
+                                                    <input type="date" class="form-control " name="order_date" id="order_date" value="<?php echo date('Y-m-d',strtotime($Query_billdetil['DATE_STARTS_strtotime'])); ?>">
                                                 </div>
 
                                                 <div class="form-group col-md-4">
                                                     <label class="">ชื่อ-นามสกุล</label>
                                                     <span class="is-required">(* กรุณาระบุข้อมูล)</span>
-                                                    <div class="input-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text"><i class="fa fa-user-circle-o"></i></span>
-                                                        </div>
-                                                        <input type="text" class="form-control " name="name" id="name" placeholder="ชื่อ-นามสกุล" value="<?php echo $Query_billdetil['NAME']; ?>" <?php echo $disabled; ?>>
-                                                    </div>
+                                                    <input type="text" class="form-control " name="name" id="name" placeholder="ชื่อ-นามสกุล" value="<?php echo $Query_billdetil['NAME']; ?>">
                                                 </div>
                                                 <div class="form-group col-md-2">
                                                     <label class="">Text Code : </label> 
@@ -198,51 +164,87 @@
                                                 </div>
                                                 <div class="form-group col-md-3">
                                                     <label class="">เบอร์โทรศัพท์</label>
-                                                    <div class="input-group">
-                                                        <div class="input-group-prepend">
-                                                            <span class="input-group-text"><i class="fa fa-phone"></i></span>
-                                                        </div>
-                                                        <input type="text" class="form-control " name="tel" id="tel" placeholder="เบอร์โทรศัพท์" value="<?php echo $Query_billdetil['PHONENUMBER']; ?>" <?php echo $disabled; ?>>
-                                                    </div>
+                                                    <input type="text" class="form-control " name="tel" id="tel" placeholder="เบอร์โทรศัพท์" value="<?php echo $Query_billdetil['PHONENUMBER']; ?>">
                                                 </div>
                                                 <div class="form-group col-md-3">
-                                                    <label class="">ช่องทางการรับออเดอร์</label>
+                                                    <label class="">ช่องทางการรับออเดอร์</label><span class="is-required">(* กรุณาระบุข้อมูล)</span>
+                                                    <select class="custom-select " name="method_order" id="method_order">
+                                                        <option value=""> เลือกช่องทางการรับออเดอร์ </option>
+                                                        <?php foreach($Query_methodorder->result() AS $row){ ?>
+                                                            <option <?php if($Query_billdetil['METHODORDER_ID'] == $row->ID){ echo 'selected';} ?> value="<?php echo $row->ID; ?>"> <?php echo $row->TOPIC; ?> </option>
+                                                        <?php } ?>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group col-md-10">
+                                                    <label class="">ที่อยู่</label>
                                                     <span class="is-required">(* กรุณาระบุข้อมูล)</span>
+                                                    <textarea rows="2" class="form-control" name="address" id="address" placeholder="ที่อยู่"><?php echo $Query_billdetil['ADDRESS']; ?></textarea>
+                                                </div>
+                                                <div class="form-group col-md-2">
+                                                    <label class="">รหัสไปรษณีย์</label>
+                                                    <span class="is-required">(* กรุณาระบุข้อมูล)</span>
+                                                    <input type="number" class="form-control " name="zipcode" id="zipcode" placeholder="รหัสไปรษณีย์" style="height: 62px;" value="<?php echo $Query_billdetil['ZIPCODE']; ?>">
+                                                </div>
+                                                <div class="form-group col-md-12">
+                                                    <label class="">เลขที่เสียภาษี/เลขที่บัตรประชาชน</label>
+                                                    <input type="text" class="form-control " name="text_nameber" id="text_nameber" placeholder="เลขที่เสียภาษี/เลขที่บัตรประชาชน" value="<?php echo $Query_billdetil['TEXTNUMBER']; ?>">
+                                                </div>
+                                            </div>
+                                            <br>
+                                            <div class="row" style="background-color: #ddd;padding: 0.5rem;border-radius: 1rem;border: 1px solid #9E9E9E;">
+                                                <div class="form-group col-md-6">
+                                                    <label>ธนาคารที่โอน</label>
                                                     <div class="input-group">
                                                         <div class="input-group-prepend">
-                                                            <span class="input-group-text"><i class="fa fa-paper-plane"></i></span>
+                                                            <span class="input-group-text"><i class="fa fa-university"></i></span>
                                                         </div>
-                                                        <select class="custom-select " name="method_order" id="method_order" <?php echo $disabled; ?>>
-                                                            <option value=""> เลือกช่องทางการรับออเดอร์ </option>
-                                                            <?php foreach($Query_methodorder->result() AS $row){ ?>
-                                                                <option <?php if($Query_billdetil['METHODORDER_ID'] == $row->ID){ echo 'selected';} ?> value="<?php echo $row->ID; ?>"> <?php echo $row->TOPIC; ?> </option>
+                                                        <select class="custom-select " name="bankID" id="bankID">
+                                                            <option value=""> เลือกธนาคารที่โอน </option>
+                                                            <?php foreach($Query_bank->result() AS $row){ ?>
+                                                                <option <?php if($Query_billdetil['BANIKID'] == $row->ID){ echo 'selected';} ?> value="<?php echo $row->ID; ?>"> <?php echo $row->NAME_TH." | ".$row->NAME_US; ?> </option>
                                                             <?php } ?>
                                                         </select>
                                                     </div>
                                                 </div>
-                                                
+                                                <div class="form-group col-md-3">
+                                                    <label>วันที่โอนเงิน</label>
+                                                    <div class="input-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                                        </div>
+                                                        <input type="date" class="form-control " name="transferedDate" id="transferedDate" value="<?php if($Query_billdetil['TRANSFEREDDAYTIME'] != ''){ echo date('Y-m-d',strtotime($Query_billdetil['TRANSFEREDDAYTIME'])); } ?>">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-3">
+                                                    <label>เวลาโอนเงิน </label>
+                                                    <div class="input-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text"><i class="fa fa-clock-o"></i></span>
+                                                        </div>
+                                                        <input type="time" class="form-control " name="transferedTime" id="transferedTime" value="<?php if($Query_billdetil['TRANSFEREDDAYTIME'] != ''){ echo date('H:i',strtotime($Query_billdetil['TRANSFEREDDAYTIME'])); } ?>">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-4">
+                                                    <label class="">จำนวนเงิน</label>
+                                                    <input type="number" class="form-control " name="Amount" id="Amount" placeholder="จำนวนเงิน - Amount" style="height: 62px;" value="<?php echo $Query_billdetil['TRANSFEREDAMOUNT']; ?>">
+                                                </div>
+                                                <div class="form-group col-md-8">
+                                                    <label class="">หมายเหตุ/Remark</label>
+                                                    <textarea rows="2" class="form-control" name="TransferedRemark" id="TransferedRemark" placeholder="กรณีโอนมากว่า 1 รายการกรุณาระบุเลข Invoice/Transfered More Then 1 Order"><?php echo $Query_billdetil['TRANSFEREDREMARK']; ?></textarea>
+                                                </div>
+                                                  
                                             </div>
-                                            <br>
-                                            
-                                           
+                                            <hr>
                                             <div class="row">
                                                 <div class="col-md-12">
                                                     <label class="">คำอธิบายเพิ่มเติม </label>
-                                                    <textarea <?php echo $disabled; ?> rows="3" class="form-control" name="remark_order" id="remark_order" placeholder="คำอธิบาย..."><?php echo $Query_billdetil['REMARKORDER']; ?></textarea>
+                                                    <textarea rows="3" class="form-control" name="remark_order" id="remark_order" placeholder="คำอธิบาย..."><?php echo $Query_billdetil['REMARK_ORDER']; ?></textarea>
                                                 </div>
                                             </div>
                                             <br>
                                             <div class="titel text-left"> 
                                                 <i class="fa fa-file-text" aria-hidden="true"></i> รายการออเดอร์
-                                                <?php 
-                                                    // $billdatetime = date('Y-m-d',strtotime($Query_billdetil['DATE_STARTSYMD']));
-                                                    // if($billdatetime == date('Y-m-d') || $this->session->userdata('permiss') == 8){
-                                                ?>
-                                                <button style="padding: 0rem .5rem; position: absolute; right: 2rem;" type="button" class="btn btn-default btn-sm modal-bill" data-toggle="modal" data-target=".bd-example-modal-lg">
-                                                <i class="fa fa-plus-circle" aria-hidden="true"></i>  เพิ่ม </button> 
-                                                <?php
-                                                    // }
-                                                ?>
+                                                <button style="padding: 0rem .5rem; position: absolute; right: 2rem;" type="button" class="btn btn-default btn-sm modal-bill" data-toggle="modal" data-target=".bd-example-modal-lg"><i class="fa fa-plus-circle" aria-hidden="true"></i>  เพิ่ม </button> 
                                             </div>
                                             <div class="row">
                                                 <div class="col-md-12">
@@ -258,24 +260,11 @@
                                                                 </tr>
                                                             </thead>
                                                             <tbody id="ORlist">
-                                                                <?php $index=1; foreach($Query_billdetil['billist'] AS $row1){ 
-                                                                        foreach($row1['PRONAME_LIST'] AS $row2){ 
-                                                                            $buttondel = '<button type="button" class="btn btn-danger btn-sm" id="btndeleterow" value="tr-'.$index.'"> <i class="fa fa-trash-o" aria-hidden="true"></i>   </button>'; 
-
-                                                                            if(countBillCreditnote_search($row2['BILLDETAIL_BILLID'])){
-                                                                                $buttondel = "";
-                                                                            }
-
-                                                                            if(countBillreceive_search($row2['BILLDETAIL_BILLID'])){
-                                                                                $buttondel = "";
-                                                                            }
-                                                                            
-                                                                ?>
+                                                                <?php $index=1; foreach($Query_billdetil['billist'] AS $row1){  
+                                                                        foreach($row1['PRONAME_LIST'] AS $row2){ ?>
                                                                         <tr id="tr-<?php echo $index; ?>" class="each-total">
                                                                             <td style="text-align: center;"> 
-                                                                                <?php
-                                                                                    echo $buttondel;
-                                                                                ?>
+                                                                                <button type="button" class="btn btn-danger btn-sm" id="btndeleterow" value="tr-<?php echo $index; ?>"> <i class="fa fa-trash-o" aria-hidden="true"></i>   </button>
                                                                             </td>
                                                                             <input type="hidden" id="orderlist[<?php echo $index; ?>][promain]" name="orderlist[<?php echo $index; ?>][promain]" value="<?php echo $row1['PRONAME_MAINID']; ?>">
                                                                             <input type="hidden" id="orderlist[<?php echo $index; ?>][prolist]" name="orderlist[<?php echo $index; ?>][prolist]" value="<?php echo $row2['PRONAME_LISTID']; ?>">
@@ -300,40 +289,31 @@
                                                                 <tr>
                                                                     <td class="text-right" style="padding: .2rem 1rem;" colspan="4"> <b>ค่ากล่องพัสดุ</b> </td>
                                                                     <td class="text-center" style="padding: .2rem;"> 
-                                                                        <input <?php echo $disabled; ?> type="number" class="form-control " style="height: 1.5rem;" name="total-Parcelcost" id="total-Parcelcost" value="<?php echo $Query_billdetil['PARCELCOST_LANG']; ?>"> 
+                                                                        <input type="number" class="form-control " style="height: 1.5rem;" name="total-Parcelcost" id="total-Parcelcost" value="<?php echo $Query_billdetil['PARCELCOST_LANG']; ?>"> 
                                                                     </td>
                                                                 </tr>
                                                                 <tr>
                                                                     <td class="text-right" style="padding: .2rem 1rem;" colspan="4"> <b>ค่าบริการจัดส่ง</b> </td>
                                                                     <td class="text-center" style="padding: .2rem;">
-                                                                        <input <?php echo $disabled; ?> type="number" class="form-control " style="height: 1.5rem;" name="total-Shippingcost" id="total-Shippingcost" value="<?php echo $Query_billdetil['DELIVERYFEE_LANG']; ?>">
+                                                                        <input type="number" class="form-control " style="height: 1.5rem;" name="total-Shippingcost" id="total-Shippingcost" value="<?php echo $Query_billdetil['DELIVERYFEE_LANG']; ?>">
                                                                     </td>
                                                                 </tr>
                                                                 <tr>
                                                                     <td class="text-right" style="padding: .2rem 1rem;" colspan="4"> <b>ค่าธรรมเนียม shopee</b> </td>
                                                                     <td class="text-center" style="padding: .2rem;">
-                                                                        <input <?php echo $disabled; ?> type="number" class="form-control " style="height: 1.5rem;" name="shor_money" id="shor_money" value="<?php echo $Query_billdetil['SHORMONEY']; ?>">
+                                                                        <input type="number" class="form-control " style="height: 1.5rem;" name="shor_money" id="shor_money" value="<?php echo $Query_billdetil['SHORMONEY']; ?>">
                                                                     </td>
                                                                 </tr>
                                                                 <tr>
                                                                     <td class="text-right" style="padding: .2rem 1rem;" colspan="4"> <b>ส่วนลด</b> </td>
                                                                     <td class="text-center" style="padding: .2rem;background-color: #FF9800;">
-                                                                        <input <?php echo $disabled; ?> type="number" class="form-control " style="background-color: #FF9800; height: 1.5rem; border: 0; color: #FFF;" name="discount" id="discount" value="<?php echo $Query_billdetil['DISCOUNTPRICE_LANG']; ?>">
+                                                                        <input type="number" class="form-control " style="background-color: #FF9800; height: 1.5rem; border: 0; color: #FFF;" name="discount" id="discount" value="<?php echo $Query_billdetil['DISCOUNTPRICE_LANG']; ?>">
                                                                     </td>
                                                                 </tr>
                                                                 <tr>
-                                                                    <td class="text-right" style="padding: .2rem 1rem;" colspan="4">
-                                                                        <input type="hidden" id="check-taxOff" name="check-taxOff" value="N">
-                                                                        <div class="form-check" style="float: left;"> 
-                                                                            <input class="form-check-input" type="checkbox" value="Y" id="check-tax-open">
-                                                                            <label class="form-check-label" for="check-txt-open">
-                                                                                ปิดการคิดค่าธรรมเนียมเก็บเงินปลายทางแบบอัตโนมัติ 
-                                                                            </label>
-                                                                        </div> 
-                                                                        <b>ค่าธรรมเนียมเก็บเงินปลายทาง</b> 
-                                                                    </td>
+                                                                    <td class="text-right" style="padding: .2rem 1rem;" colspan="4"> <b>ค่าธรรมเนียมเก็บเงินปลายทาง</b> </td>
                                                                     <td class="text-center" style="padding: .2rem;background-color: #F44336;">
-                                                                        <input <?php echo $disabled; ?> type="number" class="form-control " style="background-color: #F44336; height: 1.5rem; border: 0; color: #FFF;" name="tax" id="tax" value="<?php echo $Query_billdetil['TAX']; ?>">
+                                                                        <input type="number" class="form-control " style="background-color: #F44336; height: 1.5rem; border: 0; color: #FFF;" name="tax" id="tax" value="<?php echo $Query_billdetil['TAX']; ?>">
                                                                     </td>
                                                                 </tr>
                                                                 <tr style="background-color: #d9d9d9;">
@@ -345,7 +325,55 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            
+                                            <div class="titel text-left" style="margin-bottom: 0px;"> 
+                                                <i class="fa fa-file-image-o" aria-hidden="true"></i> หลักฐานการโอนเงิน
+                                                <button style="padding: 0rem .5rem; position: absolute; right: 2rem;" type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#exampleModalCenter">
+                                                    <i class="fa fa-search-plus" aria-hidden="true"></i>  Zoom 
+                                                </button> 
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="div-bottom text-center">
+                                                        <div class="fileImage">
+                                                            <?php 
+                                                                if($Query_billdetil['PICPAYMENT'] == '' && $Query_billdetil['PICPAYMENT2'] == ''){ 
+                                                                    foreach($Query_billdetil['IMGNAME'] AS $row){ 
+                                                                        if($row['IMGNAME_NAME']){
+                                                                            echo '<img src="'.$basepic.'front/retail/BillPaymentMultiple/'.$row['IMGNAME_NAME'].'" class="img-pay001">';
+                                                                        } else {
+                                                                            echo '<img src="https://heuft.com/upload/image/400x267/no_image_placeholder.png" class="img-pay001">';
+                                                                        }
+                                                                    }
+                                                                } else { 
+                                                                    echo '<img src="'.$basepic.'front/retail/Bill_Pyment/'.$Query_billdetil['PICPAYMENT'].'" class="img-pay001">';
+                                                                    if($Query_billdetil['PICPAYMENT2'] != ''){  
+                                                                        echo '<img src="'.$basepic.'front/retail/Bill_Pyment/'.$Query_billdetil['PICPAYMENT2'].'" class="img-pay001">';
+                                                                    }  
+                                                                } 
+                                                            ?>
+                                                        </div>
+                                                        <div style="text-align: left;">
+                                                            <div class="row">
+                                                                <div class="form-group col-md-12">
+                                                                    <label class="">หลักฐานการโอนเงิน <span class="text-ImgMultiple"> (สามารถใส่ได้มากกว่า 1 รายการ) </span> </label>
+                                                                    <div class="input-group">
+                                                                        <div class="custom-file">
+                                                                            <input type="file" class="custom-file-input" name="image_file[]" id="image_file" multiple>
+                                                                            <label class="custom-file-label" for="image_file"><span id="imagedledetail">Choose file</span></label>
+                                                                        </div>
+                                                                        <div class="input-group-append">
+                                                                            <span class="input-group-text" id="cancelimgdetail"><i class="fa fa-window-close"></i></span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <p style="color: #9a9a9a;">Image 1 MB | Size : 275 x 440</p>
+                                                                </div>
+                                                                 
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                 
+                                            </div>
                                             <hr>
                                             <div class="row">
                                                 <label class="form-group col-md-3"> </label>
@@ -354,10 +382,40 @@
                                                         <span class="text-save"> <i class="fa fa-floppy-o"></i> ยืนยันการแก้ไขบิล  </span>
                                                         <span class="text-spinner"> <i class="spinner fa fa-refresh" aria-hidden="true"></i> กรุณารอสักครู่...  </span>
                                                     </button>
-                                                    <button type="button" class="btn btn-default btn-sm" id="cancel"><li class="fa fa-angle-double-left"> </li> กลับหน้ารายการ</button>
+                                                    <button type="button" class="btn btn-default btn-sm" id="cancel"><li class="fa fa-window-close-o "> </li> ยกเลิกการแก้ไขบิล </button>
                                                 </div>
                                             </div>
-                                            
+                                            <!-- Modal ZOOM -->
+                                            <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                                <div class="modal-dialog " role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="exampleModalLongTitle"><i class="fa fa-file-image-o" aria-hidden="true"></i> หลักฐานการโอนเงิน</h5>
+                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <?php 
+                                                                if($Query_billdetil['PICPAYMENT'] == '' && $Query_billdetil['PICPAYMENT2'] == ''){ 
+                                                                    foreach($Query_billdetil['IMGNAME'] AS $row){ 
+                                                                        if($row['IMGNAME_NAME']){
+                                                                            echo '<img src="'.$basepic.'front/retail/BillPaymentMultiple/'.$row['IMGNAME_NAME'].'" style="width: 100%;">';
+                                                                        } else {
+                                                                            echo '<img src="https://heuft.com/upload/image/400x267/no_image_placeholder.png" style="width: 100%;">';
+                                                                        }
+                                                                    }
+                                                                } else { 
+                                                                    echo '<img src="'.$basepic.'front/retail/Bill_Pyment/'.$Query_billdetil['PICPAYMENT'].'" style="width: 100%;">';
+                                                                    if($Query_billdetil['PICPAYMENT2'] != ''){  
+                                                                        echo '<img src="'.$basepic.'front/retail/Bill_Pyment/'.$Query_billdetil['PICPAYMENT2'].'" style="width: 100%;">';
+                                                                    }  
+                                                                } 
+                                                            ?>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <!-- // ========== Modal ============ // -->
                                             <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
                                                 <div class="modal-dialog modal-lg">
@@ -411,24 +469,6 @@
             <script src="<?php echo $base_bn;?>plugins/sweetalert2/sweetalert2.min.js"></script>
         </div>
         <script>
-         
-            if("<?php echo $this->input->get('Check'); ?>" == "Dis"){ 
-                var length = $("#table-bill #ORlist tr").length;
-                for(var i = 1; i<=length; i++){
-                    var Tr = $("#table-bill #ORlist tr")[i-1].id;
-                    var count =  $('#'+Tr+' td').length;
-                    for(var n = 1;n <= count;n++){
-                        $($('#'+Tr+' td')[0]).addClass('displays-Col');
-                    }
-                }
-            } 
-			
-			$('.bd-example-modal-lg').on('shown.bs.modal', function () {
-                // $("#select-productmain").eq(0).prop('checked');
-                $("#select-productmain").val("");
-                $('.selectpicker').selectpicker('refresh')
-            });
-
             $('.text-spinner').hide();
             const Toast = Swal.mixin({
                 toast: true,
@@ -447,10 +487,6 @@
                 }
                 $('.fileImage').html(html);
             });
-            $(document).on('click', '#statustransfere', function(event) {
-                var val = this.value;
-                $('#StatusComplete').val(val);
-            }); 
             $("#cancel").on("click", function (e) {
                 window.location.replace('bill');
             });
@@ -458,14 +494,18 @@
                 $("#imagedle").text("Choose file");
                 $("#imageInput").val("");
             });
-             
+            $("#cancelimgdetail").on("click", function (e) {
+                $("#imagedledetail").text("Choose file");
+                $("#image_file").val("");
+            });
+            
             // ============================ //
             $( "#total-Parcelcost" ).keyup(function() {
                 var totalParcelcost = parseFloat($('#total-Parcelcost').val());
                 var totalShippingcost = parseFloat($('#total-Shippingcost').val());
                 var shormoney = parseFloat($('#shor_money').val());
                 var tax = parseFloat($('#tax').val());
-                var discount = parseFloat($('#discount').val())
+                var discount = parseFloat($('#discount').val());
                 var rowTotal = 0;
                 if($('#TBLtotalprice').val() != ''){ rowTotal = parseFloat($('#TBLtotalprice').val()); }
                 totalcost(totalParcelcost, totalShippingcost, shormoney, rowTotal, tax, discount);
@@ -475,7 +515,7 @@
                 var totalShippingcost = parseFloat($('#total-Shippingcost').val());
                 var shormoney = parseFloat($('#shor_money').val());
                 var tax = parseFloat($('#tax').val());
-                var discount = parseFloat($('#discount').val())
+                var discount = parseFloat($('#discount').val());
                 var rowTotal = 0;
                 if($('#TBLtotalprice').val() != ''){ rowTotal = parseFloat($('#TBLtotalprice').val()); }
                 totalcost(totalParcelcost, totalShippingcost, shormoney, rowTotal, tax, discount);
@@ -485,75 +525,47 @@
                 var totalShippingcost = parseFloat($('#total-Shippingcost').val());
                 var shormoney = parseFloat($('#shor_money').val());
                 var tax = parseFloat($('#tax').val());
-                var discount = parseFloat($('#discount').val())
+                var discount = parseFloat($('#discount').val());
                 var rowTotal = 0;
                 if($('#TBLtotalprice').val() != ''){ rowTotal = parseFloat($('#TBLtotalprice').val()); }
                 totalcost(totalParcelcost, totalShippingcost, shormoney, rowTotal, tax, discount);
-            });
-               
-            $('#check-tax-open').click(function() {
-                var val = $(this)[0].checked; 
-                if(val==true){
-                    $('#check-taxOff').val('Y');
-                } else {
-                    $('#check-taxOff').val('N');
-                }
             });
             $( "#tax" ).keyup(function() {
                 var totalParcelcost = parseFloat($('#total-Parcelcost').val());
                 var totalShippingcost = parseFloat($('#total-Shippingcost').val());
                 var shormoney = parseFloat($('#shor_money').val());
                 var tax = parseFloat($('#tax').val());
-                var discount = parseFloat($('#discount').val())
+                var discount = parseFloat($('#discount').val());
                 var rowTotal = 0;
                 if($('#TBLtotalprice').val() != ''){ rowTotal = parseFloat($('#TBLtotalprice').val()); }
                 totalcost(totalParcelcost, totalShippingcost, shormoney, rowTotal, tax, discount);
             });
-            
-         
             $( "#discount" ).keyup(function() {
                 var totalParcelcost = parseFloat($('#total-Parcelcost').val());
                 var totalShippingcost = parseFloat($('#total-Shippingcost').val());
                 var shormoney = parseFloat($('#shor_money').val());
                 var tax = parseFloat($('#tax').val());
-                var discount = parseFloat($('#discount').val())
+                var discount = parseFloat($('#discount').val());
                 var rowTotal = 0;
                 if($('#TBLtotalprice').val() != ''){ rowTotal = parseFloat($('#TBLtotalprice').val()); }
                 totalcost(totalParcelcost, totalShippingcost, shormoney, rowTotal, tax, discount);
             });
-
+ 
             function totalcost(totalParcelcost, totalShippingcost, shormoney, rowTotal, tax, discount){
                 var total = (rowTotal + totalParcelcost + totalShippingcost + shormoney + tax) - discount;
                 total = new Intl.NumberFormat('ja-JP').format(parseFloat(total).toFixed(2));
                 $('#total-cost').text(total);
-                sumtax(totalParcelcost, totalShippingcost, shormoney, discount);
-            }
-
-            function sumtax(totalParcelcost, totalShippingcost, shormoney, discount){
-                if($('#BillStatus').val() == "C"){
-                    var TBLtotalprice = $('#TBLtotalprice').val();
-                    var total = (parseFloat(TBLtotalprice)+totalParcelcost+totalShippingcost+shormoney+discount)-discount;
-                    
-					//
-					//  for bill free price
-					if($('#BillStatus').val() == "F"){ 
-						$('#total-cost').text(0);
-					}else{
-						$('#total-cost').text(total);
-					}
-					
-					var sum = parseFloat(total)*(3/100);     
-                    if($('#check-taxOff').val() == "N"){
-                        $('#tax').val(parseFloat(sum).toFixed(2));
-                    }  
-                }
             }
              
             $(document).on("click", "#Save" , function() {
-                var result = ["deliveryid", "name", "method_order"];
+                var result = ["deliveryid", "name", "address", "claim_remark2"];
                 for(var x=0;x<result.length;x++){
                     if(document.forms["demo2"][result[x]].value == ''){
-                        Swal.fire('ผิดผลาด!', 'กรอกข้อมูลให้ครบถ้วน', 'warning' );
+                        Swal.fire(
+                            'ผิดผลาด!',
+                            'กรอกข้อมูลให้ครบถ้วน',
+                            'warning'
+                        )
                         $("#"+result[x]).addClass('is-warning');
                         $("#"+result[x]).focus();
                         return false;
@@ -563,7 +575,11 @@
                 }
                  
                 if($("#TBLtotalprice").val() == ''){
-                    Swal.fire( 'ผิดผลาด!', 'กรุณาเลือกรายการออเดอร์', 'warning' );
+                    Swal.fire(
+                        'ผิดผลาด!',
+                        'กรุณาเลือกรายการออเดอร์',
+                        'warning'
+                    )
                     return false;
                 }
                 $('#Save').attr('disabled','disabled');
@@ -582,17 +598,55 @@
                         if(obj.error_code == 1){
                             Swal.fire( 'ผิดผลาด!', 'Error', 'warning');
                         } else {
-                            if(obj.error_code == 0){
-                                    Swal.fire('สำเร็จ!', 'แก้ไขรายการสำเร็จ ณ วันที่ <?php echo thai_date(date('Y-m-d')); ?>', 'success')
-                                    $(".swal2-confirm").on("click", function (e) {
-                                        window.location.replace('viwecreatebill?id='+obj.getid);
-                                    });
+                            $.post("claimorder", { 
+                                id: obj.getid, 
+                                remark: obj.claim_remark1, 
+                                valradio: obj.valradio,
+                                remarkclaim: obj.claim_remark2
+                            }, function(result){
+                                var obj = jQuery.parseJSON(result);
+                                if(obj.error_code == 0){
+                                    var image_file = $('#image_file');
+                                    if(image_file[0].files.length>0){
+                                        var formdata = new FormData();
+                                        var d = document;
+                                        var length = (image_file[0].files.length - 1);
+                                        for(var i=0; i<=length;i++){                    
+                                            formdata.append('ImgPayment[]', image_file[0].files[i]);
+                                        }
+                                        formdata.append('BillID', obj.getid); 
+                                        formdata.append('BillUpdate', 'Y');
+                                        $.ajax({
+                                            url: "ajaximg",
+                                            type: "POST",
+                                            data: formdata,
+                                            processData: false,
+                                            contentType: false,
+                                            success: function (results) {
+                                                var obj = jQuery.parseJSON(results);
+                                                if(obj.status == 200){
+                                                    Swal.fire('สำเร็จ!', "เคลมรายการออเดอร์สำเร็จ ณ วันที่ <?php echo thai_date(date('Y-m-d')); ?>", 'success')
+                                                    $(".swal2-confirm").on("click", function (e) {
+                                                        window.location.replace('bill');
+                                                    });
+                                                } 
+                                            }
+                                        });  
+                                    } else {
+                                        if(obj.error_code == 0){
+                                            Swal.fire('สำเร็จ!', 'แก้ไขรายการสำเร็จ ณ วันที่ <?php echo thai_date(date('Y-m-d')); ?>', 'success')
+                                            $(".swal2-confirm").on("click", function (e) {
+                                                window.location.replace('bill');
+                                            });
+                                        }
+                                    }
                                 }
+                            });
                         }
                     }
                 });
             }
-
+ 
             $(document).on("click", "#btndeleterow" , function() {
                 var val = $(this).val();
                 var html = "";
@@ -624,9 +678,6 @@
                 
                 var productmainID = $('#select-productmain').val();
                 var productlistID = $('#select-productlist').val();
-				
-				$('.selectpicker').selectpicker('refresh')
-				
                 var qty = $('#qty').val();
                 var result = ["select-productmain", "select-productlist", "qty"];
                 for(var x=0;x<result.length;x++){
@@ -739,16 +790,6 @@
                     var rowTotal = $('#TBLtotalprice').val();
                     var Total_cost = (parseFloat(rowTotal) + totalParcelcost + totalShippingcost + shormoney + tax) - discount;
                     $('#total-cost').text(Total_cost);
-					
-					//
-                    //  for bill free price
-                    if($('#BillStatus').val() == "F"){ 
-                        $('#total-price').text(0);
-                        $('#total-cost').text(0);
-                    }else{
-                        $('#total-price').text(rowTotal);
-                        $('#total-cost').text(total);
-                    }
                 });
             }
         </script>

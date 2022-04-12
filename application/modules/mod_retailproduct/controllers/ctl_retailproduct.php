@@ -234,11 +234,25 @@ class Ctl_retailproduct extends CI_Controller
 
 			switch ($this->input->get('ptype')) {
 				case 'main':
-					$dataresult = $this->getData_main();
+					$table = array('table'=>'retail_productmain','field'=>'promain_id');
+					break;
+				case 'submain':
+					$table = array('table'=>'product_submain','field'=>'prosubmain_id');
+					break;
+				case 'type':
+					$table = array('table'=>'product_type','field'=>'protype_id');
+					break;
+				case 'category':
+					$table = array('table'=>'product_category','field'=>'procate_id');
+					break;
+				default :
+					$table = array('table'=>'retail_productmain','field'=>'promain_id');
 					break;
 			}
-			
-			if(count($dataresult)){
+
+			$dataresult = $this->getData_main($table);
+
+			if (count($dataresult)) {
 				$return = json_encode($dataresult);
 			}
 
@@ -247,19 +261,20 @@ class Ctl_retailproduct extends CI_Controller
 		}
 	}
 
-	public function getData_main()
+	public function getData_main($arraytable)
 	{
-		$table = 'retail_productmain';
+		$table = $arraytable['table'];
+		$field = $arraytable['field'];
 		$sql = $this->db->select('ID,NAME_TH')
 			->from($table)
-			->where($table.'.status', 1);
+			->where($table . '.status', 1);
 		$num = $sql->count_all_results(null, false);
 		$q = $sql->get();
-		if ($num) {			
+		if ($num) {
 			foreach ($q->result() as $row) {
 				$sqlin = $this->db->from('retail_productlist')
-				->where('retail_productlist.promain_id',$row->ID)
-				->where('retail_productlist.status',1);
+					->where('retail_productlist.'.$field, $row->ID)
+					->where('retail_productlist.status', 1);
 				$total = $sqlin->count_all_results(null, false);
 				$qin = $sqlin->get();
 

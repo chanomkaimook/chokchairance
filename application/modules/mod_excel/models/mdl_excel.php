@@ -196,6 +196,7 @@ class Mdl_excel extends CI_Model {
 					'billstatus'	=> $billstatus,
 					'pos'			=> $pos,
 					'station_name'			=> $booth_name,
+					'date_upload'	=> date('Y-m-d H:i:s'),
 					'date_starts'	=> $date_starts,
 					'user_starts'	=> '00002',	//	dumpfile
 				);

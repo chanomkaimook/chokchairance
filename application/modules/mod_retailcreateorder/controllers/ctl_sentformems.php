@@ -30,8 +30,6 @@ class Ctl_sentformems extends CI_Controller {
         
         $this->set	= array (
             'ctl_name'				=> 'ctl_sentformems',
-			'mainmenu'		        => 'retail',
-			'submenu'		        => 'sentformems',
             'username_session'		=> $this->session->userdata('useradminname'),
             'userid_session'		=> $this->session->userdata('useradminid')
         );
@@ -43,8 +41,8 @@ class Ctl_sentformems extends CI_Controller {
 	public function index() {
 		
 		$data = array (
-			'mainmenu' 		=> $this->set['mainmenu'],
-			'submenu' 		=> $this->set['submenu']
+			'mainmenu' 		=> 'retail',
+			'submenu' 		=> 'sentformems'
 		);
  		$data['base_bn'] = base_url().BASE_BN;
 		$data['basepic'] = base_url().BASE_PIC;
@@ -55,8 +53,8 @@ class Ctl_sentformems extends CI_Controller {
 	public function report_scg() {
 		
 		$data = array (
-			'mainmenu' 		=> $this->set['mainmenu'],
-			'submenu' 		=> $this->set['submenu']
+			'mainmenu' 		=> 'retail',
+			'submenu' 		=> 'sentformems'
 		);
 		
 		$data['query'] = $this->mdl_sentformems->dataems($this->input->post('select-order'));
@@ -69,8 +67,8 @@ class Ctl_sentformems extends CI_Controller {
 	public function report_flash() {
 		
 		$data = array (
-			'mainmenu' 		=> $this->set['mainmenu'],
-			'submenu' 		=> $this->set['submenu']
+			'mainmenu' 		=> 'retail',
+			'submenu' 		=> 'sentformems'
 		);
 		
 		$data['query'] = $this->mdl_sentformems->dataems($this->input->post('select-order'));
@@ -82,8 +80,8 @@ class Ctl_sentformems extends CI_Controller {
 	public function report_express() {
 		
 		$data = array (
-			'mainmenu' 		=> $this->set['mainmenu'],
-			'submenu' 		=> $this->set['submenu']
+			'mainmenu' 		=> 'retail',
+			'submenu' 		=> 'sentformems'
 		);
 		
 		$data['query'] = $this->mdl_sentformems->dataems($this->input->post('select-order'));
@@ -95,8 +93,8 @@ class Ctl_sentformems extends CI_Controller {
 	public function sentformems() {
  	
 		$data = array (
-			'mainmenu' 		=> $this->set['mainmenu'],
-			'submenu' 		=> $this->set['submenu']
+			'mainmenu' 		=> 'retail',
+			'submenu' 		=> 'sentformems'
 		);
  		$data['base_bn'] = base_url().BASE_BN;
 		$data['basepic'] = base_url().BASE_PIC;
@@ -106,8 +104,8 @@ class Ctl_sentformems extends CI_Controller {
 	public function sentformems_print() {
 		 
 		$data = array (
-			'mainmenu' 		=> $this->set['mainmenu'],
-			'submenu' 		=> $this->set['submenu']
+			'mainmenu' 		=> 'retail',
+			'submenu' 		=> 'sentformems'
 		);
 		$data['Query'] = $this->mdl_sentformems->dataprintems($this->input->post('select-order'));
  		$data['base_bn'] = base_url().BASE_BN;

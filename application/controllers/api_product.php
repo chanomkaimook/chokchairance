@@ -32,7 +32,7 @@ class Api_product extends RestController
         $event = $this->uri->segment(4);
 
         if ($this->input->server('REQUEST_METHOD') == 'POST') {
-            if (!$id) {
+            if (!$id && $event != 'add') {
                 $result = array(
                     'error_code'    => 1,
                     'data'          => 'Not found id'
@@ -51,7 +51,26 @@ class Api_product extends RestController
                 $this->response($result);
 
                 // 
-                //  edit
+                //  add
+            }  else if ($event == 'add') {
+                $dataarray['name'] = array_keys(array_column($data, 'name'), 'name_th');
+
+                foreach ($dataarray as $key => $val) {
+                    if (!$data[$val[0]]->value) {
+                        $result = array(
+                            'error_code'  => 1,
+                            'data'  => 'โปรดระบุ ' . $key
+                        );
+                        $this->response($result);
+                    }
+                }
+
+                $arrayset['table'] = $tb;
+                $arrayset['data'] = array(
+                    'name_th'   => $data[$dataarray['name'][0]]->value
+                );
+                $result = $this->model->addItem($arrayset);
+                $this->response($result);
             } else if ($event == 'edit') {
                 $dataarray['name'] = array_keys(array_column($data, 'name'), 'edit_name_th');
 

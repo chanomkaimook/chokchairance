@@ -23,6 +23,7 @@ class Ctl_createorder extends CI_Controller
 	{
 		parent::__construct();
 		$this->load->model('mdl_createorder');
+		$this->load->model('mdl_claim');
 		$this->load->model('mdl_sql');
 		$this->load->model('mdl_uplode');
 		$this->load->library('session');
@@ -34,8 +35,6 @@ class Ctl_createorder extends CI_Controller
 			'max_upload_image'		=> 1000000,		// 1 k = 1000
 			'max_size_image'		=> 1920,
 			'ctl_name'				=> 'ctl_createorder',
-			'mainmenu'		        => 'retail',
-			'submenu'		        => 'bill',
 			'username_session'		=> $this->session->userdata('useradminname'),
 			'userid_session'		=> $this->session->userdata('useradminid')
 		);
@@ -66,61 +65,26 @@ class Ctl_createorder extends CI_Controller
 
 	public function bill()
 	{
+
 		$data = array(
-			'mainmenu' 		=> $this->set['mainmenu'],
-			'submenu' 		=> $this->set['submenu']
+			'mainmenu' 		=> 'retail',
+			'submenu' 		=> 'retailcreateorder'
 		);
-		// $data['Query_methodorder'] = $this->mdl_sql->get_WhereParaqry('retail_methodorder', 'status', 1);
+		$data['Query_methodorder'] = $this->mdl_sql->get_WhereParaqry('retail_methodorder', 'status', 1);
 		$data['base_bn'] = base_url() . BASE_BN;
 		$data['basepic'] = base_url() . BASE_PIC;
 		$this->load->view('bill', $data);
-	}
-
-	public function get_retailMethod()
-	{
-		if ($this->input->server('REQUEST_METHOD')) {
-			$dataresult = array();
-	
-			$request = $_REQUEST;
-			$sql = $this->db->select('ID,TOPIC')
-				->from('retail_methodorder')
-				->where('delivery_id', $request['method_id'])
-				->where('status', 1);
-			$q = $sql->get();
-			$number = $q->num_rows();
-			if ($number) {
-				$text = '';
-				foreach($q->result() as $r){
-					$text .= '<option value="'.$r->ID.'" > '.$r->TOPIC.' </option>';
-				}
-
-				$dataresult = array(
-					'error_code'	=> 0,
-					'txt'			=> '',
-					'data'			=> $text
-				);
-			}
-
-			$result = json_encode($dataresult);
-
-			echo $result;
-		}
-		
 	}
 
 	public function createbill()
 	{
 
 		$data = array(
-			'mainmenu' 		=> $this->set['mainmenu'],
-			'submenu' 		=> $this->set['submenu']
+			'mainmenu' 		=> 'retail',
+			'submenu' 		=> 'retailcreateorder'
 		);
 		$data['Query_bank'] = $this->mdl_sql->get_WhereParaqry('bank', 'status', 1);
-		if($this->session->userdata('franshine')){
-			$data['Query_methodorder'] = $this->mdl_sql->get_Where2Paraqry('retail_methodorder', 'status', 1,'id', $this->session->userdata('franshine'));
-		}else{
-			$data['Query_methodorder'] = $this->mdl_sql->get_WhereParaqry('retail_methodorder', 'status', 1);
-		}
+		$data['Query_methodorder'] = $this->mdl_sql->get_WhereParaqry('retail_methodorder', 'status', 1);
 		$data['Query_productmain'] = $this->mdl_sql->get_WhereParaqry('retail_productmain', 'status', 1);
 		$data['Query_productlist'] = $this->mdl_sql->get_WhereParaqry('retail_productlist', 'status', 1);
 		$data['base_bn'] = base_url() . BASE_BN;
@@ -132,17 +96,13 @@ class Ctl_createorder extends CI_Controller
 	{
 
 		$data = array(
-			'mainmenu' 		=> $this->set['mainmenu'],
-			'submenu' 		=> $this->set['submenu']
+			'mainmenu' 		=> 'retail',
+			'submenu' 		=> 'retailcreateorder'
 		);
 
 		$id = $this->input->get('id');
 		$data['Query_bank'] = $this->mdl_sql->get_WhereParaqry('bank', 'status', 1);
-		if($this->session->userdata('franshine')){
-			$data['Query_methodorder'] = $this->mdl_sql->get_Where2Paraqry('retail_methodorder', 'status', 1,'id', $this->session->userdata('franshine'));
-		}else{
-			$data['Query_methodorder'] = $this->mdl_sql->get_WhereParaqry('retail_methodorder', 'status', 1);
-		}
+		$data['Query_methodorder'] = $this->mdl_sql->get_WhereParaqry('retail_methodorder', 'status', 1);
 		$data['Query_billdetil'] = $this->mdl_createorder->datebilldetail($id);
 		$data['Query_productmain'] = $this->mdl_sql->get_WhereParaqry('retail_productmain', 'status', 1);
 		$data['Query_productlist'] = $this->mdl_sql->get_WhereParaqry('retail_productlist', 'status', 1);
@@ -156,8 +116,8 @@ class Ctl_createorder extends CI_Controller
 	{
 
 		$data = array(
-			'mainmenu' 		=> $this->set['mainmenu'],
-			'submenu' 		=> $this->set['submenu']
+			'mainmenu' 		=> 'retail',
+			'submenu' 		=> 'retailcreateorder'
 		);
 
 		$id = $this->input->post('hdfclaimorder');
@@ -176,8 +136,8 @@ class Ctl_createorder extends CI_Controller
 	{
 
 		$data = array(
-			'mainmenu' 		=> $this->set['mainmenu'],
-			'submenu' 		=> $this->set['submenu']
+			'mainmenu' 		=> 'retail',
+			'submenu' 		=> 'retailcreateorder'
 		);
 
 		$id = $this->input->get('id');
@@ -201,8 +161,8 @@ class Ctl_createorder extends CI_Controller
 	{
 
 		$data = array(
-			'mainmenu' 		=> $this->set['mainmenu'],
-			'submenu' 		=> $this->set['submenu']
+			'mainmenu' 		=> 'retail',
+			'submenu' 		=> 'retailcreateorder'
 		);
 		$id = $this->input->get('id');
 		$mdl = $this->input->get('mdl');
@@ -222,8 +182,8 @@ class Ctl_createorder extends CI_Controller
 	{
 
 		$data = array(
-			'mainmenu' 		=> $this->set['mainmenu'],
-			'submenu' 		=> $this->set['submenu']
+			'mainmenu' 		=> 'retail',
+			'submenu' 		=> 'retailcreateorder'
 		);
 		$id = $this->input->get('id');
 		$data['Query_billdetil'] = $this->mdl_createorder->datebilldetail($id);
@@ -255,8 +215,11 @@ class Ctl_createorder extends CI_Controller
 	function fetch_createorder()
 	{
 
-		$mdl = 'mdl_createorder';
-
+		if ($this->input->post('statuscomplete') != 4) {
+			$mdl = 'mdl_createorder';
+		} else {
+			$mdl = 'mdl_claim';
+		}
 		$fetch_data = $this->$mdl->make_datatables();
 		$basepic = base_url() . BASE_PIC;
 		$data = array();
@@ -306,7 +269,14 @@ class Ctl_createorder extends CI_Controller
 				if ($row->REMARK != '') {
 					$remark = '<b>หมายเหตุ : </b>' . $row->REMARK . '<br>';
 				}
-			} 
+			} else if ($row->STATUS_COMPLETE == 4) {
+				$STATUS_COMPLETE = '<span style="font-weight: 300;color: #17a2b8 ;"> เคลม </span>';
+				if ($row->REMARK != '') {
+					$remark = '<b>หมายเหตุ : </b>' . $row->REMARK . '<br>';
+				}
+			} else if ($row->STATUS_COMPLETE == 5) {
+				$STATUS_COMPLETE = '<span class="span-Status-002"> รอการอนุมัติรายการ <small> (เก็บเงินที่หลัง) </small> </span>';
+			}
 			if ($row->STATUS_APPROVE1 == 1) {
 				$APPROVE1 = '<span style="color: #28a745 ;"> <i class="fa fa-check-circle" aria-hidden="true"></i> </span>';
 			} else {
@@ -321,10 +291,24 @@ class Ctl_createorder extends CI_Controller
 			$claim = 'style="display: none;" ';
 			if ($row->STATUS_COMPLETE == 3) {
 				$disabled = 'style="display: none;" ';
+			} else if ($row->STATUS_COMPLETE == 4) {
+				$disabled = 'style="display: none;" ';
 			} else if ($row->STATUS_COMPLETE == 2) {
 				$disabled = 'style="display: none;" ';
 				$claim = 'style="display: block;" ';
 			}
+
+			/* if($row->DELIVERY_FORMID == 1){
+                $DELIVERYFORMID = 'KERRY';
+            } else if($row->DELIVERY_FORMID == 2){
+                $DELIVERYFORMID = 'EMS';
+            } else if($row->DELIVERY_FORMID == 3){
+				$DELIVERYFORMID = 'FLASH';
+			} else if($row->DELIVERY_FORMID == 4){
+				$DELIVERYFORMID = 'DHL';
+			} else if($row->DELIVERY_FORMID == 5){
+                $DELIVERYFORMID = 'SCG';
+			} */
 
 			//	new query
 			$sql = $this->db->select('NAME_US')
@@ -336,24 +320,38 @@ class Ctl_createorder extends CI_Controller
 				$r = $sql->row();
 				$DELIVERYFORMID = $r->NAME_US;
 			}
-			$sql = $this->db->select('TOPIC')
-				->from('retail_methodorder')
-				->where('id', $row->METHODORDER_ID)
-				->get();
-			$numdelevery = $sql->num_rows();
-			if ($numdelevery > 0) {
-				$r = $sql->row();
-				$METHODORDER_ID = $r->TOPIC;
-			}
 
 			$style_claim = '';
 			$rowID = $row->ID;
 			$STATUSCLAIM = '';
 			if ($row->STATUS_COMPLETE != 4) {
-				$content = '<b> สาขา : ' . $APPROVE1 . '</b><br>';
-				$content .= '<b> เขต : ' . $APPROVE2 . '</b><br>';
+				$content = '<b> การชำระเงิน : ' . $APPROVE1 . '</b><br>';
+				$content .= '<b> สต๊อกสินค้า : ' . $APPROVE2 . '</b><br>';
 				$content .= '<b> สถานะ : ' . $STATUS_COMPLETE . '</b><br>';
-			} 
+			} else {
+				$content = '<b> สถานะ : ' . $STATUS_COMPLETE . '</b><br>';
+				if ($row->STATUS_CLAIM == 2) {
+					$style_claim = '';
+					if ($row->STATUS_CLAIMCOMPLETE == 0) {
+						$style_claim = 'st-claim-4';
+						$divstatusclaim = 'divstatus-claim';
+					} else if ($row->STATUS_CLAIMCOMPLETE == 1) {
+						$style_claim = 'st-claim-2';
+						$divstatusclaim = 'divstatus-claim2';
+					}
+					$STATUSCLAIMCOMPLETE = ($row->STATUS_CLAIMCOMPLETE == 1) ? '<span> <i class="fa fa-check-circle" aria-hidden="true"></i> อนุมัติการเคลมสำเร็จ </span>' : '<span> <i class="fa fa-clock-o" aria-hidden="true"></i> รอการอนุมัติรายการเคลม </span>';
+					$STATUSCLAIM = '<div class="' . $divstatusclaim . '"> ' . $STATUSCLAIMCOMPLETE . ' </div>';
+				} else if ($row->STATUS_CLAIM == 3) {
+					$style_claim = 'st-claim-5';
+					$divstatusclaim = 'divstatus-claim3';
+					$STATUSCLAIM = '<div class="' . $divstatusclaim . '"> <i class="fa fa-info-circle" aria-hidden="true"></i> เคลมยกเลิกรายการ </div>';
+				} else {
+					$style_claim = 'st-claim-6';
+					$divstatusclaim = 'divstatus-claim4';
+					$STATUSCLAIM = '<div class="' . $divstatusclaim . '"> <i class="fa fa-info-circle" aria-hidden="true"></i> เคลม (*ลูกค้าปฏิเสธสินค้า) </div>';
+				}
+				$STATUSCLAIM = "<br>";
+			}
 
 			//	button
 			$bill_cancel = chkPermissPage('btn_billcancel');
@@ -384,8 +382,9 @@ class Ctl_createorder extends CI_Controller
 								<div class="col-sm-5">
 									<div class="list-CA001">
 											<b>รหัสออเดอร์ : ' . $row->CODE . '</b> <br>
+											ชื่อ-นามสกุล : ' . $row->NAME . ' ' . $textcode . '<br> 
 											วันที่ : ' . thai_date($row->DATE_STARTS) . ' เวลา : ' . date('H:i:s', strtotime($row->DATE_STARTS)) . ' น. <br>
-											รูปแบบการส่ง : ' . $DELIVERYFORMID . ' | สาขา : ' . $METHODORDER_ID .'
+											รูปแบบการส่ง : ' . $DELIVERYFORMID . ' | ยอดรวมสุทธิ : ' . number_format($row->NET_TOTAL, 2) . ' บาท
 									</div>
 								</div>
 								<div class="col-sm-5">

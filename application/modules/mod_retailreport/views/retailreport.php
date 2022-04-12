@@ -129,9 +129,9 @@
 									  <select class="form-control" id="reporttype" name="reporttype">
 										<option value="">เลือกประเภทรายงาน</option>
 										<?php if($report_bill == 1):	?>
-										<option value="bill_report">บิลส่งของ</option>
+										<option value="bill_report">บิล</option>
 										<?php endif; if($report_summarybill == 1):	?>
-										<option value="bill_summary">สรุปยอดส่ง</option>
+										<option value="bill_summary">สรุปรายการ</option>
 										<?php endif; if($report_store == 1):	?>
 										<option value="bill_store">สรุปยอดสินค้า</option>
 										<?php endif; ?>
@@ -322,6 +322,8 @@
 		<?php include("structer/backend/script.php"); ?>
 		<script src="<?php echo $base_bn;?>plugins/sweetalert2/sweetalert2.min.js"></script>
 		<script type="text/javascript" src="<?php echo base_url('asset/plugin/datatablebutton');?>/datatables.min.js"></script>
+		<!-- Select2 -->
+		<script src="<?php echo $base_bn; ?>plugins/select2/js/select2.full.min.js"></script>
 		
 		<script>
             // function viewreportall() {
@@ -1033,7 +1035,7 @@
 							}
 							
 							btn_specialbill += '<div class="form-group">';
-							btn_specialbill += '<select class="form-control form-control-sm" id="selectproduct" name="selectproduct">';
+							btn_specialbill += '<select class="form-control form-control-sm select2" id="selectproduct" name="selectproduct">';
 							btn_specialbill += '<option value="">เลือกรายการสินค้า</option>';
 							btn_specialbill += '<option value="all" '+selectedall+' >เลือกทั้งหมด</option>';
 							
@@ -1062,8 +1064,8 @@
 				
 					// $('.tab-content').html(hmtl_table);
 					$('#custom-tabs-three-product').html(hmtl_table);
-
 					setTimeout(function(){
+
 						if(productid != null){
 						var dataTable = $('#ex2').DataTable({  
 							// "serverSide": true,
@@ -1112,6 +1114,7 @@
 								}else{
 									$('.table-responsive').empty();
 								}
+
 								//	find data in json 
 								// console.log(json.data[39][5]);
 							},
@@ -1168,7 +1171,7 @@
 						//
 						//	insert button special
 						$('.'+btnSpClass).html(btn_specialbill);
-						
+						$('.select2').select2();
 					}, 1000);
 				
 				}		//	end function dataTableDetail

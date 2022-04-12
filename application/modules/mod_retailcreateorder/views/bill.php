@@ -144,7 +144,7 @@
 				<div class="container-fluid">
 					<div class="row mb-2">
 					<div class="col-sm-6">
-						<h1><?php echo $submenu; ?></h1>
+						<h1><?php echo $mainmenu; ?></h1>
 					</div>
 					<div class="col-sm-6">
 						<ol class="breadcrumb float-sm-right">
@@ -180,7 +180,7 @@
 										?>
                                         <div class="col-sm-6">
 
-                                            <label class=""> เลือกวันที่</label>
+                                            <label class=""> เลือกวันที่ออกบิล (ระหว่างวันที่) </label>
                                             <div class="input-group ">
                                                 <input type="date" class=" form-control form-control-sm" id="valdate">
                                                 <input type="date" class=" form-control form-control-sm" id="valdateTo">
@@ -190,35 +190,25 @@
 
                                         <div class="col-sm-6">
 
-                                            <label class=""> เลือกรูปแบบ </label>
+                                            <label class=""> เลือกรูปแบบการจัดส่ง </label>
                                             <div class="input-group input-group-sm">
                                                 <select class="custom-select " name="deliveryid" id="deliveryid">
-                                                    
+                                                    <option value=""> เลือกรูปแบบการจัดส่ง </option>
                                                     <?php
 														$sql = $this->db->select('*')
 														->from('delivery')
-														->where('id',1)
 														->where('status',1)
 														->get();
 														foreach($sql->result() as $row){
-															echo '<option value="'.$row->ID.'" selected> '.$row->NAME_US.' </option>';
+															echo '<option value="'.$row->ID.'"> '.$row->NAME_US.' </option>';
 														}
 													?>
                                                 </select>
                                                 <select class="custom-select " name="method_order" id="method_order">
-                                                    <!-- <option value=""> เลือกสาขา </option> -->
-                                                    <?php
-														$sql = $this->db->select('*')
-														->from('retail_methodorder')
-                                                        ->where('status',1);
-                                                        if($this->session->userdata('franshine')){
-                                                            $sql->where('id',$this->session->userdata('franshine'));
-                                                        }
-														$q = $sql->get();
-														foreach($q->result() as $row){
-															echo '<option value="'.$row->ID.'"> '.$row->TOPIC.' </option>';
-														}
-													?>
+                                                    <option value=""> เลือกช่องทางการรับออเดอร์ </option>
+                                                    <?php foreach($Query_methodorder->result() AS $row){ ?>
+                                                        <option value="<?php echo $row->ID; ?>"> <?php echo $row->TOPIC; ?> </option>
+                                                    <?php } ?>
                                                 </select>
                                               
                                                 <div class="input-group-append">
@@ -241,6 +231,12 @@
                                             </li>
                                             <li class="nav-item" style="background-color: #33333317;border-radius: 5px;margin: 0.1rem;">
                                                 <button type="button" class="btn btn-defaultnl btn-sm nav-link" data-toggle="tab" value="3" id="statuscomplete"> ยกเลิกรายการ </button>
+                                            </li>
+                                            <li class="nav-item" style="background-color: #33333317;border-radius: 5px;margin: 0.1rem;">
+                                                <button type="button" class="btn btn-defaultnl btn-sm nav-link" data-toggle="tab" value="4" id="statuscomplete"> รายการเคลม </button>
+                                            </li>
+                                            <li class="nav-item" style="background-color: #33333317;border-radius: 5px;margin: 0.1rem;">
+                                                <button type="button" class="btn btn-defaultnl btn-sm nav-link" data-toggle="tab" value="5" id="statuscomplete"> รายการเก็บเงินที่หลัง </button>
                                             </li>
  										</ul>
 									</div>
@@ -491,27 +487,6 @@
                         ],  
                     });  
                 }
-
-                $(document).on('change', '#deliveryid', function(event) {
-                    let method_id = $('select#deliveryid')
-
-                    fetch('get_retailMethod?method_id='+method_id.val())
-                    .then(res => res.json())
-                    .then((resp) => {
-                        // console.log(resp);
-                        let text = '<option value=""> เลือกสาขา </option>';
-                        if(resp.error_code == 0){
-                            text += resp.data;
-                            $('select#method_order').html(text);
-                        }else{
-                            $('select#method_order').html(text);
-                        }
-                    })
-                    .catch(function(error){
-                        console.log(`Error ${error}`);
-                    })
-                });
-
             })
         </script>
 	</body>

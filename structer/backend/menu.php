@@ -48,7 +48,7 @@ $permisspage = $this->permiss->get_PagePermiss($this->session->userdata('useradm
 				<li id="retail" class="nav-item has-treeview">
 					<a href="#" class="nav-link">
 						<img class="nav-icon" src="<?php echo $basepic . 'front/retail/icon/food-delivery.png'; ?>" style="filter: invert(1);width: 24px;height: 23px;margin-right: 0.4rem;">
-						<p> จัดการคลัง <i class="fas fa-angle-left right"></i> </p>
+						<p> การขาย <i class="fas fa-angle-left right"></i> </p>
 					</a>
 					<ul class="nav nav-treeview">
 						<li id="dashboard" class="nav-item">
@@ -70,12 +70,12 @@ $permisspage = $this->permiss->get_PagePermiss($this->session->userdata('useradm
 							</a>
 						</li>
 
-						<li id="barcode" class="nav-item">
+						<!-- <li id="barcode" class="nav-item">
 							<a href="<?php echo site_url('mod_retailproduct') ?>/ctl_retailbarcode/barcode" class="nav-link">
 								<i class="nav-icon fa fa-barcode " aria-hidden="true"></i>
 								<p>บาร์โค้ดสินค้า</p>
 							</a>
-						</li>
+						</li> -->
 
 						<li id="createbill" class="nav-item">
 							<a href="<?php echo site_url('mod_retailcreateorder') ?>/ctl_createorder/bill" class="nav-link">
@@ -89,7 +89,7 @@ $permisspage = $this->permiss->get_PagePermiss($this->session->userdata('useradm
 							</a>
 						</li>
 
-						<li id="retailreceive" class="nav-item">
+						<!-- <li id="retailreceive" class="nav-item">
 							<a href="<?php echo site_url('mod_retailreceive') ?>/ctl_receive/receive" class="nav-link">
 								<i class="nav-icon fa fa-file-alt " aria-hidden="true"></i>
 								<p>รับเข้าคลัง</p>
@@ -97,9 +97,9 @@ $permisspage = $this->permiss->get_PagePermiss($this->session->userdata('useradm
 								echo '<span class="badge bg-warning badge_receive">' . (countBillreceive() != 0 ? countBillreceive() : "") . '</span>';
 								?>
 							</a>
-						</li>
+						</li> -->
 
-						<li id="retailsupplier" class="nav-item">
+						<!-- <li id="retailsupplier" class="nav-item">
 							<a href="<?php echo site_url('mod_retailsupplier') ?>/ctl_supplier/supplier" class="nav-link">
 								<i class="nav-icon fa fa-file-alt " aria-hidden="true"></i>
 								<p>ใบ supplier</p>
@@ -110,9 +110,9 @@ $permisspage = $this->permiss->get_PagePermiss($this->session->userdata('useradm
 								}
 								?>
 							</a>
-						</li>
+						</li> -->
 
-						<li id="retailissue" class="nav-item">
+						<!-- <li id="retailissue" class="nav-item">
 							<a href="<?php echo site_url('mod_retailissue') ?>/ctl_issue/issue" class="nav-link">
 								<i class="nav-icon fa fa-file-alt " aria-hidden="true"></i>
 								<p>ใบเบิก</p>
@@ -123,9 +123,9 @@ $permisspage = $this->permiss->get_PagePermiss($this->session->userdata('useradm
 								}
 								?>
 							</a>
-						</li>
+						</li> -->
 
-						<li id="retailnote" class="nav-item">
+						<!-- <li id="retailnote" class="nav-item">
 							<a href="<?php echo site_url('mod_retailnote') ?>/ctl_note/note" class="nav-link">
 								<i class="nav-icon fa fa-exclamation-circle " aria-hidden="true"></i>
 								<p>Note!</p>
@@ -136,7 +136,7 @@ $permisspage = $this->permiss->get_PagePermiss($this->session->userdata('useradm
 								}
 								?>
 							</a>
-						</li>
+						</li> -->
 
 						<li id="report" class="nav-item">
 							<a href="<?php echo site_url('mod_retailreport') ?>/ctl_report/retailreport" class="nav-link">

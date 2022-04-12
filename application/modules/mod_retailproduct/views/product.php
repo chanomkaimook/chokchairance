@@ -387,11 +387,12 @@
             //
             // Button function
             //
+            let type;
             var modalProduct = $('.modal-product');
             $(document).on('click', '.btn_menumain', function() {
                 let element = $(this);
-                let type = element.attr('data-type');
                 let btn_name = element.text().trim();
+                type = element.attr('data-type');
 
                 //  style modal
                 let title = btn_name;
@@ -412,15 +413,100 @@
                 htmlSelect = $('option:selected', this).val();
             })
 
-            $(document).on('click', '#btn_n', function() {
-                getData('main')
+            // 
+            //  click add
+            $(document).on('click', '#btn_modal_addproduct', function() {
+                var itemid = $('#name_th').val();
+                if (itemid == "") {
+                    Swal.fire({
+                        type: 'warning',
+                        title: 'โปรดระบุชื่อ',
+                        text: '',
+                        timer: 2000
+                    })
+
+                    return false;
+                }
+
+                let form = $('form#frmmodal_add').serializeArray();
+
+                let url = '../../api/product/'+type+'/add/';
+
+                Swal.fire({
+                    title: 'Wait ...',
+                    allowOutsideClick: false,
+                    async onOpen(result) {
+                        fetch(
+                                url, {
+
+                                    headers: {
+                                        'API-KEY': 'XOGgx6vzY2yIj7li4tS1PMrqckh8dmE5FVQRZGeL',
+                                    },
+                                    method: 'POST',
+                                    body: JSON.stringify(form)
+                                })
+                            .then(async (response) => {
+                                let result = await response.json();
+
+                                swal.close();
+
+                                if (!response.ok) {
+                                    throw new Error("HTTP status " + response.status);
+                                } else {
+
+                                    if (result.error_code) {
+                                        Swal.fire({
+                                            type: 'warning',
+                                            title: 'ข้อมูลไม่ถูกต้อง',
+                                            text: result.data,
+                                        }).then((response) => {
+                                            if (response) {
+                                                $('#name_th').addClass('is-invalid').focus();
+                                            }
+                                        })
+
+                                        return false;
+                                    }
+                                    //
+                                    //  success
+                                    Swal.fire({
+                                        type: 'success',
+                                        title: 'รายการสำเร็จ',
+                                        text: 'เพิ่มรายการสำเร็จ',
+                                        timer: 2000,
+                                    }).then(async (resolve) => {
+                                        let doing1 = await new Promise((resolve, reject) => {
+                                            resolve(
+                                                    getData(type)
+                                                )
+                                        });
+
+                                        //  clear value
+                                        $('#name_th').val('');
+                                        $('#name_th').removeClass('is-valid');
+
+                                    })
+                                }
+                            })
+                            .catch(function(error) {
+                                alert(`${error}`);
+                            })
+                    },
+                    onBeforeOpen() {
+                        Swal.showLoading()
+                    }
+                })
+
             })
 
+            $(document).on('keypress', '#name_th', function() {
+                $(this).removeClass('is-invalid');
+                $(this).addClass('is-valid');
+            })
 
             // 
-            //  click delete 
+            //  click edit
             $(document).on('click', '#btn_modal_editproduct', function() {
-
                 var itemid = $('option:selected', '#selectproduct').val();
                 if (itemid == "") {
                     Swal.fire({
@@ -435,7 +521,7 @@
 
                 let form = $('form#frmmodal_edit').serializeArray();
 
-                let url = '../../api/product/main/edit/' + itemid;
+                let url = '../../api/product/'+type+'/edit/' + itemid;
 
                 Swal.fire({
                     title: 'Wait ...',
@@ -477,12 +563,12 @@
                                     Swal.fire({
                                         type: 'success',
                                         title: 'รายการสำเร็จ',
-                                        text: 'แก้ไขผู้ใช้งานสำเร็จ',
+                                        text: 'แก้ไขรายการสำเร็จ',
                                         timer: 2000,
                                     }).then(async (resolve) => {
                                         let doing1 = await new Promise((resolve, reject) => {
                                             resolve(
-                                                    getData('main')
+                                                    getData(type)
                                                 )
                                         });
 
@@ -538,7 +624,7 @@
                             allowOutsideClick: false,
                             async onOpen(result) {
                                 fetch(
-                                        '../../api/product/main/delete/' + itemid, {
+                                        '../../api/product/'+type+'/delete/' + itemid, {
 
                                             headers: {
                                                 'API-KEY': 'XOGgx6vzY2yIj7li4tS1PMrqckh8dmE5FVQRZGeL',
@@ -568,7 +654,7 @@
                                             Swal.fire({
                                                 type: 'success',
                                                 title: 'รายการสำเร็จ',
-                                                text: 'ลบผู้ใช้งานสำเร็จ',
+                                                text: 'ลบรายการสำเร็จ',
                                                 timer: 2000,
                                             }).then(
                                                 modalProduct.modal('hide')
@@ -591,6 +677,13 @@
             modalProduct.on('hide.bs.modal', function() {
                 document.frmmodal_add.reset();
                 document.frmmodal_edit.reset();
+
+                $('#edit_name_th').removeClass('is-valid')
+                $('#edit_name_th').removeClass('is-invalid')
+
+                $('#name_th').removeClass('is-valid')
+                $('#name_th').removeClass('is-invalid')
+
                 htmlSelect = "";
             })
 

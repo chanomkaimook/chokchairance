@@ -6,7 +6,9 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Writer;
 
-$write_array[] = array(
+$this->load->helper('excel_helper');
+
+/* $write_array[] = array(
 	"ลำดับ",
 	"วันทำรายการ",
 	"เลขที่",
@@ -19,7 +21,34 @@ $write_array[] = array(
 	"ผู้ตรวจ",
 
 	"คืนสินค้า",
+); */
+
+$write_array[] = array(
+	"วันที่",
+	"store",
+	"เลขที่เอกสาร",
+
+	"ชื่อเครื่อง",
+	"รหัสสินค้า",
+	"รายละเอียด",
+	"จำนวน",
+	"หน่วย",
+	"ยอดขายสุทธิ",
+
+	"กลุ่มสินค้า",
+	"หมวดหมู่",
+	"รูปแบบ",
+	"Price Category",
+	"Month",
 );
+
+//
+//	setting
+//	* 0=A, 1=B, 2=C...
+// $totalarray = count($write_array) - 1;
+$totalarray = array_sum(array_map("count", $write_array)) - 1;
+$columnfirst = get_columnExcelNameFromNumber(0);
+$columnlast = get_columnExcelNameFromNumber($totalarray);
 //
 foreach ($query as $row => $val) {
 	//	number
@@ -48,25 +77,37 @@ foreach ($query as $row => $val) {
 	}
 	//
 
-	$write_array[] = array(
-		$row,
-		date('d-m-Y', strtotime($val->bill_datetime)),
-		$val->bill_code,
 
+	$r_main = get_WherePara('retail_productmain', 'id', $val->bill_pmain_id);
+	$r_submain = get_WherePara('product_submain', 'id', $val->bill_psubmain_id);
+	$r_type = get_WherePara('product_type', 'id', $val->bill_ptype_id);
+	$r_cate = get_WherePara('product_category', 'id', $val->bill_pcate_id);
+
+	$write_array[] = array(
+
+		date('d-m-Y', strtotime($val->bill_datetime)),
+		$val->bill_gateway,
+		$val->bill_code,
+		$val->bill_pos,
+		$val->bill_pid,
 		$val->product_name,
 		$val->bill_qty,
+		$val->bill_unit,
+		$val->bill_prototalprice,
 
-		$val->bill_typedelivery,
-		$val->bill_gateway,
-		$approve1,
-		$approve2,
+		$r_main->NAME_TH,
+		$r_submain->NAME_TH,
+		$r_type->NAME_TH,
+		$r_cate->NAME_TH,
+		date('M-y', strtotime($val->bill_datetime))
+		// '1/3/2022'
 
-		$text_qty
 	);
 }
 // echo "<pre>";print_r($write_array);echo "</pre>";die();
 $row++;
 $last_row = $row;
+
 // echo  count($write_array)."<br>"."<pre>";print_r($write_array);echo "</pre>";die();
 //	
 //	set style
@@ -74,7 +115,22 @@ $richText = new \PhpOffice\PhpSpreadsheet\RichText\RichText();
 
 $spreadsheet = new Spreadsheet();
 $spreadsheet->setActiveSheetIndex(0);
-$spreadsheet->getActiveSheet()->fromArray($write_array, NULL, 'A1');
+
+
+$spreadsheet->getActiveSheet()->fromArray($write_array, NULL, $columnfirst . '1');
+/* $highestRow = $spreadsheet->getActiveSheet()->getHighestRow();
+for($i = 1; $i <= $highestRow; $i++) {
+	$cell = $spreadsheet->getActiveSheet()->getCellByColumnAndRow($columnIndex, $i);
+	$cell->setValueExplicit($cell->getValue(), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+  } */
+  /* $spreadsheet->getActiveSheet()
+    ->getStyle("I")
+    ->getNumberFormat()
+    ->setFormatCode(\PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING); */
+
+  //	set format	
+/* $spreadsheet->getActiveSheet()->getStyle($columnlast . '2:' . $columnlast . '' . $last_row)->getNumberFormat()
+->setFormatCode('B1mmm-yy'); */
 
 #	set default excel
 $spreadsheet->getDefaultStyle()->getFont()->setName('Arial');
@@ -97,8 +153,11 @@ $spreadsheet->getActiveSheet()->getStyle('A' . $row_ritchtext)
 $styleHead = [
 	'font' => [
 		'bold' => true,
-		'name' => 'Arial',
-		'size' => 8,
+		'name' => 'Cordia New',
+		'size' => 15,
+		'color' => [
+			'argb' => 'FFFFFF',
+		]
 	],
 	'alignment' => [
 		'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
@@ -107,15 +166,31 @@ $styleHead = [
 	'fill' => [
 		'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
 		'rotation' => 90,
-		'startColor' => [
-			'argb' => 'ff75e0',
-		],
-		'endColor' => [
-			'argb' => 'f8caee',
-		],
+		'color' => [
+			'argb' => '8064A2',
+		]
 	],
 ];
-$spreadsheet->getActiveSheet()->getStyle('A1:R1')->applyFromArray($styleHead);
+$spreadsheet->getActiveSheet()->getStyle($columnfirst . '1:' . $columnlast . '1')->applyFromArray($styleHead);
+
+$styleBody = [
+	'font' => [
+		'name' => 'Cordia New',
+		'size' => 15
+	],
+	'alignment' => [
+		'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+		'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+	],
+	'fill' => [
+		'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
+		'rotation' => 90,
+		'color' => [
+			'argb' => 'E4DFEC',
+		]
+	],
+];
+$spreadsheet->getActiveSheet()->getStyle($columnfirst . '2:' . $columnlast . '' . $last_row)->applyFromArray($styleBody);
 
 #	array set alignment
 $styleAlign = [
@@ -124,10 +199,40 @@ $styleAlign = [
 		'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
 	]
 ];
-$spreadsheet->getActiveSheet()->getStyle('A2:R' . $last_row)->applyFromArray($styleAlign);
+$spreadsheet->getActiveSheet()->getStyle('B2:B' . $last_row)->applyFromArray($styleAlign);
+$spreadsheet->getActiveSheet()->getStyle('F2:F' . $last_row)->applyFromArray($styleAlign);
+
+#	array set alignment
+$styleAlignRight = [
+	'alignment' => [
+		'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,
+		'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+	]
+];
+$spreadsheet->getActiveSheet()->getStyle('I2:I' . $last_row)->applyFromArray($styleAlignRight);
+
+for ($rowi = 0; $rowi <= $last_row; $rowi++) {
+	$div = $rowi % 2;
+
+	if ($div == 0) {
+		#	set background odd
+		$spreadsheet->getActiveSheet()->getStyle($columnfirst . $rowi . ':' . $columnlast . $rowi)->getFill()
+			->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+			->getStartColor()->setARGB('CCC0DA');
+	}
+}
+
+
+#
+#	number format
+#	product list
+$spreadsheet->getActiveSheet()->getStyle('i2:i' . $last_row)->getNumberFormat()
+	->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+
+
 
 #	array set
-$stylePrice = [
+/* $stylePrice = [
 	'font' => [
 		'bold' => false,
 		'name' => 'Arial',
@@ -138,7 +243,7 @@ $stylePrice = [
 		'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
 	]
 ];
-$spreadsheet->getActiveSheet()->getStyle('E2:E' . $last_row)->applyFromArray($stylePrice);
+$spreadsheet->getActiveSheet()->getStyle('E2:E' . $last_row)->applyFromArray($stylePrice); */
 
 
 #	array set border
@@ -146,73 +251,27 @@ $styleBorder = [
 	'borders' => [
 		'allBorders' => [
 			'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-			'color' => ['argb' => '00000000'],
+			'color' => ['argb' => 'FFFFFFFF'],
 		],
 	],
 ];
-$spreadsheet->getActiveSheet()->getStyle('A1:J' . $last_row)->applyFromArray($styleBorder);
+$spreadsheet->getActiveSheet()->getStyle($columnfirst . '1:' . $columnlast . '' . $last_row)->applyFromArray($styleBorder);
 
-#	wraptext (show text non-over column width)
-$spreadsheet->getActiveSheet()->getStyle('D4:D' . $last_row)->getAlignment()->setWrapText(true);
-$spreadsheet->getActiveSheet()->getStyle('N4:N' . $last_row)->getAlignment()->setWrapText(true);
-
+$spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(15);
 $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(15);
 $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(15);
-$spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(36);
-$spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(18);
-$spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(15);
-$spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(15);
-$spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(15);
-$spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(15);
-$spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(15);
-$spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(15);
-$spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(15);
-$spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(15);
-$spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(60);
+$spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(60);
+$spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(15);
+$spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(10);
 
-#	creat total
-$nextrow1 = $last_row + 1;
-$array_columntotal = array(
-	'E'	=> "",
-);
-//	price
-$styleTotalPrice = [
-	'font' => [
-		'bold' => true,
-		'name' => 'Arial',
-		'size' => 8,
-	],
-	'alignment' => [
-		'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,
-		'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-	]
-];
+$spreadsheet->getActiveSheet()->getColumnDimension('j')->setWidth(18);
+$spreadsheet->getActiveSheet()->getColumnDimension('k')->setWidth(18);
+$spreadsheet->getActiveSheet()->getColumnDimension('l')->setWidth(18);
+$spreadsheet->getActiveSheet()->getColumnDimension('m')->setWidth(18);
 
-foreach ($array_columntotal as $key => $val) {
-	/* $totalText = new \PhpOffice\PhpSpreadsheet\RichText\RichText();
-		$payable = $totalText->createTextRun($val);
-		$payable->getFont()->setBold(true);
-		$spreadsheet->getActiveSheet()->getCell(''.$key.''.$nextrow1)->setValue($totalText); */
-	$spreadsheet->getActiveSheet()->getStyle('' . $key . '' . $nextrow1)
-		->getAlignment()
-		->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
 
-	$spreadsheet->getActiveSheet()->getStyle('' . $key . '' . $nextrow1)
-		->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-		->getStartColor()->setARGB('00FFFF00');
-
-	$spreadsheet->getActiveSheet()
-		->setCellValue(
-			'' . $key . '' . $nextrow1,
-			'=SUM(' . $key . '2:' . $key . '' . $last_row . ')'
-		);
-
-	$spreadsheet->getActiveSheet()->getStyle('' . $key . '' . $nextrow1)->applyFromArray($styleTotalPrice);
-
-	//	number format
-	$spreadsheet->getActiveSheet()->getStyle('' . $key . '' . $nextrow1)->getNumberFormat()
-		->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-}
+#	set height
+$spreadsheet->getActiveSheet()->getDefaultRowDimension()->setRowHeight(30);
 
 #	set sheet name
 $spreadsheet->getActiveSheet()->setTitle(date('Y-m-d'));
@@ -222,7 +281,7 @@ $spreadsheet->getActiveSheet()->getProtection()->setSheet(false);
 
 //
 //	setting
-$filename = "rp_billSales_" . date('Y-m-d') . ".xlsx";
+$filename = "rp_billSalesMix_" . date('Y-m-d') . ".xlsx";
 header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 header('Content-Disposition: attachment;filename="' . $filename . '"');
 header('Cache-Control: max-age=0');

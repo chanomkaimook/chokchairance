@@ -3,7 +3,6 @@
 
         $(document).ready(function() {
             let page = $('input#import').val();
-            console.log(page);
             $('#sel_dataupdate').val(page);
         })
 
@@ -21,7 +20,7 @@
             result += '<thead><tr>';
             result += '<th> </th>';
             result += '<th>Order</th>';
-            result += '<th>อ้างอิง</th>';
+            result += '<th>วันที่</th>';
             result += '<th>ลูกค้า</th>';
             result += '<th>ช่องทาง</th>';
             result += '<th>ขนส่ง</th>';
@@ -34,7 +33,7 @@
 
 
             let detail = obj.resultdetail;
-
+            console.log(obj)
             if (obj.resulttable) {
                 $.each(obj.resulttable, function(key, val) {
 
@@ -63,7 +62,7 @@
                     result += '<tr id="' + key + '" data-detail="' + trdetail + '">';
                     result += '<td class="delId text-danger" data-billid="' + val.id + '" > <i class="fas fa-trash-alt"></i> </td>';
                     result += '<td>' + val.code + '</td>';
-                    result += '<td>' + val.ref + '</td>';
+                    result += '<td>' + val.date_starts + '</td>';
                     result += '<td>' + val.custname + '</td>';
                     result += '<td>' + val.receipt_name + '</td>';
                     result += '<td>' + val.shipping + '</td>';
