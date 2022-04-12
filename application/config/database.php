@@ -80,11 +80,11 @@ $db['default'] = array(
 	'hostname' => 'localhost',
 	'username' => 'root',
 	'password' => '',
-	'database' => 'shop_ummilk',
+	'database' => 'cfr',
 
-	/* 'username' => 'um_user',
-	'password' => '5zi1u5E#',
-	'database' => 'um_db', */
+	/* 'username' => 'cfr',
+	'password' => '58wsx1~T',
+	'database' => 'db_cfr', */
 
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',

@@ -9,7 +9,7 @@ $permisspage = $this->permiss->get_PagePermiss($this->session->userdata('useradm
 	}
 
 	[class*=sidebar-dark-] {
-		background-color: #426c52 !important;
+		background-color: #202936 !important;
 	}
 </style>
 <input id="mainmenu" name="mainmenu" type="hidden" value="<?php echo $mainmenu; ?>">
@@ -20,7 +20,7 @@ $permisspage = $this->permiss->get_PagePermiss($this->session->userdata('useradm
 	<!-- Brand Logo -->
 	<a href="<?php echo $siteurl . "/ctl_admin/backend_main"; ?>" class="brand-link">
 		<img src="<?php echo $base_bn; ?>dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-		<span class="brand-text font-weight-light">WAREHOUSE</span>
+		<span class="brand-text font-weight-light">Rance</span>
 	</a>
 
 	<!-- Sidebar -->
@@ -47,7 +47,7 @@ $permisspage = $this->permiss->get_PagePermiss($this->session->userdata('useradm
 
 				<li id="retail" class="nav-item has-treeview">
 					<a href="#" class="nav-link">
-						<img class="nav-icon" src="<?php echo $basepic . 'front/retail/icon/food-delivery.png'; ?>" style="filter: invert(1);width: 24px;height: 23px;margin-right: 0.4rem;">
+						<img class="nav-icon" src="<?php echo $basepic . 'back/image/food-delivery.png'; ?>" style="filter: invert(1);width: 24px;height: 23px;margin-right: 0.4rem;">
 						<p> การขาย <i class="fas fa-angle-left right"></i> </p>
 					</a>
 					<ul class="nav nav-treeview">

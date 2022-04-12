@@ -23,13 +23,13 @@
                     <div class="account-wall">
                         <div class="user-image">
 							<img style="background-color:#fff8dc"
-							src="<?php echo base_url('asset');?>/images/back/image/web.png" class="img-responsive img-circle" alt="friend 8">
+							src="<?php echo base_url('asset');?>/images/back/image/rance.png" class="img-responsive img-circle" alt="friend 8">
 
                             <div id="loader"></div>
                         </div>
 						<div class="account-form">
                         <form class="form-signin" role="form">
-                            <h2>Welcome to <strong>Backend</strong>!</h2>
+                            <h2>Backend Chokchai <b>Rance</b></h2>
                             <p>Enter your password to go to dashboard.</p>
 
                             <div class="append-icon">

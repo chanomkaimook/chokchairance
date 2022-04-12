@@ -22,18 +22,13 @@ class DataSource
     // when using above 7.1.0, declare the below constants as private
     const HOST = 'localhost';
 
-    /* const USERNAME = 'FarmCI';
-    const PASSWORD = 'Farm2018@';
-    const DATABASENAME = 'farmchokchai_steakhouse';*/
-	
-	//	ใช้ชั่วคราว
-	/* const USERNAME = 'farmadmin';
-    const PASSWORD = 'Farm2018@';
-    const DATABASENAME = 'farmchokchai_regis'; */
+    /* const USERNAME = 'cfr';
+    const PASSWORD = '58wsx1~T';
+    const DATABASENAME = 'db_cfr'; */
 
 	const USERNAME = 'root';
     const PASSWORD = '';
-    const DATABASENAME = 'shop_ummilk';
+    const DATABASENAME = 'cfr';
 
     private $conn;
 
