@@ -51,7 +51,7 @@ class Ctl_excel extends CI_Controller
 	public function report()
 	{
 
-						
+
 		$data = array(
 			'mainmenu' 		=> 'retail',
 			'submenu' 		=> 'reportexcel',
@@ -62,7 +62,7 @@ class Ctl_excel extends CI_Controller
 		$data['basepic'] = base_url() . BASE_PIC;
 		$this->load->view('report', $data);
 	}
-	
+
 	public function get_dataImport()
 	{
 		$request = $_REQUEST;
@@ -128,9 +128,9 @@ class Ctl_excel extends CI_Controller
 		$r = $q->row();
 
 		$sumtotal = $r->sumtotal;
-		if($sumtotal){
+		if ($sumtotal) {
 			$totalamount = $sumtotal;
-		}else{
+		} else {
 			$totalamount = 0;
 		}
 
@@ -140,7 +140,6 @@ class Ctl_excel extends CI_Controller
 
 		$jsonresult = json_encode($result);
 		echo $jsonresult;
-
 	}
 
 	public function get_datatoday()
@@ -158,6 +157,8 @@ class Ctl_excel extends CI_Controller
 			retail_bill.id as rt_id,
 			retail_bill.code,
 			retail_bill.billstatus,
+			
+			retail_bill.pos as bill_pos_name,
 	
 			retail_bill.total_price,
 			retail_bill.shor_money,
@@ -173,13 +174,15 @@ class Ctl_excel extends CI_Controller
 			retail_productlist.price as rp_price,
 
 			retail_methodorder.topic as receipt_name,
-			delivery.name_th as shipping
+			delivery.name_th as shipping,
+			fileupload.name as fileupload_name,
 		')
 			->from('retail_bill')
 			->join('retail_billdetail', 'retail_bill.id=retail_billdetail.bill_id', 'left')
 			->join('retail_methodorder', 'retail_bill.methodorder_id=retail_methodorder.id', 'left')
 			->join('delivery', 'retail_bill.delivery_formid=delivery.id', 'left')
 			->join('retail_productlist', 'retail_billdetail.prolist_id=retail_productlist.id', 'left')
+			->join('fileupload', 'retail_bill.fileuploadref_id=fileupload.id', 'left')
 			->where('retail_bill.status', 1)
 			->where('date(retail_bill.date_upload)', date('Y-m-d'))
 			->where('retail_bill.user_starts', $usercodeid);
@@ -203,10 +206,12 @@ class Ctl_excel extends CI_Controller
 					'total_price' 	=> $row->total_price,
 					'net_total' 	=> $row->net_total,
 					'custname' 	=> $row->custname,
+					'pos_name' 		=> $row->bill_pos_name,
 					'receipt_name' 	=> $row->receipt_name,
 					'shipping' 	=> $row->shipping,
 					'billstatus' 	=> ($row->billstatus == 'T' ? 'ปกติ' : 'เก็บปลายทาง'),
-					'conflict' 		=> "asdasd",
+					'fileupload_name' 	=> $row->fileupload_name,
+					'conflict' 		=> "",
 
 					'rp_name' => $row->rp_name,
 					'rp_price' => $row->rp_price,
@@ -249,14 +254,16 @@ class Ctl_excel extends CI_Controller
 				$data[] = array(
 					'id' 	=> $subarray[$key]['id'],
 					'code' 	=> $subarray[$key]['code'],
-					'date_starts' 	=> date('d-m-Y',strtotime($subarray[$key]['date_starts'])),
+					'date_starts' 	=> date('d-m-Y', strtotime($subarray[$key]['date_starts'])),
 					'ref' 	=> $subarray[$key]['ref'],
 					'total_price' 	=> $subarray[$key]['total_price'],
 					'net_total' 	=> $subarray[$key]['net_total'],
 					'custname' 	=> $subarray[$key]['custname'],
+					'pos_name' 	=> $subarray[$key]['pos_name'],
 					'receipt_name' 	=> $subarray[$key]['receipt_name'],
 					'shipping' 	=> $subarray[$key]['shipping'],
 					'billstatus' 	=> $subarray[$key]['billstatus'],
+					'fileupload_name' 	=> $subarray[$key]['fileupload_name'],
 					'conflict' 		=> "",
 					'total' => "<button class='btn btn-sm btn-primary' data-id='" . $id . "'><span class='small'>" . $count_detail . " รายการ</small></button>"
 				);
@@ -304,7 +311,12 @@ class Ctl_excel extends CI_Controller
 					->where('date(date_upload)', date('Y-m-d'))
 					->where('user_starts', $usercodeid)
 					->where('status', 1);
-			}else{
+			} else if ($type == 'file') {
+				$id = $request['id'];
+				$sql = $this->db->from('retail_bill')
+					->where('fileuploadref_id', $id)
+					->where('status', 1);
+			} else {
 				$id = $request['id'];
 				$sql = $this->db->from('retail_bill')
 					->where('id', $id)
@@ -314,26 +326,66 @@ class Ctl_excel extends CI_Controller
 			$num = $sql->count_all_results(null, false);
 			$q = $sql->get();
 
-			if($num){
+			if ($num) {
 				$dataupdate = array(
 					'status_complete'	=> 3,
 					'status'			=> 0
 				);
 				if ($type == 'all') {
-					$this->db->where(array('date(date_upload)' => date('Y-m-d') , 'user_starts' => $usercodeid));
-					$this->db->update('retail_bill',$dataupdate);
-				}else{
+					$this->db->where(array('date(date_upload)' => date('Y-m-d'), 'user_starts' => $usercodeid));
+					$this->db->update('retail_bill', $dataupdate);
+
+					//	update status fileupload
+					$sqlf =	$this->db->select('*')
+						->from('fileupload')
+						->where('status', 1)
+						->where('date(date_starts)', date('Y-m-d'));
+					$qf = $sqlf->get();
+					$numf = $qf->num_rows();
+					if ($numf) {
+						foreach ($qf->result() as $rf) {
+							$tbfile_id = $rf->ID;
+							$name = $rf->CODE;
+							if (file_exists(FCPATH . 'asset/upload/' . $name)) {
+								unlink(FCPATH . 'asset/upload/' . $name);
+
+								$this->db->where(array('id' => $tbfile_id));
+								$this->db->update('fileupload', array('date_update' => date('Y-m-d H:i:s'), 'user_update' => $this->session->userdata('useradminid'), 'status' => 0));
+							}
+						}
+					}
+				} else if ($type == 'file') {
+					$this->db->where(array('fileuploadref_id' => $id));
+					$this->db->update('retail_bill', $dataupdate);
+
+					//	update status fileupload
+					$sqlf =	$this->db->select('*')
+						->from('fileupload')
+						->where('id', $id);
+					$qf = $sqlf->get();
+					$numf = $qf->num_rows();
+					if ($numf) {
+						$rf = $qf->row();
+						$name = $rf->CODE;
+						if (file_exists(FCPATH . 'asset/upload/' . $name)) {
+							unlink(FCPATH . 'asset/upload/' . $name);
+
+							$this->db->where(array('id' => $id));
+							$this->db->update('fileupload', array('date_update' => date('Y-m-d H:i:s'), 'user_update' => $this->session->userdata('useradminid'), 'status' => 0));
+						}
+					}
+				} else {
 					$this->db->where(array('id' => $id));
-					$this->db->update('retail_bill',$dataupdate);
+					$this->db->update('retail_bill', $dataupdate);
 				}
-				
+
 				$error_code = 0;
-				$txt = 'ลบรายการ ' . $page . ' จำนวน '.$num.' บิลสำเร็จ';
+				$txt = 'ลบรายการ ' . $page . ' จำนวน ' . $num . ' บิลสำเร็จ';
 
 				// ============== Log_Detail ============== //
 				$log_query = $this->db->last_query();
 				$last_id = $this->session->userdata('log_id');
-				$detail = "Update cancel bill txt[ ".$txt."] Code : ".$this->session->userdata('useradminid')." Name : ".$this->session->userdata('useradminname');
+				$detail = "Update cancel bill txt[ " . $txt . "] Code : " . $this->session->userdata('useradminid') . " Name : " . $this->session->userdata('useradminname');
 				$type = "Update";
 				$arraylog = array(
 					'log_id'  		 => $last_id,
@@ -343,8 +395,7 @@ class Ctl_excel extends CI_Controller
 					'date_starts'    => date('Y-m-d H:i:s')
 				);
 				updateLog($arraylog);
-
-			}else{
+			} else {
 				$error_code = 1;
 				$txt = 'ไม่มีการลบรายการ ' . $page;
 			}
@@ -358,5 +409,46 @@ class Ctl_excel extends CI_Controller
 
 			echo $result;
 		}
+	}
+
+	function get_fileUpload()
+	{
+		$error_code = 1;
+		$txt = 'success';
+		$data = array();
+
+		$query = $this->mdl_excel->openFile_upload();
+		if ($query) {
+			foreach ($query->result() as $rowfile) {
+
+
+				/* $objOpen = opendir('asset/upload');
+				while (($file = readdir($objOpen)) !== false) {
+					if ($rowfile->CODE == trim($file)) {
+						$data[] = array(
+							'id'	=> $rowfile->ID,
+							'code'	=> $rowfile->CODE,
+							'name'	=> $rowfile->NAME
+						);
+					}
+				} */
+				if (file_exists(FCPATH . 'asset/upload/' . $rowfile->CODE)) {
+					$data[] = array(
+						'id'	=> $rowfile->ID,
+						'code'	=> $rowfile->CODE,
+						'name'	=> $rowfile->NAME
+					);
+				}
+			}
+		}
+
+		$array = array(
+			'error_code' 	=> $error_code,
+			'txt'		 	=> $txt,
+			'data' 			=> $data
+		);
+		$result = json_encode($array);
+
+		echo $result;
 	}
 }

@@ -37,7 +37,12 @@
 
 		if (in_array($_FILES["file"]["type"], $allowedFileType)) {
 
-			$targetPath = $documentroot . '/asset/upload/' . $_FILES['file']['name'];
+			$explode = explode('.',$_FILES['file']['name']); 
+			$newname = time().'.'.$explode[1];
+
+
+			// $targetPath = $documentroot . '/asset/upload/' . $_FILES['file']['name'];
+			$targetPath = $documentroot . '/asset/upload/' . $newname;
 			move_uploaded_file($_FILES['file']['tmp_name'], $targetPath);
 
 			$Reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
@@ -79,12 +84,7 @@
 				if (is_numeric(array_search('รวมวันที่', $spreadSheetAry[$i]))) {
 					$endpoint = $i;
 				}
-				/* echo $i." = ".is_numeric(array_search('รวมเครื่องที่', $spreadSheetAry[$i]))." - ".$endpoint."<br>";
-if(!is_numeric(array_search('รวมเครื่องที่', $spreadSheetAry[$i]))){
-echo "boot<br>";
-}else{
-	echo "not running<br>";
-} */
+
 				//	เช็คว่าเป็นบรรทัดสรูปยอดหรือไม่ หากใช่ ให้ข้ามไป
 				if (!is_numeric(array_search('รวมเครื่องที่', $spreadSheetAry[$i])) && $endpoint == "") {
 
@@ -173,6 +173,11 @@ echo "boot<br>";
 								//	หารหัสสินค้า
 								if ($key == 1 && $value) {
 									$array_item[$item_no]['code'] = $datainsert[$spreadSheetAry[$i][$key]];
+								}
+
+								//	หาชื่อสินค้า
+								if ($key == 5 && $value) {
+									$array_item[$item_no]['name'] = $datainsert[$spreadSheetAry[$i][$key]];
 
 									//	check error
 									$sqlcheck = $this->db->select('ID')
@@ -189,17 +194,12 @@ echo "boot<br>";
 									}
 								}
 
-								//	หาชื่อสินค้า
-								if ($key == 5 && $value) {
-									$array_item[$item_no]['name'] = $datainsert[$spreadSheetAry[$i][$key]];
-								}
-
 								//	หาหน่วยสินค้า
 								if ($key == 8 && $value) {
 									$array_item[$item_no]['unit'] = $datainsert[$spreadSheetAry[$i][$key]];
 								}
 
-								//	หาหน่วยสินค้า
+								//	หาจำนวนสินค้า
 								if ($key == 10 && $value) {
 									$array_item[$item_no]['total'] = $datainsert[$spreadSheetAry[$i][$key]];
 								}
@@ -212,6 +212,10 @@ echo "boot<br>";
 									$array['bill']['net'] += $array_item[$item_no]['price'];
 								}
 							}
+						}
+
+						if($array_error[$i][$key]){
+							$array_item[$item_no] = array();
 						}
 					}	//	end foreach วนลูปคอลัมด้านใน
 
@@ -247,9 +251,14 @@ echo "boot<br>";
 			//	running program
 			if (count($array_error) < 1) {
 				// echo "running";
-				// $create_bill = $ci->mdl_excel->create_bill($array_complete);
-				$create_bill = $ci->mdl_excel->create_bill($array_complete);
-				$total_table = $create_bill['total'];
+				$create_file = $ci->mdl_excel->create_file($_FILES['file']['name'],$newname);
+				if($create_file['error_code'] == 0){
+					$create_bill = $ci->mdl_excel->create_bill($array_complete,$create_file['data']['id']);
+					$total_table = $create_bill['total'];
+				}else{
+					$type = "error";
+					$message = $create_file['txt'];
+				}
 			}
 		} else {
 			$type = "error";
@@ -406,9 +415,15 @@ echo "boot<br>";
 															</a>
 														</li>
 														<li class="nav-item">
-															<a href="#dataupdate" data-toggle="tab" aria-expanded="true" class="nav-link">
+															<a href="#dataupdate" data-toggle="tab" aria-expanded="false" class="nav-link">
 																<span class="d-block d-sm-none"><i class="fa fa-bar-chart"></i></span>
 																<span class="d-none d-sm-block">ข้อมูลวันนี้</span>
+															</a>
+														</li>
+														<li class="nav-item">
+															<a href="#datafile" data-toggle="tab" aria-expanded="false" class="nav-link">
+																<span class="d-block d-sm-none"><i class="fa fa-bar-chart"></i></span>
+																<span class="d-none d-sm-block">ไฟล์นำเข้าวันนี้</span>
 															</a>
 														</li>
 													</ul>
@@ -423,6 +438,9 @@ echo "boot<br>";
 															$resultrow = "จำนวนบิลทั้งหมด " . $countgroup . "<br>";
 															$resultrow .= "<span class='text-info'> จำนวนบิลที่พร้อมเข้าระบบ " . count($array_complete) . " </span><br><hr>";
 															if (count($array_error)) {
+																//	delete file
+																unlink(FCPATH . 'asset/upload/' . $newname);
+
 																$i=1;
 																foreach ($array_error as $key => $row) {
 																	foreach ($row as $keyin => $valin) {

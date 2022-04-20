@@ -21,13 +21,14 @@
             result += '<th> </th>';
             result += '<th>Order</th>';
             result += '<th>วันที่</th>';
-            result += '<th>ลูกค้า</th>';
-            result += '<th>ช่องทาง</th>';
-            result += '<th>ขนส่ง</th>';
+            result += '<th>POS</th>';
+            result += '<th>สาขา</th>';
+            result += '<th>BU</th>';
             result += '<th>ยอดขาย</th>';
             result += '<th>รวมสุทธิ</th>';
-            result += '<th>ชำระเงิน</th>';
-            result += '<th>สถานะ</th>';
+            // result += '<th>ชำระเงิน</th>';
+            // result += '<th>สถานะ</th>';
+            result += '<th>อ้างอิง</th>';
             result += '<th>เนื้อหา</th>';
             result += '</tr></thead>';
 
@@ -63,13 +64,14 @@
                     result += '<td class="delId text-danger" data-billid="' + val.id + '" > <i class="fas fa-trash-alt"></i> </td>';
                     result += '<td>' + val.code + '</td>';
                     result += '<td>' + val.date_starts + '</td>';
-                    result += '<td>' + val.custname + '</td>';
+                    result += '<td>' + val.pos_name + '</td>';
                     result += '<td>' + val.receipt_name + '</td>';
                     result += '<td>' + val.shipping + '</td>';
                     result += '<td>' + val.total_price + '</td>';
                     result += '<td>' + val.net_total + '</td>';
-                    result += '<td>' + val.billstatus + '</td>';
-                    result += '<td>' + val.conflict + '</td>';
+                    // result += '<td>' + val.billstatus + '</td>';
+                    // result += '<td>' + val.conflict + '</td>';
+                    result += '<td>' + val.fileupload_name + '</td>';
                     result += '<td>' + val.total + '</td>';
                     result += '</tr>';
                 })
@@ -162,27 +164,148 @@
 
             let toolDetail = "";
             let text = "<a id='deleteall' class='text-primary' style='cursor:pointer'>ลบข้อมูล " + $('#sel_dataupdate').val() + " วันนี้ทั้งหมด <i class='fas fa-trash-alt'></i></a>";
-            
+
 
             toolDetail = text;
 
-            $.post("get_sumTotalAmount",
-			{
-				//  paramiter
-                method: $('#sel_dataupdate').val()
-			})
-			.done(function(data, status, error){ 
-				let obj = jQuery.parseJSON(data);
-                let textreport = "<a class='float-right'>ยอดรวม <span class='totalamount text-success text-bold'>" + formatMoney(obj.totalamount) + "</span> บาท</a>";
-               
-                toolDetail += textreport;
-                $('.tool-detail').html(toolDetail);
-			})
-			.fail(function(xhr, status, error) {
-				// error handling
-				console.log(`err : ${error}`);
-			});
+            $.post("get_sumTotalAmount", {
+                    //  paramiter
+                    method: $('#sel_dataupdate').val()
+                })
+                .done(function(data, status, error) {
+                    let obj = jQuery.parseJSON(data);
+                    let textreport = "<a class='float-right'>ยอดรวม <span class='totalamount text-success text-bold'>" + formatMoney(obj.totalamount) + "</span> บาท</a>";
+
+                    toolDetail += textreport;
+                    $('.tool-detail').html(toolDetail);
+                })
+                .fail(function(xhr, status, error) {
+                    // error handling
+                    console.log(`err : ${error}`);
+                });
         }
+
+        //
+        //	show file upload
+        $(document).on('click', 'a[href="#datafile"]', function(event) {
+            event.stopPropagation();
+
+            get_FileUpload();
+        });
+
+        function get_FileUpload() {
+            let url = './get_fileUpload';
+
+            let dataimport = ".datafiletoday";
+            let textloading = '<div class="spinner-border text-info"></div>';
+
+            //  loading
+            $(dataimport).html(textloading);
+
+            fetch(url)
+                .then(res => res.json())
+                .then((resp) => {
+                    async function async_createHTMLFile() {
+                        let doing1 = await new Promise((resolve, reject) => {
+                            resolve(blockFileUpload(resp.data))
+                        });
+                        let doing2 = await new Promise((resolve, reject) => {
+                            resolve($('.datafiletoday').html(doing1));
+                        });
+                    }
+                    async_createHTMLFile();
+
+                })
+                .catch(function(err) {
+                    console.log('err : ' + err);
+                })
+        }
+
+        // create block HTML
+        function blockFileUpload(data = null) {
+            let parent = $('.datafiletoday');
+            let result = "";
+
+            if (data) {
+                let html = '<div class="list-group">';
+
+
+                let htmllist = "";
+
+                data.forEach(function(key, item) {
+                    htmllist += `
+                    <a class="list-group-item list-group-item-action" style="cursor:pointer" 
+                    data-id="${key.id}" data-code="${key.code}" >
+                    <i class="fas fa-trash-alt"></i> ${key.name}</a>`;
+                })
+
+                result = html + htmllist + '</div>';
+
+                return result;
+            }
+        }
+
+        // delete file and data 
+        $(document).on('click', '#datafile a', function(event) {
+            event.stopPropagation();
+
+            let div = $(this);
+            let id = div.attr('data-id');
+            let name = div.attr('data-name');
+            let code = div.attr('data-code');
+
+            const swaltheme = Swal.mixin({
+                customClass: {
+                    confirmButton: 'btn btn-danger mr-3',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: false
+            })
+
+            swaltheme.fire({
+                type: 'warning',
+                title: 'ต้องการลบข้อมูลของ file ' + div.text() + '',
+                // timer: 2000,
+                showCancelButton: true,
+                confirmButtonText: 'ยืนยัน',
+                cancelButtonText: 'ไม่ทำ',
+            }).then((result) => {
+                //
+                // 
+                if (result.value) {
+                    Swal.fire({
+                        title: 'Wait ...',
+                        allowOutsideClick: false,
+                        async onOpen(r) {
+
+                            let resp = await runningFile(id);
+
+                            if (resp) {
+                                Swal.fire({
+                                    type: resp.icon,
+                                    title: resp.topic,
+                                    // timer: 2000,
+                                    showConfirmButton: true,
+                                    text: resp.txt,
+                                }).then((result) => {
+                                    //
+                                    get_FileUpload();
+                                })
+                            } else {
+                                alert('error');
+                                window.location.reload();
+                            }
+                        },
+                        onBeforeOpen() {
+                            Swal.showLoading()
+                        },
+                        onAfterClose() {
+                            // Swal.hideLoading()
+                        }
+                    })
+                }
+            })
+        });
 
         $(document).on('click', 'tr td button', function(event) {
             event.stopPropagation();
@@ -333,6 +456,48 @@
                         data: {
                             'method': $('#sel_dataupdate').val(),
                             'type': 'all'
+                        }
+                    })
+                    // .then(res => res.json())
+                    .then((data) => {
+
+                        var obj = jQuery.parseJSON(data);
+
+                        let obj_icon, obj_topic;
+                        if (obj.error_code == 1) {
+                            obj_icon = 'warning';
+                            obj_topic = 'ไม่มีการทำรายการ';
+                        }
+                        if (obj.error_code == 0) {
+                            obj_icon = 'success';
+                            obj_topic = 'ทำรายการสำเร็จ';
+                        }
+
+                        resolve({
+                            error_code: obj.error_code,
+                            icon: obj_icon,
+                            topic: obj_topic,
+                            txt: obj.txt
+                        })
+
+                    })
+                    .fail(error => {
+                        console.log(`error ${error}`)
+                    })
+
+            })
+        }
+
+        function runningFile(fileid) {
+            return new Promise((resolve, reject) => {
+
+                $.ajax({
+                        method: 'post',
+                        url: 'cancelBillDump',
+                        data: {
+                            'method': $('#sel_dataupdate').val(),
+                            'type': 'file',
+                            'id': fileid
                         }
                     })
                     // .then(res => res.json())
