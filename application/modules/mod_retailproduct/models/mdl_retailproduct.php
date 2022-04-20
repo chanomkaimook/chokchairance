@@ -12,7 +12,7 @@ class Mdl_retailproduct extends CI_Model
         $this->db->select('retail_productmain.ID AS RPM_ID, retail_productmain.NAME_TH AS RPM_NAME_TH, retail_productmain.NAME_US AS RPM_NAME_US,
             retail_productlist.NAME_TH AS RPL_NAME_TH, retail_productlist.NAME_US AS RPL_NAME_US, retail_productlist.STATUS AS RPL_STATUS,
             retail_productlist.DATE_STARTS AS RPL_DATE_STARTS, retail_productlist.ID AS RPL_ID, retail_productlist.CODE AS RPL_CODE,
-            retail_productlist.list_id AS RPL_LISTID, retail_productlist.CODEMAC AS RPL_CM
+            retail_productlist.list_id AS RPL_LISTID, retail_productlist.CODEMAC AS RPL_CM,
         ');
         $this->db->from('retail_productmain');
         $this->db->join('retail_productlist', "retail_productmain.ID = retail_productlist.PROMAIN_ID", 'right');
@@ -260,6 +260,13 @@ class Mdl_retailproduct extends CI_Model
                     $listid = null;
                 }
 
+                // ระบุ promotion
+                if(trim($this->input->post('procate_id')) == 3){
+                   $promotion = 1;
+                }else{
+                   $promotion = "";
+                }
+
                 $data = array(
                     'NAME_TH'             => get_valueNullToNull(trim($this->input->post('name_th'))),
                     'NAME_US'             => get_valueNullToNull(trim($this->input->post('name_us'))),
@@ -268,6 +275,8 @@ class Mdl_retailproduct extends CI_Model
                     'PROSUBMAIN_ID'             => get_valueNullToNull(trim($this->input->post('prosubmain_id'))),
                     'PROTYPE_ID'             => get_valueNullToNull(trim($this->input->post('protype_id'))),
                     'PROCATE_ID'             => get_valueNullToNull(trim($this->input->post('procate_id'))),
+
+                    'PROMOTION'             => $promotion,
 
                     'LIST_ID'             => get_valueNullToNull($listid),
                     'PRICE'             => get_valueNullToNull(trim($this->input->post('price'))),
@@ -330,6 +339,13 @@ class Mdl_retailproduct extends CI_Model
                     }
                 }
 
+                // ระบุ promotion
+                if(trim($this->input->post('procate_id')) == 3){
+                    $promotion = 1;
+                 }else{
+                    $promotion = "";
+                 }
+
                 $data = array(
                     'NAME_TH'             => get_valueNullToNull(trim($this->input->post('name_th'))),
                     'NAME_US'             => get_valueNullToNull(trim($this->input->post('name_us'))),
@@ -338,6 +354,8 @@ class Mdl_retailproduct extends CI_Model
                     'PROSUBMAIN_ID'             => get_valueNullToNull(trim($this->input->post('prosubmain_id'))),
                     'PROTYPE_ID'             => get_valueNullToNull(trim($this->input->post('protype_id'))),
                     'PROCATE_ID'             => get_valueNullToNull(trim($this->input->post('procate_id'))),
+
+                    'PROMOTION'             => $promotion,
 
                     'PRICE'             => get_valueNullToNull(trim($this->input->post('price'))),
                     'CODE'             => get_valueNullToNull(trim($this->input->post('code'))),

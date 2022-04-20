@@ -8,31 +8,31 @@ require APPPATH . 'libraries/RestController.php';
 use chriskacerguis\RestServer\RestController;
 
 
-class Api_product extends RestController
+class Api_methodorder extends RestController
 {
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('mdl_product');
+        $this->load->model('mdl_methodorder');
         $this->load->library('session');
         $this->load->library('Permiss');
         $this->load->helper(array('form', 'url', 'myfunction_helper', 'sql_helper', 'permiss_helper'));
 
-        $this->model  = $this->mdl_product;
+        $this->model  = $this->mdl_methodorder;
     }
 
 
-    public function product_post($id = "")
+    public function method_post($id = "")
     {
 
         $json = file_get_contents('php://input');
         $data = json_decode($json);
 
-        $tb = $this->uri->segment(3);
-        $event = $this->uri->segment(4);
+        $event = $this->uri->segment(3);
+        $tb = 'retail_methodorder';
 
         if ($this->input->server('REQUEST_METHOD') == 'POST') {
-            if (!$id && $event != 'add') {
+            if ($id == "" && $event != 'add') {
                 $result = array(
                     'error_code'    => 1,
                     'data'          => 'Not found id'
@@ -53,10 +53,11 @@ class Api_product extends RestController
                 // 
                 //  add
             }  else if ($event == 'add') {
-                $dataarray['name'] = array_keys(array_column($data, 'name'), 'name_th');
+                $dataarray['bu'] = array_keys(array_column($data, 'name'), 'delivery_id');
+                $dataarray['name'] = array_keys(array_column($data, 'name'), 'name');
 
                 foreach ($dataarray as $key => $val) {
-                    if (!$data[$val[0]]->value) {
+                    if (!$data[$val[0]]->value || empty(trim($data[$val[0]]->value))) {
                         $result = array(
                             'error_code'  => 1,
                             'data'  => 'โปรดระบุ ' . $key
@@ -67,15 +68,17 @@ class Api_product extends RestController
 
                 $arrayset['table'] = $tb;
                 $arrayset['data'] = array(
-                    'name_th'   => $data[$dataarray['name'][0]]->value
+                    'delivery_id'   => $data[$dataarray['bu'][0]]->value,
+                    'name'   => $data[$dataarray['name'][0]]->value
                 );
                 $result = $this->model->addItem($arrayset);
                 $this->response($result);
             } else if ($event == 'edit') {
-                $dataarray['name'] = array_keys(array_column($data, 'name'), 'edit_name_th');
+                $dataarray['bu'] = array_keys(array_column($data, 'name'), 'delivery_id');
+                $dataarray['name'] = array_keys(array_column($data, 'name'), 'name');
 
                 foreach ($dataarray as $key => $val) {
-                    if (!$data[$val[0]]->value) {
+                    if (!$data[$val[0]]->value || empty(trim($data[$val[0]]->value))) {
                         $result = array(
                             'error_code'  => 1,
                             'data'  => 'โปรดระบุ ' . $key
@@ -99,6 +102,5 @@ class Api_product extends RestController
                 $this->response($result);
             }
         }
-
     }
 }

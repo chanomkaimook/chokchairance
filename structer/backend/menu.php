@@ -69,6 +69,12 @@ $permisspage = $this->permiss->get_PagePermiss($this->session->userdata('useradm
 								<p>สินค้า</p>
 							</a>
 						</li>
+						<li id="methodorder" class="nav-item">
+							<a href="<?php echo site_url('mod_methodorder') ?>/ctl_methodorder/methodorder" class="nav-link">
+								<i class="nav-icon fa fa-wrench " aria-hidden="true"></i>
+								<p>จุดขาย</p>
+							</a>
+						</li>
 
 						<!-- <li id="barcode" class="nav-item">
 							<a href="<?php echo site_url('mod_retailproduct') ?>/ctl_retailbarcode/barcode" class="nav-link">

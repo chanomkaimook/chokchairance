@@ -61,6 +61,11 @@ $route['api/staff/add'] = 'mod_staff/authdatastaff/user';
 $route['api/staff/edit/(:any)'] = 'mod_staff/authdatastaff/user/$1';
 $route['api/staff/delete/(:any)'] = 'mod_staff/authdatastaff/user/$1';
 
+/**
+ * ===================
+ *      product
+ * ===================  
+ */
 $route['api/product/main/add'] = 'api_product/product';
 $route['api/product/main/edit/(:any)'] = 'api_product/product/$1';
 $route['api/product/main/delete/(:any)'] = 'api_product/product/$1';
@@ -73,6 +78,16 @@ $route['api/product/type/delete/(:any)'] = 'api_product/product/$1';
 $route['api/product/category/add'] = 'api_product/product';
 $route['api/product/category/edit/(:any)'] = 'api_product/product/$1';
 $route['api/product/category/delete/(:any)'] = 'api_product/product/$1';
+
+/**
+ * ===================
+ *      methodorder
+ * ===================  
+ */
+$route['api/methodorder/add'] = 'api_methodorder/method';
+$route['api/methodorder/edit/(:any)'] = 'api_methodorder/method/$1';
+$route['api/methodorder/delete/(:any)'] = 'api_methodorder/method/$1';
+
 /* $route['api/staff/add'] = 'mod_staff/authdatastaff/user';
 $route['api/staff/edit/(:any)'] = 'mod_staff/authdatastaff/user/$1';
 $route['api/staff/delete/(:any)'] = 'mod_staff/authdatastaff/user/$1'; */

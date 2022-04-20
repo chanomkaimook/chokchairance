@@ -183,7 +183,7 @@
                                                     <?php
                                                     if ($UPproductlist->ID) {
                                                         foreach ($Query_productcate->result() as $row) { ?>
-                                                            <option <?php if ($UPproductlist->PROSUBMAIN_ID == $row->ID) {
+                                                            <option <?php if ($UPproductlist->PROCATE_ID == $row->ID) {
                                                                         echo 'selected';
                                                                     } ?> value="<?php echo $row->ID ?>"><?php echo $row->NAME_TH; ?></option>
                                                         <?php   }
