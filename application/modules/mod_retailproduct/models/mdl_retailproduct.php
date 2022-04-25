@@ -9,13 +9,35 @@ class Mdl_retailproduct extends CI_Model
     function make_query()
     {
 
-        $this->db->select('retail_productmain.ID AS RPM_ID, retail_productmain.NAME_TH AS RPM_NAME_TH, retail_productmain.NAME_US AS RPM_NAME_US,
+        $this->db->select('
             retail_productlist.NAME_TH AS RPL_NAME_TH, retail_productlist.NAME_US AS RPL_NAME_US, retail_productlist.STATUS AS RPL_STATUS,
             retail_productlist.DATE_STARTS AS RPL_DATE_STARTS, retail_productlist.ID AS RPL_ID, retail_productlist.CODE AS RPL_CODE,
             retail_productlist.list_id AS RPL_LISTID, retail_productlist.CODEMAC AS RPL_CM,
+
+            retail_productmain.ID AS RPM_ID, 
+            retail_productmain.NAME_TH AS RPM_NAME_TH, 
+
+            product_submain.ID AS RPS_ID, 
+            product_submain.NAME_TH AS RPS_NAME_TH, 
+
+            product_type.ID AS RPT_ID, 
+            product_type.NAME_TH AS RPT_NAME_TH, 
+
+            product_category.ID AS RPC_ID, 
+            product_category.NAME_TH AS RPC_NAME_TH, 
+
+            retail_productlist.price AS RPL_PRICE,
+            retail_productlist.promotion AS RPL_PRO,
+            retail_productlist.promain_id AS RPL_MAIN,
+            retail_productlist.prosubmain_id AS RPL_SUBMAIN,
+            retail_productlist.protype_id AS RPL_TYPE,
+            retail_productlist.procate_id AS RPL_CATE
         ');
-        $this->db->from('retail_productmain');
-        $this->db->join('retail_productlist', "retail_productmain.ID = retail_productlist.PROMAIN_ID", 'right');
+        $this->db->from('retail_productlist');
+        $this->db->join('retail_productmain', "retail_productlist.PROMAIN_ID = retail_productmain.ID", 'left');
+        $this->db->join('product_submain', "retail_productlist.PROSUBMAIN_ID = product_submain.ID", 'left');
+        $this->db->join('product_type', "retail_productlist.PROSUBMAIN_ID = product_type.ID", 'left');
+        $this->db->join('product_category', "retail_productlist.PROCATE_ID = product_category.ID", 'left');
         $this->db->where('retail_productlist.STATUS_VIEW', 1);    //  for show 
 
         if (!empty($_POST["search"]["value"])) {
@@ -25,6 +47,7 @@ class Mdl_retailproduct extends CI_Model
                 or retail_productlist.NAME_TH like '%" . $_POST["search"]["value"] . "%'
                 or retail_productlist.NAME_US like '%" . $_POST["search"]["value"] . "%'
                 or retail_productlist.CODE like '" . $_POST["search"]["value"] . "'
+                or retail_productlist.ID like '" . $_POST["search"]["value"] . "'
                 )",
                 null,
                 null
@@ -267,6 +290,12 @@ class Mdl_retailproduct extends CI_Model
                    $promotion = "";
                 }
 
+                if($this->input->post('product_cut')){
+                    $product_cut = json_encode($_REQUEST['product_cut']);
+                }else{
+                    $product_cut = null;
+                }
+
                 $data = array(
                     'NAME_TH'             => get_valueNullToNull(trim($this->input->post('name_th'))),
                     'NAME_US'             => get_valueNullToNull(trim($this->input->post('name_us'))),
@@ -278,8 +307,8 @@ class Mdl_retailproduct extends CI_Model
 
                     'PROMOTION'             => $promotion,
 
-                    'LIST_ID'             => get_valueNullToNull($listid),
-                    'PRICE'             => get_valueNullToNull(trim($this->input->post('price'))),
+                    'LIST_ID'             => get_valueNullToNull($product_cut),
+                    'PRICE'             => (trim($this->input->post('price')) ? number_format(trim($this->input->post('price')),2) : '0.00') ,
                     'CODE'             => get_valueNullToNull(trim($this->input->post('code'))),
 
                     'date_update'     => date('Y-m-d H:i:s'),
@@ -357,7 +386,7 @@ class Mdl_retailproduct extends CI_Model
 
                     'PROMOTION'             => $promotion,
 
-                    'PRICE'             => get_valueNullToNull(trim($this->input->post('price'))),
+                    'PRICE'             => (trim($this->input->post('price')) ? number_format(trim($this->input->post('price')),2) : '0.00'),
                     'CODE'             => get_valueNullToNull(trim($this->input->post('code'))),
 
                     'date_starts'     => date('Y-m-d H:i:s'),

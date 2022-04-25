@@ -127,7 +127,6 @@
         data.append('remark', document.getElementById('remark').value);
 
         data.append('complete', document.getElementById('set_billcomplete').value);
-console.log(document.getElementById('selectsupplier').value);
 
         // image
         var image_file = $('#image_file');

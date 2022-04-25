@@ -105,6 +105,15 @@ class Ctl_retailproduct extends CI_Controller
 
 	function fetch_product()
 	{
+
+		//	load library product
+		$this->load->library('product');
+		/* $arrayset = array(
+			'id'		=> 742,
+			'list_id'	=> '[(p741):(t2)],[(p739):(t4)]'
+		);
+		print_r($this->product->get_dataProductCut($arrayset)); */
+
 		$fetch_data = $this->mdl_retailproduct->make_datatables();
 		$basepic = base_url() . BASE_PIC;
 		$data = array();
@@ -112,16 +121,20 @@ class Ctl_retailproduct extends CI_Controller
 		$status_bnt = '';
 		foreach ($fetch_data as $row) {
 			if ($row->RPL_STATUS == 1) {
-				$status_bnt = '<li class="fa fa-toggle-on"> </li> Status Open';
+				$status_bnt = '<li class="fa fa-toggle-on"> </li> Open';
 				$bgcolor = 'bg-success';
 			} else {
-				$status_bnt = '<li class="fa fa-toggle-off"> </li> Status Off';
+				$status_bnt = '<li class="fa fa-toggle-off"> </li> Off';
 				$bgcolor = 'bg-danger';
 			}
 
-			$btngroup_manage =	'<div class="text-right">
-									<a href="' . site_url("mod_retailproduct") . '/ctl_retailproduct/product_insertlist?prolist_id=' . $row->RPL_ID . '" class="btn btn-default btn-sm"> <li class="fa fa-pencil-square-o"> </li>  Edit </a>
-									<button type="button" id="editstatus" class="btn btn-sm ' . $bgcolor . '" value="' . $row->RPL_ID . '"> ' . $status_bnt . ' </button>
+			$btngroup_manage =	'<div class="text-right form">
+									<div class="form-group">
+									<a href="' . site_url("mod_retailproduct") . '/ctl_retailproduct/product_insertlist?prolist_id=' . $row->RPL_ID . '" class="btn btn-default btn-sm w-100"> <li class="fa fa-pencil-square-o"> </li>  Edit </a>
+									</div>
+									<div class="form-group">
+									<button type="button" id="editstatus" class="btn btn-sm w-100 ' . $bgcolor . '" value="' . $row->RPL_ID . '"> ' . $status_bnt . ' </button>
+									</div>
 								</div>';
 			//	button
 			$manage_check = chkPermissPage('btn_productmanage');
@@ -134,30 +147,57 @@ class Ctl_retailproduct extends CI_Controller
 			// ($row->RPM_ID == 6 ? $colormenu = 'text-success' : $colormenu="");
 			$btn_proref = "<button class='btn btn-secondary btn-xs mx-2 btn_promotionref' data-target='.md_proref' data-toggle='modal' data-id='" . $row->RPL_ID . "' >โปรที่ผูก</button>";
 			$promotionhook = "";
-			if ($row->RPM_ID == 6) {
+
+			if ($row->RPL_PRO) {
+				$type_product = "โปรโมชั่น";
 				$colormenu = 'text-success';
 				$btn_proref = "";
 				if (!$row->RPL_LISTID) {
 					$promotionhook = "<span class='text-danger'>(ยังไม่ผูกสินค้า)</span>";
 				}
 			} else {
-
-
+				$type_product = "สินค้า";
 				$colormenu = "";
 			}
 
+			//
+			// get product cut
+			if($row->RPL_LISTID){
 
+				$get_prolist = $this->product->get_dataProductCut(array('id'=>$row->RPL_ID,'list_id'=>$row->RPL_LISTID));
+			}else{
+				$get_prolist = array();
+			}
+
+			$prolist = "";
+			if(array_key_exists('data',$get_prolist)){
+				$setarray = array();
+				// print_r($get_prolist);
+				foreach($get_prolist['data'] as $key => $val){
+					$setarray[] = $val['name']." จำนวน ".$val['total'];
+				}
+
+				($setarray ? $prolist = implode(',<br>',$setarray) : $prolist);
+			}
+			//
+			//
 
 			$textmenu = "";
-			$textmenu .= "เมนูหลัก : <span class='" . $colormenu . "'";
-			$textmenu .= "style='font-weight: bold;'>" . $row->RPM_NAME_TH . "</span> <br>";
-			$textmenu .= "รหัส(SKU) : <span class='text-success'>" . $row->RPL_CM . "</span> | Code : <span class='text-info'>" . $row->RPL_CODE . "</span> " . $promotionhook . "<br>";
-			$textmenu .= "รายการเมนู : " . $row->RPL_NAME_TH . $btn_proref . "<br>";
-			$textmenu .= "วันที่เพิ่ม : " . thai_date($row->RPL_DATE_STARTS) . $btngroup_manage;
+			$textmenu .= "ชื่อ : " . $row->RPL_NAME_TH . $btn_proref . "<br>";
+			$textmenu .= "รูปแบบ : <span class='" . $colormenu . "'";
+			$textmenu .= "style='font-weight: bold;'>" . $type_product . "</span> <br>";
+			$textmenu .= "รหัส(SKU) : <span class='text-success'>" . $row->RPL_ID . "</span> | Code : <span class='text-info'>" . $row->RPL_CODE . "</span> " . $promotionhook . "<br>";
+			$textmenu .= "วันที่เพิ่ม : " . thai_date($row->RPL_DATE_STARTS);
 
 			$sub_array = array();
-			$sub_array[] = "<div class='text-center'>" . $index++ . "</div>";
-			$sub_array[] = $textmenu;
+			$sub_array['detail'] = $textmenu;
+			$sub_array['price'] = "<div class='text-right'>" . $row->RPL_PRICE . "</div>";
+			$sub_array['cut'] = "<div class='text-center'>" . $prolist . "</div>";
+			$sub_array['main'] = "<div class='text-center'>" . $row->RPM_NAME_TH . "</div>";
+			$sub_array['submain'] = "<div class='text-center'>" . $row->RPS_NAME_TH . "</div>";
+			$sub_array['type'] = "<div class='text-center'>" . $row->RPT_NAME_TH . "</div>";
+			$sub_array['catalog'] = "<div class='text-center'>" . $row->RPC_NAME_TH . "</div>";
+			$sub_array['action'] = "<div class='text-center'>" . $btngroup_manage . "</div>";
 
 			$data[] = $sub_array;
 		}
@@ -234,19 +274,19 @@ class Ctl_retailproduct extends CI_Controller
 
 			switch ($this->input->get('ptype')) {
 				case 'main':
-					$table = array('table'=>'retail_productmain','field'=>'promain_id');
+					$table = array('table' => 'retail_productmain', 'field' => 'promain_id');
 					break;
 				case 'submain':
-					$table = array('table'=>'product_submain','field'=>'prosubmain_id');
+					$table = array('table' => 'product_submain', 'field' => 'prosubmain_id');
 					break;
 				case 'type':
-					$table = array('table'=>'product_type','field'=>'protype_id');
+					$table = array('table' => 'product_type', 'field' => 'protype_id');
 					break;
 				case 'category':
-					$table = array('table'=>'product_category','field'=>'procate_id');
+					$table = array('table' => 'product_category', 'field' => 'procate_id');
 					break;
-				default :
-					$table = array('table'=>'retail_productmain','field'=>'promain_id');
+				default:
+					$table = array('table' => 'retail_productmain', 'field' => 'promain_id');
 					break;
 			}
 
@@ -273,7 +313,7 @@ class Ctl_retailproduct extends CI_Controller
 		if ($num) {
 			foreach ($q->result() as $row) {
 				$sqlin = $this->db->from('retail_productlist')
-					->where('retail_productlist.'.$field, $row->ID)
+					->where('retail_productlist.' . $field, $row->ID)
 					->where('retail_productlist.status', 1);
 				$total = $sqlin->count_all_results(null, false);
 				$qin = $sqlin->get();
@@ -287,5 +327,26 @@ class Ctl_retailproduct extends CI_Controller
 		}
 
 		return $result;
+	}
+
+	public function getProductList()
+	{
+		$result = array();
+		$sql = $this->db->from('retail_productlist')
+			->where('retail_productlist.promotion is null')
+			->where('retail_productlist.status', 1);
+		$total = $sql->count_all_results(null, false);
+		$q = $sql->get();
+		$num = $q->num_rows();
+		if($num){
+			foreach($q->result() as $r){
+				$result[] = array('id'=>$r->ID,'value'=>$r->NAME_TH);
+			}
+			
+		}
+
+		$results = json_encode($result);
+
+		echo $results;
 	}
 }

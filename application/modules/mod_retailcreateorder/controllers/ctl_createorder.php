@@ -68,7 +68,7 @@ class Ctl_createorder extends CI_Controller
 
 		$data = array(
 			'mainmenu' 		=> 'retail',
-			'submenu' 		=> 'retailcreateorder'
+			'submenu' 		=> 'createbill'
 		);
 		$data['Query_methodorder'] = $this->mdl_sql->get_WhereParaqry('retail_methodorder', 'status', 1);
 		$data['base_bn'] = base_url() . BASE_BN;
@@ -496,6 +496,7 @@ class Ctl_createorder extends CI_Controller
 				$this->db->select('*');
 				$this->db->from('retail_bill');
 				$this->db->where('retail_bill.TextCode', trim($this->input->post('textcode')));
+				$this->db->where('retail_bill.status_complete !=', 3);
 				$q = $this->db->get();
 				$num = $q->num_rows($q);
 			}

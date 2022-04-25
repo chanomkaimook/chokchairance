@@ -46,7 +46,7 @@ class Ctl_methodorder extends CI_Controller
 
 		$data = array(
 			'mainmenu' 		=> 'retail',
-			'submenu' 		=> 'retailmethodorder'
+			'submenu' 		=> 'methodorder'
 		);
 
 		$data['namemethod'] = $this->set['namemethod'];

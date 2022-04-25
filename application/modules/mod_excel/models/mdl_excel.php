@@ -267,6 +267,12 @@ class Mdl_excel extends CI_Model
 							$list_id = null;
 						}
 
+						if($rowgroup->PROCATE_ID == 3){
+							$promotion = 1;
+						}else{
+							$promotion = null;
+						}
+
 						$datainsertdetail = array(
 							'code'		=> $code,
 							'bill_id'	=> $id,
@@ -277,6 +283,7 @@ class Mdl_excel extends CI_Model
 							'procate_id'	=> $rowgroup->PROCATE_ID,
 							'prolist_id'	=> $rowgroup->ID,
 							'list_id'		=> $list_id,
+							'promotion'		=> $promotion,
 							'quantity'		=> $item_total,
 							'total_price'	=> $item_price,
 							'prounit'		=> $item_unit,

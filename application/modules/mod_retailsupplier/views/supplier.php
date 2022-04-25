@@ -463,7 +463,8 @@
 								data: textresult
 							})
 
-						}).catch(function(error) {
+						})
+						.catch(function(error) {
 							console.log(`Error : ${error}`);
 						})
 				})

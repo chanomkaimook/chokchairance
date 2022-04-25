@@ -140,9 +140,15 @@
                                     <div class="table-responsive">
                                         <table id="ex1" class="table table-bordered  ">
                                             <thead>
-                                                <tr>
-                                                    <th width="5%">#</th>
+                                                <tr align=center>
                                                     <th>รายการ</th>
+                                                    <th>ราคา</th>
+                                                    <th>สินค้าตัดสต็อค</th>
+                                                    <th>กลุ่ม</th>
+                                                    <th>หมวดหมู่</th>
+                                                    <th>รูปแบบ</th>
+                                                    <th>catalog</th>
+                                                    <th></th>
                                                 </tr>
                                             </thead>
                                         </table>
@@ -381,7 +387,36 @@
                     "columnDefs": [{
                         "targets": 0,
                         "orderable": false,
-                    }, ],
+                    }, {
+                        "targets": 5,
+                        "orderable": false,
+                    }],
+                    "columns": [{
+                            "data": "detail"
+                        },
+                        {
+                            "data": "price"
+                        },
+                        {
+                            "data": "cut"
+                        },
+                        {
+                            "data": "main"
+                        },
+                        {
+                            "data": "submain"
+                        },
+                        {
+                            "data": "type"
+                        },
+                        {
+                            "data": "catalog"
+                        },
+                        {
+                            "data": "action"
+                        }
+                    ],
+
                 });
             }
             //
@@ -430,7 +465,7 @@
 
                 let form = $('form#frmmodal_add').serializeArray();
 
-                let url = '../../api/product/'+type+'/add/';
+                let url = '../../api/product/' + type + '/add/';
 
                 Swal.fire({
                     title: 'Wait ...',
@@ -477,8 +512,8 @@
                                     }).then(async (resolve) => {
                                         let doing1 = await new Promise((resolve, reject) => {
                                             resolve(
-                                                    getData(type)
-                                                )
+                                                getData(type)
+                                            )
                                         });
 
                                         //  clear value
@@ -521,7 +556,7 @@
 
                 let form = $('form#frmmodal_edit').serializeArray();
 
-                let url = '../../api/product/'+type+'/edit/' + itemid;
+                let url = '../../api/product/' + type + '/edit/' + itemid;
 
                 Swal.fire({
                     title: 'Wait ...',
@@ -568,8 +603,8 @@
                                     }).then(async (resolve) => {
                                         let doing1 = await new Promise((resolve, reject) => {
                                             resolve(
-                                                    getData(type)
-                                                )
+                                                getData(type)
+                                            )
                                         });
 
                                     })
@@ -624,7 +659,7 @@
                             allowOutsideClick: false,
                             async onOpen(result) {
                                 fetch(
-                                        '../../api/product/'+type+'/delete/' + itemid, {
+                                        '../../api/product/' + type + '/delete/' + itemid, {
 
                                             headers: {
                                                 'API-KEY': 'XOGgx6vzY2yIj7li4tS1PMrqckh8dmE5FVQRZGeL',

@@ -75,12 +75,14 @@
                                                     $setlist = "";
 
                                                     if ($UPproductlist->ID) {
+                                                        //  check type promotion
+                                                        if ($UPproductlist->PROMOTION == 1) {
+                                                            $setlist = "on";
+                                                        }
+
                                                         foreach ($Query_productmain->result() as $row) { ?>
                                                             <option <?php if ($UPproductlist->PROMAIN_ID == $row->ID) {
                                                                         echo 'selected';
-                                                                        if ($row->ID == 6) {
-                                                                            $setlist = "on";
-                                                                        }
                                                                     } ?> value="<?php echo $row->ID ?>"><?php echo $row->NAME_TH; ?></option>
                                                         <?php   }
                                                     } else {
@@ -98,42 +100,105 @@
                                             if ($setlist == "on") {
                                                 $sql = $this->db->select('id,codemac,name_th')
                                                     ->from('retail_productlist')
+                                                    ->where('retail_productlist.promotion is null')
                                                     ->where('status', 1);
                                                 $q = $sql->get();
                                                 $num = $q->num_rows();
+
+                                                //
+                                                // product list
+                                                $this->load->library('product');
+                                                $id = $UPproductlist->ID;
+                                                $list = $UPproductlist->LIST_ID;
+                                                $array_list = $this->product->get_dataProductCut(array('id' => $id, 'list_id' => $list));
+                                                // 
+                                                // 
                                             ?>
                                                 <label class="form-group col-md-3 text-right" for="code"> ผูกสินค้า </label>
-                                                <div class="form-group col-md-9 ">
-                                                    <select id="select-listid" name="select-listid" class="selectpicker" data-live-search="true">
-                                                        <option value="">เลือกสินค้าผูกกับโปร</option>
+                                                <div class="form-group col-md-9 contentpromotion">
+                                                    <div class="list_promotion">
+
+                                                        <div class="row">
+                                                            <div class="col-md-7">
+                                                                <select name="select-listid" class="selectpicker " data-live-search="true">
+                                                                    <option value="">เลือกสินค้าผูกกับโปร</option>
+                                                                    <?php
+                                                                    if ($num) {
+                                                                        foreach ($q->result() as $r) {
+                                                                            //  name
+                                                                            if ($r->codemac ? $codemac = "(" . $r->codemac . ")" : $codemac = "");
+                                                                            $name = $r->name_th . "" . $codemac;
+                                                                    ?>
+                                                                            <option value="<?php echo $r->id; ?>"><?php echo $name; ?></option>
+                                                                    <?php
+                                                                        }
+                                                                    }
+                                                                    ?>
+                                                                </select>
+                                                            </div>
+                                                            <label class="col-md-2 text-right" for="code"> จำนวน </label>
+                                                            <div class="col-md-2">
+                                                                <input type="text" name="pro_qty" class="form-control form-control-sm " value="" OnKeyPress="return checkNumber(this)">
+                                                            </div>
+                                                            <hr>
+                                                        </div>
+
                                                         <?php
-                                                        if ($num) {
-                                                            foreach ($q->result() as $r) {
-
-                                                                $selected_listid = "";
-                                                                if ($UPproductlist->LIST_ID == $r->id) {
-                                                                    $selected_listid = "selected=selected";
-                                                                }
-
-                                                                //  name
-                                                                if ($r->codemac ? $codemac = "(" . $r->codemac . ")" : $codemac = "");
-                                                                $name = $r->name_th . "" . $codemac;
+                                                        if (array_key_exists('data', $array_list)) :
+                                                            if (count($array_list['data'])) {
+                                                                foreach ($array_list['data'] as $key => $val) :
                                                         ?>
-                                                                <option value="<?php echo $r->id; ?>" <?php echo $selected_listid; ?>><?php echo $name; ?></option>
+                                                                    <div class="row">
+                                                                        <div class="col-md-7">
+                                                                            <select name="select-listid" class="selectpicker " data-live-search="true">
+                                                                                <option value="">เลือกสินค้าผูกกับโปร</option>
+                                                                                <?php
+                                                                                if ($num) {
+                                                                                    foreach ($q->result() as $r) {
+
+                                                                                        $selected_listid = "";
+                                                                                        if ($val['id'] == $r->id) {
+                                                                                            $selected_listid = "selected=selected";
+                                                                                        }
+
+                                                                                        //  name
+                                                                                        if ($r->codemac ? $codemac = "(" . $r->codemac . ")" : $codemac = "");
+                                                                                        $name = $r->name_th . "" . $codemac;
+                                                                                ?>
+                                                                                        <option value="<?php echo $r->id; ?>" <?php echo $selected_listid; ?>><?php echo $name; ?></option>
+                                                                                <?php
+                                                                                    }
+                                                                                }
+                                                                                ?>
+                                                                            </select>
+                                                                        </div>
+                                                                        <label class="col-md-2 text-right" for="code"> จำนวน </label>
+                                                                        <div class="col-md-2">
+                                                                            <input type="text" name="pro_qty" class="form-control form-control-sm " value="<?php echo $val['total'];?>" OnKeyPress="return checkNumber(this)">
+                                                                        </div>
+                                                                        <hr>
+                                                                        <div class="col-md-1 btnManagePromotion">
+                                                                        <button type="button" class="btn btn-danger w-100 btn-sm btnDelPromotion"><i class='fas fa-trash-alt'></i></button>
+                                                                        </div>
+                                                                    </div>
                                                         <?php
+                                                                endforeach;
                                                             }
-                                                        }
+                                                        endif;
                                                         ?>
-                                                    </select>
-                                                    <ul class="text-secondary">
-                                                        <li><span>บิลที่เปิดด้วยรายการสินค้านี้จะเปลี่ยนแปลงรายการที่ผูกให้อัตโนมัติ</span></li>
-                                                        <li><span>หากบิลที่มีรายการสินค้านี้ถูกเปิดใบลดหนี้ หรือใบส่งของไปแล้ว จะไม่มีการเปลี่ยนแปลงรายการที่ผูกภายในบิล</span></li>
-                                                    </ul>
 
+                                                    </div>
 
+                                                    <div class="row">
+                                                        <ul class="text-secondary mb-0">
+                                                            <li><span><small>บิลที่เปิดด้วยรายการสินค้านี้จะเปลี่ยนแปลงรายการที่ผูกให้อัตโนมัติ</small></span></li>
+                                                            <li><span><small>หากบิลที่มีรายการสินค้านี้ถูกเปิดใบลดหนี้ หรือใบส่งของไปแล้ว จะไม่มีการเปลี่ยนแปลงรายการที่ผูกภายในบิล</small></span></li>
+                                                        </ul>
+                                                    </div>
 
                                                 </div>
                                             <?php
+
                                             }
                                             ?>
 
@@ -285,7 +350,103 @@
         <script src="<?php echo $base_bn; ?>frontend/bootstrap-select/js/bootstrap-select.js"></script>
     </div>
     <script>
+        let html = `<div class="col-md-1 btnManagePromotion">
+                        <button type="button" class="btn btn-secondary w-100 btn-sm btnAddPromotion">+</button>
+                    </div>`;
+        let htmldel = `<button type="button" class="btn btn-danger w-100 btn-sm btnDelPromotion"><i class='fas fa-trash-alt'></i></button>`;
         $(document).ready(function() {
+            $(".contentpromotion").ready(function(e) {
+                htmlAddPromotion();
+                // $('.contentpromotion .list_promotion .row:eq(0)').append(html);
+            });
+
+            async function htmlBlockPromotion() {
+                let optionlist = await get_ProductList();
+
+                let htmlPro = await new Promise((resolve, reject) => {
+
+                    resolve(createBlock(optionlist));
+                });
+                let html_AddPromotion = await new Promise((resolve, reject) => {
+
+                    resolve(
+                        htmlAddPromotion()
+                    );
+                });
+
+            }
+
+            function createBlock(optionlist) {
+                let hmtl = `
+                                <div class="row">
+
+                                    <div class="col-md-7">
+                                        <select name="select-listid" class="selectpicker" data-live-search="true">
+                                            <option value="">เลือกสินค้าผูกกับโปร</option>
+                                            ${optionlist}
+                                        </select>
+                                    </div>
+
+                                    <label class="col-md-2 text-right" for="code"> จำนวน </label>
+                                    <div class="col-md-2">
+                                        <input type="text" name="pro_qty" class="form-control form-control-sm " value="" OnKeyPress="return checkNumber(this)">
+                                    </div>
+                                    <hr>
+                                </div>
+                            `
+                $('.contentpromotion .list_promotion').prepend(hmtl)
+            }
+
+            function htmlAddPromotion() {
+
+                let element = $('.contentpromotion .list_promotion .row');
+
+                let lengthTotal = element.length - 1;
+                if (element.length) {
+                    let element_btn = $('.btnManagePromotion');
+                    if (element_btn.length) {
+                        $('.btnManagePromotion').html(htmldel);
+                    }
+                    $('.contentpromotion .list_promotion .row:eq(0)').append(html);
+                    $('select[name=select-listid]').selectpicker('refresh')
+                }
+            }
+
+            function get_ProductList() {
+                let result = "";
+                let url = "./getProductList";
+                return new Promise((resolve, reject) => {
+
+
+                    fetch(url)
+                        .then(res => res.json())
+                        .then((resp) => {
+
+                            if (resp.length) {
+                                resp.forEach(function(key, item) {
+                                    result += `<option value="${key.id}">${key.value}</option>`;
+                                })
+                            }
+                            resolve(result)
+                        })
+                        .catch(function(error) {
+                            alert(`Error : ${error}`)
+                        })
+
+
+                })
+
+            }
+
+            $(document).on('click', '.btnAddPromotion', function() {
+                //  add html promotion
+                htmlBlockPromotion();
+            })
+            $(document).on('click', '.btnDelPromotion', function(e) {
+                //  del html promotion
+                $(this).parents('.list_promotion .row').empty();
+            })
+
 
             $("#cancel").on("click", function(e) {
                 window.location.replace('product');
@@ -319,6 +480,22 @@
                 if ($('#prolist_id').val()) {
                     prolist_id = $('#prolist_id').val();
                 }
+
+                //  list promotion
+                let qty = $('[name=pro_qty]');
+                if (qty.length) {
+                    let qtyn = 0;
+                    qty.each(function(key) {
+                        
+                        if ($(this).val() && $('[name=select-listid]').eq(key).val() != "") {
+                            data.append("product_cut[" + qtyn + "][id]", $('[name=select-listid]').eq(key).val());
+                            data.append("product_cut[" + qtyn + "][value]", parseInt($(this).val()));
+                            qtyn++;
+                        }
+                        
+                    })
+                }
+
                 data.append("prolist_id", prolist_id);
                 data.append("name_th", d.getElementById('name_th').value);
                 data.append("name_us", d.getElementById('name_us').value);
@@ -329,7 +506,7 @@
                 data.append("price", d.getElementById('price').value);
                 data.append("code", d.getElementById('code').value);
 
-                let select_listid = $('#select-listid');
+                let select_listid = $('.select-listid');
                 if (select_listid.length) {
                     if (select_listid.val() == "") {
                         swal("ผิดผลาด", "กรุณาระบุช่องผูกสินค้า", "warning");
@@ -373,6 +550,15 @@
         });
     </script>
     <script type="text/javascript">
+        function checkNumber(ele) {
+            var vchar = String.fromCharCode(event.keyCode);
+            // console.log(vchar);
+            if (vchar < '0' || vchar > '9') {
+                return false
+            }
+
+        }
+
         $(document).ready(function() {
             bsCustomFileInput.init();
         });
