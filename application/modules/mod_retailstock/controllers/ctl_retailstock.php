@@ -12,6 +12,7 @@ class Ctl_retailstock extends CI_Controller
 		$this->load->model('mdl_retailstock');
 		$this->load->library('session');
 		$this->load->library('Permiss');
+		$this->load->library('Product');
 		$this->load->helper(array('form', 'url', 'myfunction_helper', 'sql_helper', 'permiss_helper'));
 
 		$this->set	= array(
@@ -22,7 +23,7 @@ class Ctl_retailstock extends CI_Controller
 			'submenu'		        => 'retailstock',
 			'url_begin'		        => $this->uri->segment(1) . "/" . $this->uri->segment(2),
 			'datenow'				=> date('Y-m-d')
-			// 'datenow'				=> "2022-02-01"
+			// 'datenow'				=> "2022-03-27"
 			// 'datenow'				=> $this->input->get('date')
 		);
 		if ($this->session->userdata('useradminid') == '') {
@@ -144,13 +145,28 @@ class Ctl_retailstock extends CI_Controller
 			$qproductbill = $sqlproductbill->get();
 			if ($numproductbill) {
 				foreach ($qproductbill->result() as $row) {
+					// echo $row->rt_list_id."<br>";
 					if ($row->rt_list_id) {
-						$item_on[] = $row->rt_list_id;
+						//	แยกค่า product id
+						$list_text = $this->product->decodeValue($row->rt_list_id);
+
+						if(count($list_text)){
+
+							foreach($list_text as $key => $val){
+								$item_on[] = $val['id'];
+							}
+						}
+
 					} else {
 						$item_on[] = $row->rt_prolist_id;
 					}
 				}
 			}
+			/* echo "<pre>";
+			print_r($item_on);
+			echo "</pre>";
+
+			exit; */
 
 			/**
 			 * 
@@ -169,7 +185,16 @@ class Ctl_retailstock extends CI_Controller
 			if ($numreceive) {
 				foreach ($qreceive->result() as $row) {
 					if ($row->rt_list_id) {
-						$item_on[] = $row->rt_list_id;
+						//	แยกค่า product id
+						$list_text = $this->product->decodeValue($row->rt_list_id);
+
+						if(count($list_text)){
+
+							foreach($list_text as $key => $val){
+								$item_on[] = $val['id'];
+							}
+						}
+
 					} else {
 						$item_on[] = $row->rt_prolist_id;
 					}
@@ -189,8 +214,9 @@ class Ctl_retailstock extends CI_Controller
 			exit; */
 
 			/**
-			 * * ค้นหาจำนวนเหลือบน stock
+			 * * ค้นหาสินค้าที่อยู่บนสต็อคที่ยังเหลือ (ไม่มีการขาย ไม่มีกาารรับเข้า ไม่มีการเปิดทำงาน แต่มีแสดงผลบนสต็อค)
 			 */
+
 			if($datestart){
 				$setitem_on = implode(',',$item);
 				$sqlst = $this->db->select('retail_stock.RETAIL_PRODUCTLIST_ID as productid')
@@ -201,8 +227,8 @@ class Ctl_retailstock extends CI_Controller
 				->group_by('retail_stock.retail_productlist_id');
 				$qst = $sqlst->get();
 				$numst = $qst->num_rows();
+				
 				if($numst){
-					
 					foreach($qst->result() as $rst){
 						$arrayst = array(
 							'item'			=> $rst->productid,
@@ -265,7 +291,7 @@ class Ctl_retailstock extends CI_Controller
 					 */
 					$chk_stock_item = $this->mdl_retailstock->find_stockItemCut($val, $datecut);
 					/* echo "<pre>chk_stock_item";
-					print_r($chk_stock_item);
+					print_r($val);
 					echo "</pre>======="; */
 					// exit;
 					/**
@@ -348,7 +374,6 @@ class Ctl_retailstock extends CI_Controller
 						}
 					}
 				}		//	end foreach จบการเพิ่ม แก้ไข สถานะ stock
-
 				/* echo "<pre>item";
 				print_r($item);
 				echo "==== insert";
@@ -501,6 +526,9 @@ class Ctl_retailstock extends CI_Controller
 		$result_receive_start = $this->mdl_retailstock->result_receive_start($arraystart);
 		
 		/* echo "<pre>";
+		echo "cut == ";
+		print_r($result_cut);
+		echo "bill == ";
 		print_r($result_bill_start);
 		echo "==================<br>";
 		print_r($result_issue_start);
@@ -888,10 +916,11 @@ class Ctl_retailstock extends CI_Controller
 
 	function fetch_product()
 	{
-
 		$fetch_data = $this->mdl_retailstock->make_datatables();
 		/* echo "<pre>";
 		print_r($_REQUEST);
+		echo "==========================================";
+		print_r($fetch_data);
 		echo "</pre>";
 		exit; */
 		$data = array();
@@ -946,7 +975,7 @@ class Ctl_retailstock extends CI_Controller
 		$result_cut = $this->mdl_retailstock->find_stockItemCutquery($request['date_cut']);
 		/* echo "<pre> bill";
 		print_r($result_cut);
-		echo "</pre>"; */
+		echo "</pre>";exit; */
 
 		foreach ($fetch_data as $row) {
 
@@ -1027,9 +1056,13 @@ class Ctl_retailstock extends CI_Controller
 
 			/* echo "<pre> ".$productid."--";
 			// print_r($key_bill);
-			echo "result=";
+			echo "bill==";
 			print_r($total_billOrder);
+			echo "====";
+			echo "issue==";
 			print_r($total_billIssue);
+			echo "====";
+			echo "receive==";
 			print_r($total_billReceive);
 			echo "</pre>"; */
 

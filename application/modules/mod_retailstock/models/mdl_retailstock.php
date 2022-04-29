@@ -45,7 +45,9 @@ class Mdl_retailstock extends CI_Model
 		$this->db->join('retail_productlist', "retail_productlist.id = retail_stock.retail_productlist_id", 'left');
 		$this->db->join('retail_stocksetting', 'retail_productlist.id=retail_stocksetting.retail_productlist_id', 'left');
 
-		$this->db->where('retail_productlist.promain_id not in(6,12,14,15,16)');    //  14,15,16 dryeage
+		// $this->db->where('retail_productlist.promain_id not in(6,12,14,15,16)');    //  14,15,16 dryeage
+		$this->db->where('retail_productlist.procate_id !=', 3);    //  not promotion
+
 		$this->db->where('retail_productlist.stock_view is null');
 		$this->db->where('retail_stock.date_cut', $date_cut);
 
@@ -55,7 +57,7 @@ class Mdl_retailstock extends CI_Model
 			$this->db->where('retail_stock.date_starts <=', date('Y-m-d'));
 		}
 
-		$this->db->where('if(retail_stock.date_end is not null, date(retail_stock.date_end) > "'.$datesearch.'" and retail_stock.status = 0 ,retail_stock.status = 1 )',null,false );
+		$this->db->where('if(retail_stock.date_end is not null, date(retail_stock.date_end) > "' . $datesearch . '" and retail_stock.status = 0 ,retail_stock.status = 1 )', null, false);
 
 		$this->db->group_by('retail_productlist.id');
 		// $this->db->order_by('SIGN(retail_stock.total) asc');
@@ -66,7 +68,7 @@ class Mdl_retailstock extends CI_Model
 	function make_queryMonth()
 	{
 		$request = $_REQUEST;
-		$monthsearch = date('m',strtotime($request['date']));
+		$monthsearch = date('m', strtotime($request['date']));
 		$date_cut = $request['date_cut'];
 
 		$this->db->select('
@@ -89,11 +91,13 @@ class Mdl_retailstock extends CI_Model
 		$this->db->join('retail_productlist', "retail_productlist.id = retail_stock.retail_productlist_id", 'left');
 		$this->db->join('retail_stocksetting', 'retail_productlist.id=retail_stocksetting.retail_productlist_id', 'left');
 
-		$this->db->where('retail_productlist.promain_id not in(6,12,14,15,16)');    //  14,15,16 dryeage
+		// $this->db->where('retail_productlist.promain_id not in(6,12,14,15,16)');    //  14,15,16 dryeage
+		$this->db->where('retail_productlist.procate_id !=', 3);    //  not promotion
+
 		$this->db->where('retail_productlist.stock_view is null');
 		$this->db->where('retail_stock.date_cut', $date_cut);
 
-		$this->db->where('if(retail_stock.date_end is not null, month(retail_stock.date_end) = "'.$monthsearch.'" and date(retail_stock.date_starts)!=date(retail_stock.date_end) and retail_stock.status = 0 ,retail_stock.status = 1 )',null,false );
+		$this->db->where('if(retail_stock.date_end is not null, month(retail_stock.date_end) = "' . $monthsearch . '" and date(retail_stock.date_starts)!=date(retail_stock.date_end) and retail_stock.status = 0 ,retail_stock.status = 1 )', null, false);
 
 		$this->db->group_by('retail_productlist.id');
 		// $this->db->order_by('SIGN(retail_stock.total) asc');
@@ -102,15 +106,15 @@ class Mdl_retailstock extends CI_Model
 	}
 
 	function make_datatables()
-	{	
+	{
 		$urlfunc = $this->uri->segment(3);
-		if($urlfunc == 'fetch_productMonth'){
+		if ($urlfunc == 'fetch_productMonth') {
 			$this->make_queryMonth();
-		}else{
+		} else {
 			$this->make_query();
 		}
 
-		
+
 		if ($_POST["length"] != -1) {
 			$this->db->limit($_POST['length'], $_POST['start']);
 		}
@@ -224,7 +228,8 @@ class Mdl_retailstock extends CI_Model
 		$this->db->join('retail_stocksetting', 'retail_productlist.id=retail_stocksetting.retail_productlist_id', 'left');
 		$this->db->join('staff', 'retail_stocksetting.user_update=staff.code', 'left');
 
-		$this->db->where('retail_productlist.promain_id not in(6,12,14,15,16)');    //  14,15,16 dryeage
+		// $this->db->where('retail_productlist.promain_id not in(6,12,14,15,16)');    //  14,15,16 dryeage
+		$this->db->where('retail_productlist.procate_id !=', 3);    //  not promotion
 		$this->db->where('retail_productlist.stock_view is null');
 		$this->db->where('retail_productlist.status', 1);
 		$this->db->where('retail_productlist.id not in(279,278,277)');
@@ -457,16 +462,16 @@ class Mdl_retailstock extends CI_Model
 		$q = $sql->get();
 		$num = $q->num_rows();
 		if ($num) {
-			if($num == 1){
+			if ($num == 1) {
 				$r = $q->row();
 				$datecut = $r->DATECUT;
 				$datestart = "";
-			}else{
+			} else {
 				$index = 1;
-				foreach($q->result() as $r){
-					if($index == 1){
+				foreach ($q->result() as $r) {
+					if ($index == 1) {
 						$datecut = $r->DATECUT;
-					}else{
+					} else {
 						$datestart = $r->DATECUT;
 					}
 					$index++;
@@ -474,24 +479,24 @@ class Mdl_retailstock extends CI_Model
 			}
 
 			//	หาระยะห่างในการเก็บรอบตัด stock
-			$sqlcut = $this->db->select("timestampdiff(month,'".$datecut."','".$array['date']."') as lengthcut")
-			->from('retail_stockcut');
+			$sqlcut = $this->db->select("timestampdiff(month,'" . $datecut . "','" . $array['date'] . "') as lengthcut")
+				->from('retail_stockcut');
 			$qcut = $sqlcut->get();
 			$numcut = $qcut->num_rows();
-			if($numcut){
+			if ($numcut) {
 				$rcut = $qcut->row();
-				if($rcut->lengthcut >= 3){	//	ห่าง 3 เดือน
+				if ($rcut->lengthcut >= 3) {	//	ห่าง 3 เดือน
 					$time = strtotime($array['date']);
-					$year = date('Y',$time);
-					$month = date('m',$time);
-					$newcut = $year.'-'.$month.'-01';
+					$year = date('Y', $time);
+					$month = date('m', $time);
+					$newcut = $year . '-' . $month . '-01';
 
 					$datainsert = array(
 						'datecut'	=> $newcut
 					);
-					$this->db->insert('retail_stockcut',$datainsert);
+					$this->db->insert('retail_stockcut', $datainsert);
 					$id = $this->db->insert_id();
-					if($id){
+					if ($id) {
 
 						$sqlnew = $this->db->select('*')
 							->from('retail_stockcut')
@@ -501,10 +506,10 @@ class Mdl_retailstock extends CI_Model
 						$qnew = $sqlnew->get();
 
 						$index = 1;
-						foreach($qnew->result() as $rnew){
-							if($index == 1){
+						foreach ($qnew->result() as $rnew) {
+							if ($index == 1) {
 								$datecut = $rnew->DATECUT;
-							}else{
+							} else {
 								$datestart = $rnew->DATECUT;
 							}
 							$index++;
@@ -531,17 +536,19 @@ class Mdl_retailstock extends CI_Model
 	// 	
 	function total_start_billOrder($array)
 	{
+
 		//	setting
 		$result = "";
 		$arrayset = array(
-			'query'	=> 'sum(retail_billdetail.quantity) as rtd_qty'
+			'query'	=> 'sum(retail_billdetail.quantity) as rtd_qty,retail_billdetail.list_id as rtd_list_id'
 		);
 		$sql = $this->mdl_retailstock->sqlBillOrderDate($arrayset)
 			->where('date(retail_bill.date_starts) <', $array['datecut'])
-			->where('if(retail_billdetail.list_id is not null,retail_billdetail.list_id =' . $array['item'] . ',retail_billdetail.prolist_id =' . $array['item'] . ')', null, false);
-		
-		if($array['datestart']){
-			$sql->where('date(retail_bill.date_starts) >=', $array['datestart']);
+			// ->where('retail_billdetail.prolist_id',$array['item']);
+			->where('if(retail_billdetail.list_id is not null,retail_billdetail.list_id like \'%"id":"' . $array['item'] . '"%\',retail_billdetail.prolist_id =' . $array['item'] . ')', null, false);
+
+		if ($array['datestart']) {
+			$sql->where('date(retail_bill.date_start) >=', $array['datestart']);
 		}
 
 		$q = $sql->get();
@@ -550,19 +557,21 @@ class Mdl_retailstock extends CI_Model
 			$row = $q->row();
 			$rowqty = $row->rtd_qty;
 
-			if($array['datestart']){
+			if ($row->rtd_list_id) {
+				$array_product = $this->product->decodeValue_focus($array['item'], $row->rtd_list_id);
+				$rowqty = intval($array_product['total']) * intval($rowqty);
+			}
+
+			if ($array['datestart']) {
 				$sqlset = $this->mdl_retailstock->sqlStock()
-				->where('retail_stock.date_cut',$array['datestart']);
+					->where('retail_stock.date_cut', $array['datestart']);
 				$qset = $sqlset->get();
 				$numset = $qset->num_rows();
-				if($numset){
+				if ($numset) {
 					$rowset = $qset->row();
 					$total = $rowset->TOTAL;
 					$rowqty = $total + $row->rtd_qty;
 				}
-				
-			}else{
-				$rowqty = $row->rtd_qty;
 			}
 
 			$result = array(
@@ -585,13 +594,14 @@ class Mdl_retailstock extends CI_Model
 		//	setting
 		$result = "";
 		$arrayset = array(
-			'query'	=> 'sum(retail_issue.quantity) as rtd_qty'
+			'query'	=> 'sum(retail_issue.quantity) as rtd_qty,retail_issue.list_id as rtd_list_id'
 		);
 		$sql = $this->mdl_retailstock->sqlBillIssue($arrayset)
 			->where('date(retail_issue.date_starts) <', $array['datecut'])
-			->where('if(retail_issue.list_id is not null,retail_issue.list_id =' . $array['item'] . ',retail_issue.prolist_id =' . $array['item'] . ')', null, false);
-		
-		if($array['datestart']){
+			// ->where('if(retail_issue.list_id is not null,retail_issue.list_id =' . $array['item'] . ',retail_issue.prolist_id =' . $array['item'] . ')', null, false);
+			->where('if(retail_issue.list_id is not null,retail_issue.list_id like \'%"id":"' . $array['item'] . '"%\',retail_issue.prolist_id =' . $array['item'] . ')', null, false);
+
+		if ($array['datestart']) {
 			$sql->where('date(retail_issue.date_starts) >=', $array['datestart']);
 		}
 
@@ -601,19 +611,21 @@ class Mdl_retailstock extends CI_Model
 			$row = $q->row();
 			$rowqty = $row->rtd_qty;
 
-			if($array['datestart']){
+			if ($row->rtd_list_id) {
+				$array_product = $this->product->decodeValue_focus($array['item'], $row->rtd_list_id);
+				$rowqty = intval($array_product['total']) * intval($row->rtd_qty);
+			}
+
+			if ($array['datestart']) {
 				$sqlset = $this->mdl_retailstock->sqlStock()
-				->where('retail_stock.date_cut',$array['datestart']);
+					->where('retail_stock.date_cut', $array['datestart']);
 				$qset = $sqlset->get();
 				$numset = $qset->num_rows();
-				if($numset){
+				if ($numset) {
 					$rowset = $qset->row();
 					$total = $rowset->TOTAL;
 					$rowqty = $total + $row->rtd_qty;
 				}
-				
-			}else{
-				$rowqty = $row->rtd_qty;
 			}
 
 			$result = array(
@@ -636,13 +648,15 @@ class Mdl_retailstock extends CI_Model
 		//	setting
 		$result = "";
 		$arrayset = array(
-			'query'	=> 'sum(retail_receivedetail.quantity) as rtd_qty'
+			'query'	=> 'sum(retail_receivedetail.quantity) as rtd_qty,retail_receivedetail.list_id as rtd_list_id'
 		);
 		$sql = $this->mdl_retailstock->sqlBillReceive($arrayset)
 			->where('date(retail_receive.date_starts) <', $array['datecut'])
-			->where('if(retail_receivedetail.list_id is not null,retail_receivedetail.list_id =' . $array['item'] . ',retail_receivedetail.prolist_id =' . $array['item'] . ')', null, false);
-		
-		if($array['datestart']){
+			// ->where('if(retail_receivedetail.list_id is not null,retail_receivedetail.list_id =' . $array['item'] . ',retail_receivedetail.prolist_id =' . $array['item'] . ')', null, false);
+			->where('if(retail_receivedetail.list_id is not null,retail_receivedetail.list_id like \'%"id":"' . $array['item'] . '"%\',retail_receivedetail.prolist_id =' . $array['item'] . ')', null, false);
+
+
+		if ($array['datestart']) {
 			$sql->where('date(retail_receive.date_starts) >=', $array['datestart']);
 		}
 
@@ -652,19 +666,21 @@ class Mdl_retailstock extends CI_Model
 			$row = $q->row();
 			$rowqty = $row->rtd_qty;
 
-			if($array['datestart']){
+			if ($row->rtd_list_id) {
+				$array_product = $this->product->decodeValue_focus($array['item'], $row->rtd_list_id);
+				$rowqty = intval($array_product['total']) * intval($row->rtd_qty);
+			}
+
+			if ($array['datestart']) {
 				$sqlset = $this->mdl_retailstock->sqlStock()
-				->where('retail_stock.date_cut',$array['datestart']);
+					->where('retail_stock.date_cut', $array['datestart']);
 				$qset = $sqlset->get();
 				$numset = $qset->num_rows();
-				if($numset){
+				if ($numset) {
 					$rowset = $qset->row();
 					$total = $rowset->TOTAL;
 					$rowqty = $total + $row->rtd_qty;
 				}
-				
-			}else{
-				$rowqty = $row->rtd_qty;
 			}
 
 			$result = array(
@@ -703,14 +719,31 @@ class Mdl_retailstock extends CI_Model
 		$q = $sql->get();
 		$num = $q->num_rows();
 		if ($num) {
-			
-			foreach($q->result() as $row){
-				$data[] = array(
-					'date_starts'	=> $row->rt_date_starts,
-					'pid'	=> $row->rtd_pid,
-					'lid'	=> $row->rtd_lid,
-					'qty'	=> $row->rtd_qty
-				);
+
+			foreach ($q->result() as $row) {
+				if ($row->rtd_lid) {
+
+					//	อ่านข้อมูลของสินค้าที่ตัดจากโปรโมชั่น
+					$array_list = $this->product->decodeValue($row->rtd_lid);
+					if ($array_list) {
+						foreach($array_list as $key => $val){
+							$productcut_total = intval($val['total']) * intval($row->rtd_qty);
+							$data[] = array(
+								'date_starts'	=> $row->rt_date_starts,
+								'pid'	=> $row->rtd_pid,
+								'lid'	=> $val['id'],
+								'qty'	=> $productcut_total
+							);
+						}
+					}
+				} else {
+					$data[] = array(
+						'date_starts'	=> $row->rt_date_starts,
+						'pid'	=> $row->rtd_pid,
+						'lid'	=> $row->rtd_lid,
+						'qty'	=> $row->rtd_qty
+					);
+				}
 			}
 
 			$result = array(
@@ -749,13 +782,30 @@ class Mdl_retailstock extends CI_Model
 		$num = $q->num_rows();
 		if ($num) {
 
-			foreach($q->result() as $row){
-				$data[] = array(
-					'date_starts'	=> $row->rt_date_starts,
-					'pid'	=> $row->rtd_pid,
-					'lid'	=> $row->rtd_lid,
-					'qty'	=> $row->rtd_qty
-				);
+			foreach ($q->result() as $row) {
+				if ($row->rtd_lid) {
+
+					//	อ่านข้อมูลของสินค้าที่ตัดจากโปรโมชั่น
+					$array_list = $this->product->decodeValue($row->rtd_lid);
+					if ($array_list) {
+						foreach($array_list as $key => $val){
+							$productcut_total = intval($val['total']) * intval($row->rtd_qty);
+							$data[] = array(
+								'date_starts'	=> $row->rt_date_starts,
+								'pid'	=> $row->rtd_pid,
+								'lid'	=> $val['id'],
+								'qty'	=> $productcut_total
+							);
+						}
+					}
+				} else {
+					$data[] = array(
+						'date_starts'	=> $row->rt_date_starts,
+						'pid'	=> $row->rtd_pid,
+						'lid'	=> $row->rtd_lid,
+						'qty'	=> $row->rtd_qty
+					);
+				}
 			}
 
 			$result = array(
@@ -794,13 +844,30 @@ class Mdl_retailstock extends CI_Model
 		$num = $q->num_rows();
 		if ($num) {
 
-			foreach($q->result() as $row){
-				$data[] = array(
-					'date_starts'	=> $row->rt_date_starts,
-					'pid'	=> $row->rtd_pid,
-					'lid'	=> $row->rtd_lid,
-					'qty'	=> $row->rtd_qty
-				);
+			foreach ($q->result() as $row) {
+				if ($row->rtd_lid) {
+
+					//	อ่านข้อมูลของสินค้าที่ตัดจากโปรโมชั่น
+					$array_list = $this->product->decodeValue($row->rtd_lid);
+					if ($array_list) {
+						foreach($array_list as $key => $val){
+							$productcut_total = intval($val['total']) * intval($row->rtd_qty);
+							$data[] = array(
+								'date_starts'	=> $row->rt_date_starts,
+								'pid'	=> $row->rtd_pid,
+								'lid'	=> $val['id'],
+								'qty'	=> $productcut_total
+							);
+						}
+					}
+				} else {
+					$data[] = array(
+						'date_starts'	=> $row->rt_date_starts,
+						'pid'	=> $row->rtd_pid,
+						'lid'	=> $row->rtd_lid,
+						'qty'	=> $row->rtd_qty
+					);
+				}
 			}
 
 			$result = array(
@@ -925,13 +992,29 @@ class Mdl_retailstock extends CI_Model
 		$q = $sql->get();
 		$num = $q->num_rows();
 		if ($num) {
-			
-			foreach($q->result() as $row){
-				$data[] = array(
-					'pid'	=> $row->rtd_pid,
-					'lid'	=> $row->rtd_lid,
-					'qty'	=> $row->rtd_qty
-				);
+
+			foreach ($q->result() as $row) {
+				if ($row->rtd_lid) {
+
+					//	อ่านข้อมูลของสินค้าที่ตัดจากโปรโมชั่น
+					$array_list = $this->product->decodeValue($row->rtd_lid);
+					if ($array_list) {
+						foreach($array_list as $key => $val){
+							$productcut_total = intval($val['total']) * intval($row->rtd_qty);
+							$data[] = array(
+								'pid'	=> $row->rtd_pid,
+								'lid'	=> $val['id'],
+								'qty'	=> $productcut_total
+							);
+						}
+					}
+				}else{
+					$data[] = array(
+						'pid'	=> $row->rtd_pid,
+						'lid'	=> $row->rtd_lid,
+						'qty'	=> $row->rtd_qty
+					);
+				}
 			}
 
 			$result = array(
@@ -960,12 +1043,28 @@ class Mdl_retailstock extends CI_Model
 		$num = $q->num_rows();
 		if ($num) {
 
-			foreach($q->result() as $row){
-				$data[] = array(
-					'pid'	=> $row->rtd_pid,
-					'lid'	=> $row->rtd_lid,
-					'qty'	=> $row->rtd_qty
-				);
+			foreach ($q->result() as $row) {
+				if ($row->rtd_lid) {
+
+					//	อ่านข้อมูลของสินค้าที่ตัดจากโปรโมชั่น
+					$array_list = $this->product->decodeValue($row->rtd_lid);
+					if ($array_list) {
+						foreach($array_list as $key => $val){
+							$productcut_total = intval($val['total']) * intval($row->rtd_qty);
+							$data[] = array(
+								'pid'	=> $row->rtd_pid,
+								'lid'	=> $val['id'],
+								'qty'	=> $productcut_total
+							);
+						}
+					}
+				}else{
+					$data[] = array(
+						'pid'	=> $row->rtd_pid,
+						'lid'	=> $row->rtd_lid,
+						'qty'	=> $row->rtd_qty
+					);
+				}
 			}
 
 			$result = array(
@@ -993,13 +1092,29 @@ class Mdl_retailstock extends CI_Model
 		$q = $sql->get();
 		$num = $q->num_rows();
 		if ($num) {
-			
-			foreach($q->result() as $row){
-				$data[] = array(
-					'pid'	=> $row->rtd_pid,
-					'lid'	=> $row->rtd_lid,
-					'qty'	=> $row->rtd_qty
-				);
+
+			foreach ($q->result() as $row) {
+				if ($row->rtd_lid) {
+
+					//	อ่านข้อมูลของสินค้าที่ตัดจากโปรโมชั่น
+					$array_list = $this->product->decodeValue($row->rtd_lid);
+					if ($array_list) {
+						foreach($array_list as $key => $val){
+							$productcut_total = intval($val['total']) * intval($row->rtd_qty);
+							$data[] = array(
+								'pid'	=> $row->rtd_pid,
+								'lid'	=> $val['id'],
+								'qty'	=> $productcut_total
+							);
+						}
+					}
+				}else{
+					$data[] = array(
+						'pid'	=> $row->rtd_pid,
+						'lid'	=> $row->rtd_lid,
+						'qty'	=> $row->rtd_qty
+					);
+				}
 			}
 
 			$result = array(
@@ -1211,7 +1326,7 @@ class Mdl_retailstock extends CI_Model
 		$total_bill_order = $this->mdl_retailstock->total_start_billOrder($array);
 		$total_bill_issue = $this->mdl_retailstock->total_start_billIssue($array);
 		$total_bill_receive = $this->mdl_retailstock->total_start_billReceive($array);
-		/* echo "<pre>";
+		/* echo "<pre> item =".$array['item']." ";
 		echo "bill";
 		print_r($total_bill_order);
 		echo "issue";
@@ -1248,7 +1363,7 @@ class Mdl_retailstock extends CI_Model
 		($array['total_bill'] ? $total_bill = $array['total_bill'] : true);
 		($array['total_issue'] ? $total_issue = $array['total_issue'] : true);
 		($array['total_receive'] ? $total_receive = $array['total_receive'] : true);
-		
+
 		$result = $total_receive - ($total_bill + $total_issue);
 		// echo $total_receive."-(".$total_bill."+".$total_issue.") = ".$result;
 		/* if($result < 0){
@@ -1269,9 +1384,9 @@ class Mdl_retailstock extends CI_Model
 			->from('retail_stock')
 			->where('retail_stock.retail_productlist_id', $itemid)
 			->where('retail_stock.date_cut', $datecut)
-			->order_by('retail_stock.id','desc');
-			// ->where('if(retail_stock.date_end is not null, retail_stock.date_end < '.$this->set['datenow'].',retail_stock.date_starts <= '.$this->set['datenow'].')',null,false);
-			// ->where('retail_stock.status', 1);
+			->order_by('retail_stock.id', 'desc');
+		// ->where('if(retail_stock.date_end is not null, retail_stock.date_end < '.$this->set['datenow'].',retail_stock.date_starts <= '.$this->set['datenow'].')',null,false);
+		// ->where('retail_stock.status', 1);
 		$q = $sql->get();
 		$num = $q->num_rows();
 		if ($num) {
@@ -1295,14 +1410,14 @@ class Mdl_retailstock extends CI_Model
 			->from('retail_stock')
 			->where('retail_stock.date_cut', $datecut)
 			->group_by('retail_stock.retail_productlist_id')
-			->order_by('retail_stock.id','desc');
-			// ->where('if(retail_stock.date_end is not null, retail_stock.date_end < '.$this->set['datenow'].',retail_stock.date_starts <= '.$this->set['datenow'].')',null,false);
-			// ->where('retail_stock.status', 1);
+			->order_by('retail_stock.id', 'desc');
+		// ->where('if(retail_stock.date_end is not null, retail_stock.date_end < '.$this->set['datenow'].',retail_stock.date_starts <= '.$this->set['datenow'].')',null,false);
+		// ->where('retail_stock.status', 1);
 		$q = $sql->get();
 		$num = $q->num_rows();
 		if ($num) {
 
-			foreach($q->result() as $row){
+			foreach ($q->result() as $row) {
 				$data[] = array(
 					'pid'	=> $row->rt_pid,
 					'qty'	=> $row->rt_qty
@@ -1363,7 +1478,7 @@ class Mdl_retailstock extends CI_Model
 			'datestart'		=> $array['datebefore'],
 			'datecut'	=> $array['datecut']
 		);
-		
+
 		$total_bill_order = $this->mdl_retailstock->total_start_billOrder($arraytotal);
 		$total_bill_issue = $this->mdl_retailstock->total_start_billIssue($arraytotal);
 		$total_bill_receive = $this->mdl_retailstock->total_start_billReceive($arraytotal);
@@ -1377,11 +1492,11 @@ class Mdl_retailstock extends CI_Model
 
 		if ($total > 0) {
 			$stage_delerror = 2;
-			$txt = 'มีจำนวนเหลือใน stock '.$total;
+			$txt = 'มีจำนวนเหลือใน stock ' . $total;
 		}
 
 		// echo "total : ".$total."<br>";
-/* 		echo $stage_delerror." :: st";
+		/* 		echo $stage_delerror." :: st";
 exit; */
 		/**
 		 * * ลบการแสดงผลของสินค้านั้นหากผ่านเงื่อนไขการตรวจสอบ
@@ -1394,22 +1509,22 @@ exit; */
 			);
 			$this->db->where('retail_stock.id', $item_check_id);
 			$this->db->update('retail_stock', $dataupdate);
-		}else{
+		} else {
 			/**
 			 * * ถ้าสินค้าที่ปิดไป เกิดมีการขาย หรือ จำนวนขึ้นมาใน stock
 			 */
-			if($item_check_status == 0){
+			if ($item_check_status == 0) {
 				/**
 				 * * ถ้าวันปิดสินค้าตรงกับวันปัจจุบันในระบบ stock
 				 */
-				if($item_check_date_end && $item_check_date_end == $this->set['datenow'] ){
+				if ($item_check_date_end && $item_check_date_end == $this->set['datenow']) {
 					$dataupdate = array(
 						'status'	=> 1,
 						'date_end'	=> null
 					);
 					$this->db->where('retail_stock.id', $item_check_id);
 					$this->db->update('retail_stock', $dataupdate);
-				}else{
+				} else {
 					/**
 					 * * ถ้าวันปิดสินค้าไม่ตรงกับวันปัจจุบัน
 					 */
@@ -1428,7 +1543,6 @@ exit; */
 					);
 					echo "stockมี insert :".$item_check_del;
 					$this->db->insert('retail_stock', $insert); */
-
 				}
 			}
 		}
@@ -1437,7 +1551,7 @@ exit; */
 			'error_code'	=> $stage_delerror,
 			'txt'			=> $txt
 		);
-		
+
 		return $result;
 	}
 
@@ -1446,7 +1560,8 @@ exit; */
 	// 								date		@date => date now ,
 	// 								datecut		@date => date cut stock ,
 	// 
-	function find_total_stockproduct($array){
+	function find_total_stockproduct($array)
+	{
 		//	setting
 		$item = $array['item'];
 		$date = $array['date'];
@@ -1456,7 +1571,7 @@ exit; */
 		$total_billOrder = $this->mdl_retailstock->total_billOrder($array);
 		$total_billIssue = $this->mdl_retailstock->total_billIssue($array);
 		$total_billReceive = $this->mdl_retailstock->total_billReceive($array);
-		
+
 		$arraytotal = array(
 			'total_bill'	=> $total_billOrder['row']->rtd_qty,
 			'total_issue'	=> $total_billIssue['row']->rtd_qty,
@@ -1478,7 +1593,8 @@ exit; */
 	// 								date		@date => date now ,
 	// 								datecut		@date => date cut stock ,
 	// 
-	function find_total_stockproductstarts($array){
+	function find_total_stockproductstarts($array)
+	{
 		//	setting
 		$item = $array['item'];
 		$date = $array['date'];
@@ -1488,7 +1604,7 @@ exit; */
 		$total_billOrder = $this->mdl_retailstock->total_billOrder_starts($array);
 		$total_billIssue = $this->mdl_retailstock->total_billIssue_starts($array);
 		$total_billReceive = $this->mdl_retailstock->total_billReceive_starts($array);
-		
+
 		$arraytotal = array(
 			'total_bill'	=> $total_billOrder['row']->rtd_qty,
 			'total_issue'	=> $total_billIssue['row']->rtd_qty,
@@ -1508,7 +1624,8 @@ exit; */
 	// 								id			@int => stock id ,
 	// 								total		@int => stock total ,
 	//
-	function update_ProductOnline($array) {
+	function update_ProductOnline($array)
+	{
 		if ($array['id']) {
 			$dataupdate = array(
 				'total'			=> $array['total'],
@@ -1520,11 +1637,12 @@ exit; */
 			$this->db->update('retail_stock', $dataupdate);
 		}
 	}
-	
+
 	//	@param	date 	@date = date now
 	//	@param	item 	@int = item stock
 	//
-	function get_billorderDetail() {
+	function get_billorderDetail()
+	{
 		$input = filter_input_array(INPUT_GET);
 
 		//	setting
@@ -1536,7 +1654,7 @@ exit; */
 			'query'	=> 'retail_bill.code as rtd_code,retail_bill.name as rtd_name,retail_productlist.name_th as rtd_product_name,retail_billdetail.quantity as rtd_qty'
 		);
 		$sql = $this->mdl_retailstock->sqlBillOrderDate($arrayset)
-			->join('retail_productlist', 'if(retail_billdetail.list_id is not null,retail_productlist.id = retail_billdetail.list_id,retail_productlist.id = retail_billdetail.prolist_id)','left', false)
+			->join('retail_productlist', 'if(retail_billdetail.list_id is not null,retail_productlist.id = retail_billdetail.list_id,retail_productlist.id = retail_billdetail.prolist_id)', 'left', false)
 			->where('date(retail_bill.date_starts)', $date)
 			->where('if(retail_billdetail.list_id is not null,retail_billdetail.list_id =' . $item . ',retail_billdetail.prolist_id =' . $item . ')', null, false);
 
@@ -1558,7 +1676,8 @@ exit; */
 	//	@param	date 	@date = date now
 	//	@param	item 	@int = item stock
 	//
-	function get_receiveDetail() {
+	function get_receiveDetail()
+	{
 		$input = filter_input_array(INPUT_GET);
 
 		//	setting
@@ -1577,7 +1696,7 @@ exit; */
 			'
 		);
 		$sql = $this->mdl_retailstock->sqlBillReceive($arrayset)
-			->join('retail_productlist', 'if(retail_receivedetail.list_id is not null,retail_productlist.id = retail_receivedetail.list_id,retail_productlist.id = retail_receivedetail.prolist_id)','left', false)
+			->join('retail_productlist', 'if(retail_receivedetail.list_id is not null,retail_productlist.id = retail_receivedetail.list_id,retail_productlist.id = retail_receivedetail.prolist_id)', 'left', false)
 			->where('date(retail_receive.date_starts)', $date)
 			->where('if(retail_receivedetail.list_id is not null,retail_receivedetail.list_id =' . $item . ',retail_receivedetail.prolist_id =' . $item . ')', null, false);
 
@@ -1599,7 +1718,8 @@ exit; */
 	//	@param	date 	@date = date now
 	//	@param	item 	@int = item stock
 	//
-	function get_issueDetail() {
+	function get_issueDetail()
+	{
 		$input = filter_input_array(INPUT_GET);
 
 		//	setting
@@ -1617,7 +1737,7 @@ exit; */
 			'
 		);
 		$sql = $this->mdl_retailstock->sqlBillIssue($arrayset)
-			->join('retail_productlist', 'if(retail_issue.list_id is not null,retail_productlist.id = retail_issue.list_id,retail_productlist.id = retail_issue.prolist_id)','left', false)
+			->join('retail_productlist', 'if(retail_issue.list_id is not null,retail_productlist.id = retail_issue.list_id,retail_productlist.id = retail_issue.prolist_id)', 'left', false)
 			->where('date(retail_issue.date_starts)', $date)
 			->where('if(retail_issue.list_id is not null,retail_issue.list_id =' . $item . ',retail_issue.prolist_id =' . $item . ')', null, false);
 
@@ -1650,12 +1770,13 @@ exit; */
 		return $this->db->select($array['query'])
 			->from('retail_productlist')
 			->join('retail_stock', 'retail_productlist.id=retail_stock.retail_productlist_id')
-			->where('retail_productlist.promain_id not in(6,12,14,15,16)')    //  14,15,16 dryeage
+			// ->where('retail_productlist.promain_id not in(6,12,14,15,16)')    //  14,15,16 dryeage
+			->where('retail_productlist.procate_id !=', 3)    //  not promotion
 			->where('retail_productlist.stock_view is null')
 			->where('retail_stock.date_starts >=', $array['datecut'])
-			->where('if(retail_stock.date_end is not null,date(retail_stock.date_end) >= "'.$this->set['datenow'].'",retail_stock.date_end is null)',null,false)
+			->where('if(retail_stock.date_end is not null,date(retail_stock.date_end) >= "' . $this->set['datenow'] . '",retail_stock.date_end is null)', null, false)
 			->where('retail_productlist.status', 0);
-			// ->where('retail_stock.status', 1);
+		// ->where('retail_stock.status', 1);
 	}
 
 	//	@param	array @array = array[ 
@@ -1665,7 +1786,8 @@ exit; */
 	{
 		return $this->db->select($array['query'])
 			->from('retail_productlist')
-			->where('retail_productlist.promain_id not in(6,12,14,15,16)')    //  14,15,16 dryeage
+			// ->where('retail_productlist.promain_id not in(6,12,14,15,16)')    //  14,15,16 dryeage
+			->where('retail_productlist.procate_id !=', 3)    //  not promotion
 			->where('retail_productlist.stock_view is null')
 			->where('retail_productlist.status', 1);
 	}
@@ -1715,5 +1837,4 @@ exit; */
 			->from('retail_stock')
 			->where('retail_stock.status', 1);
 	}
-
 }

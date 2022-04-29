@@ -1455,6 +1455,36 @@ class Product
 	}
 
 	// 
+	//	decode value only id
+	//	paramiter text
+	//	@param item	@int = product id
+	//	@param text	@text = text
+	function decodeValue_focus($item,$text){
+		//=	 call database	=//
+		$ci = &get_instance();
+		$ci->load->database();
+		//===================//
+		//	setting
+		$result = array(); 
+		$resultdecode = array(); 
+		$res = array();
+
+		if($text){
+			$resultdecode = $this->decodeValue($text);
+		}
+
+		$dataproduct = "";
+		if(count($resultdecode)){
+			$dataproduct = array_keys(array_column($resultdecode,'id'),$item);
+		}
+		
+		if($dataproduct){
+			$result = $resultdecode[$dataproduct[0]];
+		}
+
+		return $result;
+	}
+	// 
 	//	decode value
 	//	paramiter text
 	//	@param text	@text = text

@@ -881,7 +881,7 @@ class Mdl_report extends CI_Model
 				$this->db->join($this->tablethird, $this->table . '.delivery_formid=' . $this->tablethird . '.id', 'left');
 				$this->db->join($this->tablefour, $this->table . '.id=' . $this->tablefour . '.bill_id', 'left');
 				$this->db->join($this->tablefive, $this->table . '.methodorder_id=' . $this->tablefive . '.id', 'left');
-				$this->db->join($this->tablesix, 'if('.$this->tablesecond.'.list_id is not null , '.$this->tablesecond.'.list_id='.$this->tablesix.'.id , '.$this->tablesecond.'.prolist_id='.$this->tablesix.'.id)',null,false);
+				$this->db->join($this->tablesix, $this->tablesecond.'.prolist_id='.$this->tablesix.'.id','left');
 				$this->db->where($this->table . '.status_complete = 2');
 				$this->db->where($this->table . '.status = 1');
 

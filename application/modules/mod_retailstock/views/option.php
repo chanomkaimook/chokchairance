@@ -80,7 +80,7 @@
                                 $year = date('Y');
                                 $month = date('m');
                                 $keyset = $year."-".$month;
-                                $thaiyearset = $year + 43;   //	43 from 543 thai date
+                                $thaiyearset = date('y') + 43;   //	43 from 543 thai date
 
                                 if (!array_search($year."-".$month, $dataarray) !== false) {
                                     $dataarray[$keyset] = $thaiyearset;
@@ -94,6 +94,7 @@
                             }
                         ?>
                     </select>
+                    
                 </div>
                 <?php
                     }
