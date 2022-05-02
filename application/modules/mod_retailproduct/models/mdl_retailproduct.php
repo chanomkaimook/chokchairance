@@ -321,9 +321,9 @@ class Mdl_retailproduct extends CI_Model
                 $this->db->update('retail_productlist', $data);
 
                 //  update bill
-                if ($list_old != $listid) {
+                if ($list_old != $product_cut) {
                     $dataupdate = array(
-                        'list_id'             => $listid
+                        'list_id'             => $product_cut
                     );
 
                     $this->db->where('prolist_id', $this->input->post('prolist_id'));
