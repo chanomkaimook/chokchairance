@@ -80,7 +80,7 @@ $db['default'] = array(
 	'hostname' => 'localhost',
 	'username' => 'root',
 	'password' => '',
-	'database' => 'cfr',
+	'database' => 'cfrx',
 
 	/* 'username' => 'cfr',
 	'password' => '58wsx1~T',
