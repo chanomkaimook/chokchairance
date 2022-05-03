@@ -23,7 +23,7 @@ class Ctl_retailstock extends CI_Controller
 			'submenu'		        => 'retailstock',
 			'url_begin'		        => $this->uri->segment(1) . "/" . $this->uri->segment(2),
 			'datenow'				=> date('Y-m-d')
-			// 'datenow'				=> "2022-03-27"
+			// 'datenow'				=> "2022-02-01"
 			// 'datenow'				=> $this->input->get('date')
 		);
 		if ($this->session->userdata('useradminid') == '') {
@@ -43,27 +43,27 @@ class Ctl_retailstock extends CI_Controller
 			$date = date('Y-m-d');
 		}
 
-		if($this->input->get('m')){
-			$explode = explode('-',$this->input->get('m'));
+		if ($this->input->get('m')) {
+			$explode = explode('-', $this->input->get('m'));
 			$month = $explode[1];
 			$year = $explode[0];
-			$totaldays = cal_days_in_month(CAL_GREGORIAN,$month,$year);
-		}else{
+			$totaldays = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+		} else {
 			$month = date('m');
 			$year = date('Y');
-			$totaldays = cal_days_in_month(CAL_GREGORIAN,$month,$year);
+			$totaldays = cal_days_in_month(CAL_GREGORIAN, $month, $year);
 		}
 
 		$arrayset = array(
 			'date'	=> $date
 		);
 		$find_date = $this->mdl_retailstock->dateCut($arrayset);
-		if($find_date){
+		if ($find_date) {
 			$datecut = $find_date['datecut'];
 			$datestart = $find_date['datestart'];
 		}
 
-		$data = array (
+		$data = array(
 			'mainmenu' 		=> $this->set['mainmenu'],
 			'submenu' 		=> 'stock'
 		);
@@ -106,10 +106,10 @@ class Ctl_retailstock extends CI_Controller
 			'date'	=> $date
 		);
 		$find_date = $this->mdl_retailstock->dateCut($arrayset);
-		if($find_date){
+		if ($find_date) {
 			$datecut = $find_date['datecut'];
 			$datestart = $find_date['datestart'];
-		
+
 			$item = array();		//	product set id to stock
 
 			/**
@@ -139,8 +139,8 @@ class Ctl_retailstock extends CI_Controller
 			);
 			$sqlproductbill = $this->mdl_retailstock->sqlBillOrderDate($arrayquery)
 				->where('date(retail_bill.date_starts) >=', $datecut);
-				// ->where('if(retail_billdetail.list_id is not null,retail_billdetail.list_id =' . $item_check_del . ',retail_billdetail.prolist_id =' . $item_check_del . ')', null, false)
-				// ->where('date(retail_bill.date_starts) <', $this->set['datenow']);
+			// ->where('if(retail_billdetail.list_id is not null,retail_billdetail.list_id =' . $item_check_del . ',retail_billdetail.prolist_id =' . $item_check_del . ')', null, false)
+			// ->where('date(retail_bill.date_starts) <', $this->set['datenow']);
 			$numproductbill = $sqlproductbill->count_all_results(null, false);
 			$qproductbill = $sqlproductbill->get();
 			if ($numproductbill) {
@@ -162,11 +162,6 @@ class Ctl_retailstock extends CI_Controller
 					}
 				}
 			}
-			/* echo "<pre>";
-			print_r($item_on);
-			echo "</pre>";
-
-			exit; */
 
 			/**
 			 * 
@@ -178,8 +173,8 @@ class Ctl_retailstock extends CI_Controller
 			);
 			$sqlproductreceive = $this->mdl_retailstock->sqlBillReceive($arrayquery)
 				->where('date(retail_receive.date_starts) >=', $datecut);
-				// ->where('if(retail_billdetail.list_id is not null,retail_billdetail.list_id =' . $item_check_del . ',retail_billdetail.prolist_id =' . $item_check_del . ')', null, false)
-				// ->where('date(retail_bill.date_starts) <', $this->set['datenow']);
+			// ->where('if(retail_billdetail.list_id is not null,retail_billdetail.list_id =' . $item_check_del . ',retail_billdetail.prolist_id =' . $item_check_del . ')', null, false)
+			// ->where('date(retail_bill.date_starts) <', $this->set['datenow']);
 			$numreceive = $sqlproductreceive->count_all_results(null, false);
 			$qreceive = $sqlproductreceive->get();
 			if ($numreceive) {
@@ -216,30 +211,29 @@ class Ctl_retailstock extends CI_Controller
 			/**
 			 * * ค้นหาสินค้าที่อยู่บนสต็อคที่ยังเหลือ (ไม่มีการขาย ไม่มีกาารรับเข้า ไม่มีการเปิดทำงาน แต่มีแสดงผลบนสต็อค)
 			 */
-
-			if($datestart){
-				$setitem_on = implode(',',$item);
+			if ($datestart) {
+				$setitem_on = implode(',', $item);
 				$sqlst = $this->db->select('retail_stock.RETAIL_PRODUCTLIST_ID as productid')
-				->from('retail_stock')
-				->where('retail_stock.status',1)
-				->where('retail_stock.date_cut >=',$datestart)
-				->where('retail_stock.retail_productlist_id not in('.$setitem_on.')',null,false)
-				->group_by('retail_stock.retail_productlist_id');
+					->from('retail_stock')
+					->where('retail_stock.status', 1)
+					->where('retail_stock.date_cut >=', $datestart)
+					->where('retail_stock.retail_productlist_id not in(' . $setitem_on . ')', null, false)
+					->group_by('retail_stock.retail_productlist_id');
 				$qst = $sqlst->get();
 				$numst = $qst->num_rows();
-				
-				if($numst){
-					foreach($qst->result() as $rst){
+				if ($numst) {
+
+					foreach ($qst->result() as $rst) {
 						$arrayst = array(
 							'item'			=> $rst->productid,
 							'datestart'		=> $datestart,
 							'datecut'		=> $datecut
 						);
-						
+
 						$total_bill_order = $this->mdl_retailstock->total_start_billOrder($arrayst);
 						$total_bill_issue = $this->mdl_retailstock->total_start_billIssue($arrayst);
 						$total_bill_receive = $this->mdl_retailstock->total_start_billReceive($arrayst);
-				
+
 						$arraycal = array(
 							'total_bill'	=> $total_bill_order['row'],
 							'total_issue'	=> $total_bill_issue['row'],
@@ -260,7 +254,7 @@ class Ctl_retailstock extends CI_Controller
 				}
 			}
 			//	create value unique
-			
+
 			/* echo "<pre>item";
 			print_r($item);
 			echo "==== insert";
@@ -310,7 +304,7 @@ class Ctl_retailstock extends CI_Controller
 							'datecut'		=> $datecut
 						);
 						$total = $this->mdl_retailstock->total_stock($arrayset);
-						
+
 						$datainsert[] = array(
 							'retail_productlist_id' => $val,
 							/* 'total_bill_order' 				=> get_valueNullToNull($total_bill_order['row']->rtd_qty),
@@ -328,9 +322,9 @@ class Ctl_retailstock extends CI_Controller
 						 * todo date_end คือ ค่าระบุของการปิดสถานะการทำงานของสินค้าใน stock ในวันดังกล่าว
 						 * todo เมื่อสินค้ากลับมาทำงาน จะต้องล้างค่า date_end ออก
 						 */
-						if($chk_stock_item['result']->STATUS == 0){
-							$date_end = date('Y-m-d',strtotime($chk_stock_item['result']->DATE_END));
-							if($date_end == $this->set['datenow']){
+						if ($chk_stock_item['result']->STATUS == 0) {
+							$date_end = date('Y-m-d', strtotime($chk_stock_item['result']->DATE_END));
+							if ($date_end == $this->set['datenow']) {
 								$arrayset = array(
 									'item'			=> $val,
 									'datecut'		=> $datecut
@@ -343,7 +337,7 @@ class Ctl_retailstock extends CI_Controller
 								);
 								// echo "stockมี update :".$chk_stock_item['result']->ID;
 								// $this->mdl_retailstock->update_ProductOnline($arrayupdate);
-							}else{
+							} else {
 
 								/**
 								 * 
@@ -368,18 +362,17 @@ class Ctl_retailstock extends CI_Controller
 								);
 								echo "stockมี insert :".$val." = ".$total['total'];
 								$this->db->insert('retail_stock', $insert); */
-
 							}
-
 						}
 					}
 				}		//	end foreach จบการเพิ่ม แก้ไข สถานะ stock
+
 				/* echo "<pre>item";
 				print_r($item);
 				echo "==== insert";
 				print_r($datainsert);
 				echo "</pre>"; */
-			
+
 				if ($datainsert) {
 					$this->db->insert_batch('retail_stock', $datainsert);
 				}
@@ -397,13 +390,13 @@ class Ctl_retailstock extends CI_Controller
 				 */
 
 				$item_off = array();		//	product offline
-				($datestart ? $date_before_cut=$datestart : $date_before_cut=$datecut );
+				($datestart ? $date_before_cut = $datestart : $date_before_cut = $datecut);
 				$arrayquery = array('query' => 'retail_stock.total as st_total,retail_stock.retail_productlist_id as st_pro_id,retail_stock.id as st_id,retail_stock.status as st_status,retail_stock.date_end as st_date_end', 'datecut' => $date_before_cut);
 				$sqloff = $this->mdl_retailstock->sqlProductlistOff($arrayquery);
 				$numoff = $sqloff->count_all_results(null, false);
 				$qoff = $sqloff->get();
 				// echo "numberoff :".$numoff."<br>";
-				
+
 				if ($numoff) {
 					foreach ($qoff->result() as $row) {
 						$arrayset = array(
@@ -413,7 +406,7 @@ class Ctl_retailstock extends CI_Controller
 							'stockid'	=> $row->st_id,
 							'total'		=> $row->st_total,
 							'status'	=> $row->st_status,
-							'date_end'	=> date('Y-m-d',strtotime($row->st_date_end))
+							'date_end'	=> date('Y-m-d', strtotime($row->st_date_end))
 						);
 						$func_del = $this->mdl_retailstock->check_stockDel($arrayset);
 						// echo 'item :'.$row->st_pro_id.'<br>';
@@ -426,7 +419,7 @@ class Ctl_retailstock extends CI_Controller
 					'datecut'	=> $request['date_cut']
 				);
 				$start = $this->mdl_retailstock->find_total_stockproductstarts($arraytotal); */
-				
+
 				// exit;
 				/* echo "<pre>off<br>";
 				print_r($item_off);
@@ -436,7 +429,7 @@ class Ctl_retailstock extends CI_Controller
 			}	//	end to set stock
 		}
 
-		$data = array (
+		$data = array(
 			'mainmenu' 		=> $this->set['mainmenu'],
 			'submenu' 		=> 'stock'
 		);
@@ -477,20 +470,21 @@ class Ctl_retailstock extends CI_Controller
 	//
 	//	@param		itemid		@int = product id
 	//
-	function findscore($dataarray,$itemid){
-		$key_pid = array_keys(array_column($dataarray['result'],'pid'),$itemid);
-		$key_lid = array_keys(array_column($dataarray['result'],'lid'),$itemid);
-	
-		$key_array = array_merge($key_pid,$key_lid);
+	function findscore($dataarray, $itemid)
+	{
+		$key_pid = array_keys(array_column($dataarray['result'], 'pid'), $itemid);
+		$key_lid = array_keys(array_column($dataarray['result'], 'lid'), $itemid);
+
+		$key_array = array_merge($key_pid, $key_lid);
 		$totalbill = 0;
-		if(count($key_array)){
-			foreach($key_array as $key => $value){
+		if (count($key_array)) {
+			foreach ($key_array as $key => $value) {
 				$totalbill += $dataarray['result'][$value]['qty'];
 			}
 		}
 		$total_billOrdert = $totalbill;
 
-		if($total_billOrdert){
+		if ($total_billOrdert) {
 			$result = $total_billOrdert;
 		}
 
@@ -504,7 +498,7 @@ class Ctl_retailstock extends CI_Controller
 
 		$request = $_REQUEST;
 
-		($request['date'] ? $date = $request['date'] : $date = date('Y-m') );
+		($request['date'] ? $date = $request['date'] : $date = date('Y-m'));
 
 		$arrayset = array(
 			'date'	=> ($request['date'] ? $request['date'] : date('Y-m-d'))
@@ -512,10 +506,14 @@ class Ctl_retailstock extends CI_Controller
 
 		//	total starts
 		$result_cut = $this->mdl_retailstock->find_stockItemCutquery($request['date_cut']);
-		
 
-		$month = ($request['date'] ? date('m',strtotime($request['date'])) : date('m'));
-		$year = ($request['date'] ? date('Y',strtotime($request['date'])) : date('Y'));
+
+		//test
+
+		// echo "date cut ".$request['date_cut'];
+
+		$month = ($request['date'] ? date('m', strtotime($request['date'])) : date('m'));
+		$year = ($request['date'] ? date('Y', strtotime($request['date'])) : date('Y'));
 		$arraystart = array(
 			'datecut'	=> $request['date_cut'],
 			'month'		=> $month
@@ -524,11 +522,8 @@ class Ctl_retailstock extends CI_Controller
 		$result_bill_start = $this->mdl_retailstock->result_bill_start($arraystart);
 		$result_issue_start = $this->mdl_retailstock->result_issue_start($arraystart);
 		$result_receive_start = $this->mdl_retailstock->result_receive_start($arraystart);
-		
+
 		/* echo "<pre>";
-		echo "cut == ";
-		print_r($result_cut);
-		echo "bill == ";
 		print_r($result_bill_start);
 		echo "==================<br>";
 		print_r($result_issue_start);
@@ -537,15 +532,15 @@ class Ctl_retailstock extends CI_Controller
 		echo "==================<br>";
 		echo "</pre>";
 		exit; */
-		
+
 		//	find total days in month
-		$totaldays = cal_days_in_month(CAL_GREGORIAN,$month,$year);
+		$totaldays = cal_days_in_month(CAL_GREGORIAN, $month, $year);
 		$data = array();
-		
+
 		$date_begin = ($request['date_begin'] != 'null' ? $request['date_begin'] : 1);
 		$date_length = ($request['date_length'] != 'null' ? $request['date_length'] : $totaldays);
-	
-		$date_full_begin = $date."-".str_pad($date_begin, 2, '0', STR_PAD_LEFT);
+
+		$date_full_begin = $date . "-" . str_pad($date_begin, 2, '0', STR_PAD_LEFT);
 
 		$data_today[] = array();
 		//	product in stock this month
@@ -560,10 +555,10 @@ class Ctl_retailstock extends CI_Controller
 			$total_issue_net = 0;
 
 			// $total_cut = 0;
-			if($result_cut){
-				$key_lid = array_keys(array_column($result_cut['result'],'pid'),$productid);
-				if(count($key_lid)){
-					foreach($key_lid as $key => $value){
+			if ($result_cut) {
+				$key_lid = array_keys(array_column($result_cut['result'], 'pid'), $productid);
+				if (count($key_lid)) {
+					foreach ($key_lid as $key => $value) {
 
 						$arraytest = array(
 							'item'	=> $productid,
@@ -571,177 +566,45 @@ class Ctl_retailstock extends CI_Controller
 							'datecut'	=> $request['date_cut'],
 						);
 						$starts = $this->mdl_retailstock->find_total_stockproductstarts($arraytest);
-						/* echo "<pre>";
-						echo "id = ".$productid."<br>";
-						echo "cut = ".$arraytest['datecut']."--------".$arraytest['date']."<br>";
-						echo "cut total = ".$result_cut['result'][$value]['qty']."<br>";
-						print_r($starts);
-						echo "</pre>"; */
-						
+/* echo "<pre>";
+echo "id = ".$productid."<br>";
+echo "cut = ".$arraytest['datecut']."--------".$arraytest['date']."<br>";
+echo "cut total = ".$result_cut['result'][$value]['qty']."<br>";
+print_r($starts);
+echo "</pre>"; */
+
 						// $totalcut = $result_cut['result'][$value]['qty'];
+
+						// $totalcut = $starts['total'];	ถูกในตอนที่เลือกเต็มเดือน
+
 						$totalcut = $starts['total'] + $result_cut['result'][$value]['qty'];
 					}
 					$total_cut = $totalcut;
 				}
 			}
-			
-			$total_for_length = 0;
-			
-			if($date_begin > 1 && $date_length){
-				
-				for($datei=1;$datei<$date_begin;$datei++){
-					$total_start_bill_net = 0;
-					$total_start_receive_net = 0;
-					$total_start_issue_net = 0;
-					$array_start_bill_result = array();
-					$array_start_receive_result = array();
-					$array_start_issue_result = array();
-					
-					$dateizero = str_pad($datei, 2, '0', STR_PAD_LEFT);
-					$date_for = $date."-".$dateizero;
 
-					//
-					//	รวมยอดบิลก่อนถึงวันปัจจุบัน
-					$total_start_bill_start = 0;
-					if($result_bill_start){
-						$array_start_bill_date_today = array_keys(array_column($result_bill_start['result'],'date_starts'),$date_for);
-						if($array_start_bill_date_today){
-							$arraysub_start_bill_result = array();
-
-							foreach($array_start_bill_date_today as $key => $value){
-								$arraysub_start_bill_result[] = array(
-									'date_starts'	=> $result_bill_start['result'][$value]['date_starts'],
-									'pid'			=> $result_bill_start['result'][$value]['pid'],
-									'lid'			=> $result_bill_start['result'][$value]['lid'],
-									'qty'			=> $result_bill_start['result'][$value]['qty']
-								);
-							}
-							$array_start_bill_result['result'] = $arraysub_start_bill_result;
-							
-						}
-					}
-					
-					//
-					//	รวมยอดบิลรับเข้าก่อนถึงวันปัจจุบัน
-					$total_start_receive_start = 0;
-					if($result_receive_start){
-						$array_start_receive_date_today = array_keys(array_column($result_receive_start['result'],'date_starts'),$date_for);
-						if($array_start_receive_date_today){
-							
-							$arraysub_start_receive_result = array();
-
-							foreach($array_start_receive_date_today as $key => $value){
-								$arraysub_start_receive_result[] = array(
-									'date_starts'	=> $result_receive_start['result'][$value]['date_starts'],
-									'pid'			=> $result_receive_start['result'][$value]['pid'],
-									'lid'			=> $result_receive_start['result'][$value]['lid'],
-									'qty'			=> $result_receive_start['result'][$value]['qty']
-								);
-							}
-							$array_start_receive_result['result'] = $arraysub_start_receive_result;
-							
-						}
-					}
-					
-					//
-					//	รวมยอดเบิกออกก่อนถึงวันปัจจุบัน
-					$total_start_issue_start = 0;
-					if($result_issue_start){
-						$array_start_issue_date_today = array_keys(array_column($result_issue_start['result'],'date_starts'),$date_for);
-						if($array_start_issue_date_today){
-							
-							$arraysub_start_issue_result = array();
-
-							foreach($array_start_issue_date_today as $key => $value){
-								$arraysub_start_issue_result[] = array(
-									'date_starts'	=> $result_issue_start['result'][$value]['date_starts'],
-									'pid'			=> $result_issue_start['result'][$value]['pid'],
-									'lid'			=> $result_issue_start['result'][$value]['lid'],
-									'qty'			=> $result_issue_start['result'][$value]['qty']
-								);
-							}
-							$array_start_issue_result['result'] = $arraysub_start_issue_result;
-							
-						}
-					}
-					
-					//	หาจำนวนรายการบิลของสินค้าในวันนี้
-					if($array_start_bill_result['result']){
-						$total_start_bill_start = $this->findscore($array_start_bill_result,$productid);
-						$total_start_bill_net += $total_start_bill_start;
-					}
-
-					//	หาจำนวนรับเข้าของสินค้าในวันนี้
-					if($array_start_receive_result['result']){
-						$total_start_receive_start = $this->findscore($array_start_receive_result,$productid);
-						$total_start_receive_net += $total_start_receive_start;
-					}
-
-					//	หาจำนวนเบิกออกของสินค้าในวันนี้
-					if($array_start_issue_result['result']){
-						$total_start_issue_start = $this->findscore($array_start_issue_result,$productid);
-						$total_start_issue_net += $total_start_issue_start;
-					}
-
-					
-					//	find data cut value from data stock
-					$arraytotal_start = array(
-						'total_bill'	=> $total_start_bill_net,
-						'total_issue'	=> $total_start_issue_net,
-						'total_receive'	=> $total_start_receive_net
-					);
-					$net = $this->mdl_retailstock->cal_stock($arraytotal_start);
-					$total_for_length = get_valueNullTozero($total_for_length) + $net;
-					
-					
-					
-					/* echo "test".$productid." -- ".$date_for." = ".$totalcut."<br>";
-					echo "bill ::".$total_start_bill_net."<br>";
-					echo "issue ::".$total_start_issue_net."<br>";
-					echo "rece ::".$total_start_receive_net."<br>";
-					echo "<pre>";
-					// print_r($array_start_bill_result);
-					// echo "==================<br>";
-					// print_r($array_start_receive_result);
-					// echo "==================<br>";
-					// print_r($array_start_issue_result);
-					// echo "==================<br>";
-					echo " total_for_length = ".$total_for_length."<br>";
-					echo "</pre>"; */
-		
-				}
-				
-			}
-			
-			//	สำหรับคำนวณกับยอดอื่นๆ
-			if($total_for_length){
-				$totalcut = $totalcut + $total_for_length;
-				$total_cut = $totalcut;
-				// $totalcut = get_valueNullTozero($totalcut) + $net;
-			}
-
-			for($d=$date_begin;$d<=$date_length;$d++){
+			for ($d = $date_begin; $d <= $date_length; $d++) {
 				$total_bill_start = "";
 				$total_receive_start = "";
 				$total_issue_start = "";
 				$total_net = 0;
-				
+
 
 				$array_bill_result = array();
 				$array_receive_result = array();
 				$array_issue_result = array();
 
-				$date_today = $date.'-'.sprintf("%02d", $d);
+				$date_today = $date . '-' . sprintf("%02d", $d);
 
 				//	หา array ในวันนี้ และสร้าง array รอไว้สำหรับหาจำนวน
 				//	รวมยอดบิลสั่งซื้อ
-				if($result_bill_start){
-					$array_bill_date_today = array_keys(array_column($result_bill_start['result'],'date_starts'),$date_today);
-					if($array_bill_date_today){
+				if ($result_bill_start) {
+					$array_bill_date_today = array_keys(array_column($result_bill_start['result'], 'date_starts'), $date_today);
+					if ($array_bill_date_today) {
 						$total_bill_start = 0;
 						$arraysub_bill_result = array();
 
-						foreach($array_bill_date_today as $key => $value){
+						foreach ($array_bill_date_today as $key => $value) {
 							$arraysub_bill_result[] = array(
 								'date_starts'	=> $result_bill_start['result'][$value]['date_starts'],
 								'pid'			=> $result_bill_start['result'][$value]['pid'],
@@ -750,20 +613,19 @@ class Ctl_retailstock extends CI_Controller
 							);
 						}
 						$array_bill_result['result'] = $arraysub_bill_result;
-						
 					}
 				}
 				//
 				//
 
 				//	รวมยอดบิลรับเข้า
-				if($result_receive_start){
-					$array_receive_date_today = array_keys(array_column($result_receive_start['result'],'date_starts'),$date_today);
-					if($array_receive_date_today){
+				if ($result_receive_start) {
+					$array_receive_date_today = array_keys(array_column($result_receive_start['result'], 'date_starts'), $date_today);
+					if ($array_receive_date_today) {
 						$total_receive_start = 0;
 						$arraysub_receive_result = array();
 
-						foreach($array_receive_date_today as $key => $value){
+						foreach ($array_receive_date_today as $key => $value) {
 							$arraysub_receive_result[] = array(
 								'date_starts'	=> $result_receive_start['result'][$value]['date_starts'],
 								'pid'			=> $result_receive_start['result'][$value]['pid'],
@@ -772,20 +634,19 @@ class Ctl_retailstock extends CI_Controller
 							);
 						}
 						$array_receive_result['result'] = $arraysub_receive_result;
-						
 					}
 				}
 				//
 				//
 
 				//	รวมยอดเบิกออก
-				if($result_issue_start){
-					$array_issue_date_today = array_keys(array_column($result_issue_start['result'],'date_starts'),$date_today);
-					if($array_issue_date_today){
+				if ($result_issue_start) {
+					$array_issue_date_today = array_keys(array_column($result_issue_start['result'], 'date_starts'), $date_today);
+					if ($array_issue_date_today) {
 						$total_issue_start = 0;
 						$arraysub_issue_result = array();
 
-						foreach($array_issue_date_today as $key => $value){
+						foreach ($array_issue_date_today as $key => $value) {
 							$arraysub_issue_result[] = array(
 								'date_starts'	=> $result_issue_start['result'][$value]['date_starts'],
 								'pid'			=> $result_issue_start['result'][$value]['pid'],
@@ -794,31 +655,30 @@ class Ctl_retailstock extends CI_Controller
 							);
 						}
 						$array_issue_result['result'] = $arraysub_issue_result;
-						
 					}
 				}
 				//
 				//
 
 				//	หาจำนวนรายการบิลของสินค้าในวันนี้
-				if($array_bill_result){
-					$total_bill_start = $this->findscore($array_bill_result,$productid);
+				if ($array_bill_result) {
+					$total_bill_start = $this->findscore($array_bill_result, $productid);
 					$total_bill_net += $total_bill_start;
 				}
 
 				//	หาจำนวนรับเข้าของสินค้าในวันนี้
-				if($array_receive_result){
-					$total_receive_start = $this->findscore($array_receive_result,$productid);
+				if ($array_receive_result) {
+					$total_receive_start = $this->findscore($array_receive_result, $productid);
 					$total_receive_net += $total_receive_start;
 				}
 
 				//	หาจำนวนเบิกออกของสินค้าในวันนี้
-				if($array_issue_result){
-					$total_issue_start = $this->findscore($array_issue_result,$productid);
+				if ($array_issue_result) {
+					$total_issue_start = $this->findscore($array_issue_result, $productid);
 					$total_issue_net += $total_issue_start;
 				}
 
-				
+
 				//	find data cut value from data stock
 				$arraytotal_start = array(
 					'total_bill'	=> $total_bill_start,
@@ -870,26 +730,26 @@ class Ctl_retailstock extends CI_Controller
 		$array_cut_issue = array();
 		//	select field bill
 		// echo $request['dataField']['bill'];
-		if($request['dataField']['bill'] !== 'false'){
-			$array_cut_bill = array_keys(array_column($data,'bill_net'),true); 
+		if ($request['dataField']['bill'] !== 'false') {
+			$array_cut_bill = array_keys(array_column($data, 'bill_net'), true);
 		}
 
 		//	select field receive
-		if($request['dataField']['receive'] !== 'false'){
-			$array_cut_receive = array_keys(array_column($data,'receive_net'),true); 
+		if ($request['dataField']['receive'] !== 'false') {
+			$array_cut_receive = array_keys(array_column($data, 'receive_net'), true);
 		}
 
 		//	select field issue
-		if($request['dataField']['issue'] !== 'false'){
-			$array_cut_issue = array_keys(array_column($data,'issue_net'),true); 
+		if ($request['dataField']['issue'] !== 'false') {
+			$array_cut_issue = array_keys(array_column($data, 'issue_net'), true);
 		}
 
-		if($request['dataField']['bill'] !== 'false' || $request['dataField']['receive'] !== 'false' || $request['dataField']['issue'] !== 'false'){
+		if ($request['dataField']['bill'] !== 'false' || $request['dataField']['receive'] !== 'false' || $request['dataField']['issue'] !== 'false') {
 			// if(count($array_cut_bill) || count($array_cut_receive) || count($array_cut_issue)){
-				$array_cut_all = array_merge($array_cut_bill,$array_cut_receive,$array_cut_issue);
-				$array_cut = array_unique($array_cut_all);
-	
-				/* echo "<pre>";
+			$array_cut_all = array_merge($array_cut_bill, $array_cut_receive, $array_cut_issue);
+			$array_cut = array_unique($array_cut_all);
+
+			/* echo "<pre>";
 				print_r($data);
 				echo "=========";
 				print_r($array_cut_bill);
@@ -900,23 +760,23 @@ class Ctl_retailstock extends CI_Controller
 				echo "result====";
 				print_r($array_cut);
 				echo "</pre>"; */
-				
-				if($array_cut){
-					foreach($data as $key => $val){
-						$t = array_keys($array_cut,$key);
-						if(!$t){
-							unset($data[$key]);
-						}
+
+			if ($array_cut) {
+				foreach ($data as $key => $val) {
+					$t = array_keys($array_cut, $key);
+					if (!$t) {
+						unset($data[$key]);
 					}
-					$ar = array_values($data);
-	
-					$data = $ar;
-				}else{
-					$data = array();
 				}
-			}else{
-				$data = $data;
+				$ar = array_values($data);
+
+				$data = $ar;
+			} else {
+				$data = array();
 			}
+		} else {
+			$data = $data;
+		}
 
 		/* echo "<pre>";
 		print_r($_REQUEST);
@@ -925,17 +785,27 @@ class Ctl_retailstock extends CI_Controller
 		print_r($data);
 		echo "</pre>";
 		exit; */
-	
+
 		echo json_encode($data);
 	}
 
+
+
+
+
+
+
+
+
+
+
+
 	function fetch_product()
 	{
+
 		$fetch_data = $this->mdl_retailstock->make_datatables();
 		/* echo "<pre>";
 		print_r($_REQUEST);
-		echo "==========================================";
-		print_r($fetch_data);
 		echo "</pre>";
 		exit; */
 		$data = array();
@@ -943,7 +813,7 @@ class Ctl_retailstock extends CI_Controller
 
 		$request = $_REQUEST;
 
-		($request['date'] ? $date = $request['date'] : $date = date('Y-m-d') );
+		($request['date'] ? $date = $request['date'] : $date = date('Y-m-d'));
 
 		$arrayset = array(
 			'date'	=> ($request['date'] ? $request['date'] : date('Y-m-d'))
@@ -990,7 +860,7 @@ class Ctl_retailstock extends CI_Controller
 		$result_cut = $this->mdl_retailstock->find_stockItemCutquery($request['date_cut']);
 		/* echo "<pre> bill";
 		print_r($result_cut);
-		echo "</pre>";exit; */
+		echo "</pre>"; */
 
 		foreach ($fetch_data as $row) {
 
@@ -1012,18 +882,18 @@ class Ctl_retailstock extends CI_Controller
 			// $start = $this->mdl_retailstock->find_total_stockproductstarts($arraytotal);
 
 			//	find array key product id at value before today from data result bill
-			if($result_bill_start){
-				$total_billOrder_start = $this->findscore($result_bill_start,$productid);
+			if ($result_bill_start) {
+				$total_billOrder_start = $this->findscore($result_bill_start, $productid);
 			}
 
 			//	find array key product id at value before today from data result issue
-			if($result_issue_start){
-				$total_billIssue_start = $this->findscore($result_issue_start,$productid);
+			if ($result_issue_start) {
+				$total_billIssue_start = $this->findscore($result_issue_start, $productid);
 			}
 
 			//	find array key product id at value before today from data result receive
-			if($result_receive_start){
-				$total_billReceive_start = $this->findscore($result_receive_start,$productid);
+			if ($result_receive_start) {
+				$total_billReceive_start = $this->findscore($result_receive_start, $productid);
 			}
 
 			$arraytotal_start = array(
@@ -1042,10 +912,10 @@ class Ctl_retailstock extends CI_Controller
 
 			//	find data cut value from data stock
 			$total_cut = 0;
-			if($result_cut){
-				$key_lid = array_keys(array_column($result_cut['result'],'pid'),$productid);
-				if(count($key_lid)){
-					foreach($key_lid as $key => $value){
+			if ($result_cut) {
+				$key_lid = array_keys(array_column($result_cut['result'], 'pid'), $productid);
+				if (count($key_lid)) {
+					foreach ($key_lid as $key => $value) {
 						$totalcut = $result_cut['result'][$value]['qty'];
 					}
 					$total_cut = $totalcut;
@@ -1055,29 +925,25 @@ class Ctl_retailstock extends CI_Controller
 			$total_start = $total_cut_convert + $start;
 
 			//	find array key product id from data result bill
-			if($result_bill){
-				$total_billOrder = $this->findscore($result_bill,$productid);
+			if ($result_bill) {
+				$total_billOrder = $this->findscore($result_bill, $productid);
 			}
-			
+
 			//	find array key product id from data result issue
-			if($result_issue){
-				$total_billIssue = $this->findscore($result_issue,$productid);
+			if ($result_issue) {
+				$total_billIssue = $this->findscore($result_issue, $productid);
 			}
 
 			//	find array key product id from data result receive
-			if($result_receive){
-				$total_billReceive = $this->findscore($result_receive,$productid);
+			if ($result_receive) {
+				$total_billReceive = $this->findscore($result_receive, $productid);
 			}
 
 			/* echo "<pre> ".$productid."--";
 			// print_r($key_bill);
-			echo "bill==";
+			echo "result=";
 			print_r($total_billOrder);
-			echo "====";
-			echo "issue==";
 			print_r($total_billIssue);
-			echo "====";
-			echo "receive==";
 			print_r($total_billReceive);
 			echo "</pre>"; */
 
@@ -1087,7 +953,7 @@ class Ctl_retailstock extends CI_Controller
 			$textproducttotal = "";
 
 			$sub_array = array();
-			$sub_array[] = "<div class='text-right' data-item='".$productid."' data-id='" . $stockid . "' data-min='" . $row->rtst_min . "' >-</div>";
+			$sub_array[] = "<div class='text-right' data-item='" . $productid . "' data-id='" . $stockid . "' data-min='" . $row->rtst_min . "' >-</div>";
 			$sub_array[] = $productid;	//	productlist id
 			$sub_array[] = $row->p_name . $textcodemac . $textproducttotal;
 			$sub_array[] = $total_start;
@@ -1103,24 +969,24 @@ class Ctl_retailstock extends CI_Controller
 		$array_cut_issue = array();
 		//	select field bill
 		// echo $request['dataField']['bill'];
-		if($request['dataField']['bill'] !== 'false'){
-			$array_cut_bill = array_keys(array_column($data,4),true); 
+		if ($request['dataField']['bill'] !== 'false') {
+			$array_cut_bill = array_keys(array_column($data, 4), true);
 		}
 
 		//	select field receive
-		if($request['dataField']['receive'] !== 'false'){
-			$array_cut_receive = array_keys(array_column($data,5),true); 
+		if ($request['dataField']['receive'] !== 'false') {
+			$array_cut_receive = array_keys(array_column($data, 5), true);
 		}
 
 		//	select field issue
-		if($request['dataField']['issue'] !== 'false'){
-			$array_cut_issue = array_keys(array_column($data,6),true); 
+		if ($request['dataField']['issue'] !== 'false') {
+			$array_cut_issue = array_keys(array_column($data, 6), true);
 		}
 
-		
-		if($request['dataField']['bill'] !== 'false' || $request['dataField']['receive'] !== 'false' || $request['dataField']['issue'] !== 'false'){
-		// if(count($array_cut_bill) || count($array_cut_receive) || count($array_cut_issue)){
-			$array_cut_all = array_merge($array_cut_bill,$array_cut_receive,$array_cut_issue);
+
+		if ($request['dataField']['bill'] !== 'false' || $request['dataField']['receive'] !== 'false' || $request['dataField']['issue'] !== 'false') {
+			// if(count($array_cut_bill) || count($array_cut_receive) || count($array_cut_issue)){
+			$array_cut_all = array_merge($array_cut_bill, $array_cut_receive, $array_cut_issue);
 			$array_cut = array_unique($array_cut_all);
 
 			/* echo "<pre>";
@@ -1135,10 +1001,10 @@ class Ctl_retailstock extends CI_Controller
 			echo "result====";
 			print_r($array_cut);
 			echo "</pre>"; */
-			if($array_cut){
-				foreach($data as $key => $val){
-					$t = array_keys($array_cut,$key);
-					if(!$t){
+			if ($array_cut) {
+				foreach ($data as $key => $val) {
+					$t = array_keys($array_cut, $key);
+					if (!$t) {
 						unset($data[$key]);
 					}
 				}
@@ -1150,7 +1016,7 @@ class Ctl_retailstock extends CI_Controller
 					"recordsFiltered"   =>     $this->mdl_retailstock->get_filtered_data(),
 					"data"              =>     $ar
 				);
-			}else{
+			} else {
 				$data = array();
 				$output = array(
 					"draw"             	=>     intval($_POST["draw"]),
@@ -1159,7 +1025,7 @@ class Ctl_retailstock extends CI_Controller
 					"data"              =>     $data
 				);
 			}
-		}else{
+		} else {
 			$output = array(
 				"draw"             	=>     intval($_POST["draw"]),
 				"recordsTotal"      =>     $this->mdl_retailstock->get_all_data(),
@@ -1167,7 +1033,7 @@ class Ctl_retailstock extends CI_Controller
 				"data"              =>     $data
 			);
 		}
-		
+
 		echo json_encode($output);
 	}
 
@@ -1314,8 +1180,8 @@ class Ctl_retailstock extends CI_Controller
 			$sql = $this->mdl_retailstock->get_billorderDetail();
 			$q = json_decode($sql);
 
-			if($q->num){
-				foreach($q->result as $row){
+			if ($q->num) {
+				foreach ($q->result as $row) {
 					$returns[] = array(
 						'code'	=> $row->rtd_code,
 						'product'	=> $row->rtd_product_name,
@@ -1336,23 +1202,23 @@ class Ctl_retailstock extends CI_Controller
 			$sql = $this->mdl_retailstock->get_receiveDetail();
 			$q = json_decode($sql);
 
-			if($q->num){
-				foreach($q->result as $row){
+			if ($q->num) {
+				foreach ($q->result as $row) {
 					$name = "";
-					if($row->rtd_type == 1){
+					if ($row->rtd_type == 1) {
 						$name = $row->rtd_sp_name;
 						$billtype = 'sup';
-					}else if($row->rtd_type == 2){
+					} else if ($row->rtd_type == 2) {
 						$billtype = 'บิล';
-					}else if($row->rtd_type == 3){
+					} else if ($row->rtd_type == 3) {
 						$billtype = 'ลดหนี้';
-					}else{
+					} else {
 						$name = $row->rtd_is_name;
 						$billtype = 'ยืม';
 					}
 
 					$returns[] = array(
-						'code'	=> $row->rtd_code." ".$billtype." ",
+						'code'	=> $row->rtd_code . " " . $billtype . " ",
 						'product'	=> $row->rtd_product_name,
 						'qty'	=> $row->rtd_qty,
 						'name'	=> $name
@@ -1371,24 +1237,24 @@ class Ctl_retailstock extends CI_Controller
 			$sql = $this->mdl_retailstock->get_issueDetail();
 			$q = json_decode($sql);
 
-			if($q->num){
-				foreach($q->result as $row){
+			if ($q->num) {
+				foreach ($q->result as $row) {
 
 					$name = "";
-					if($row->rtd_type == 1){
+					if ($row->rtd_type == 1) {
 						$name = $row->rtd_name;
 						$billtype = 'ยืม';
-					}else if($row->rtd_type == 2){
+					} else if ($row->rtd_type == 2) {
 						$billtype = 'สูญเสีย';
-					}else if($row->rtd_type == 3){
+					} else if ($row->rtd_type == 3) {
 						$billtype = 'โอนย้าย';
-					}else{
+					} else {
 						$billtype = 'เข้าผิด';
 					}
 
 
 					$returns[] = array(
-						'code'	=> $row->rtd_code." ".$billtype." ",
+						'code'	=> $row->rtd_code . " " . $billtype . " ",
 						'product'	=> $row->rtd_product_name,
 						'qty'	=> $row->rtd_qty,
 						'name'	=> $name

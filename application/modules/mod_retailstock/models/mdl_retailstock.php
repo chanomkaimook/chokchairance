@@ -887,11 +887,12 @@ class Mdl_retailstock extends CI_Model
 		//	setting
 		$result = "";
 		$arrayset = array(
-			'query'	=> 'sum(retail_billdetail.quantity) as rtd_qty'
+			'query'	=> 'sum(retail_billdetail.quantity) as rtd_qty,retail_billdetail.list_id as rtd_list_id'
 		);
 		$sql = $this->mdl_retailstock->sqlBillOrderDate($arrayset)
 			->where('date(retail_bill.date_starts) >=', $array['datecut'])
-			->where('if(retail_billdetail.list_id is not null,retail_billdetail.list_id =' . $array['item'] . ',retail_billdetail.prolist_id =' . $array['item'] . ')', null, false);
+			// ->where('if(retail_billdetail.list_id is not null,retail_billdetail.list_id =' . $array['item'] . ',retail_billdetail.prolist_id =' . $array['item'] . ')', null, false);
+			->where('if(retail_billdetail.list_id is not null,retail_billdetail.list_id like \'%"id":"' . $array['item'] . '"%\',retail_billdetail.prolist_id =' . $array['item'] . ')', null, false);
 		if ($array['date']) {
 			$sql->where('date(retail_bill.date_starts) <', $array['date']);
 		}
@@ -900,9 +901,18 @@ class Mdl_retailstock extends CI_Model
 		$num = $q->num_rows();
 		if ($num) {
 			$row = $q->row();
+
+			if ($row->rtd_list_id) {
+				$array_product = $this->product->decodeValue_focus($array['item'], $row->rtd_list_id);
+				$rowqty = intval($array_product['total']) * intval($row->rtd_qty);
+			}else{
+				$rowqty = $row->rtd_qty;
+			}
+
+
 			$result = array(
 				'num'		=> $num,
-				'row'		=> $q->row(),
+				'row'		=> $rowqty,
 				'result'	=> $q->result()
 			);
 		}
@@ -920,11 +930,12 @@ class Mdl_retailstock extends CI_Model
 		//	setting
 		$result = "";
 		$arrayset = array(
-			'query'	=> 'sum(retail_issue.quantity) as rtd_qty'
+			'query'	=> 'sum(retail_issue.quantity) as rtd_qty,retail_issue.list_id as rtd_list_id'
 		);
 		$sql = $this->mdl_retailstock->sqlBillIssue($arrayset)
 			->where('date(retail_issue.date_starts) >=', $array['datecut'])
-			->where('if(retail_issue.list_id is not null,retail_issue.list_id =' . $array['item'] . ',retail_issue.prolist_id =' . $array['item'] . ')', null, false);
+			// ->where('if(retail_issue.list_id is not null,retail_issue.list_id =' . $array['item'] . ',retail_issue.prolist_id =' . $array['item'] . ')', null, false);
+			->where('if(retail_issue.list_id is not null,retail_issue.list_id like \'%"id":"' . $array['item'] . '"%\',retail_issue.prolist_id =' . $array['item'] . ')', null, false);
 		if ($array['date']) {
 			$sql->where('date(retail_issue.date_starts) <', $array['date']);
 		}
@@ -933,9 +944,17 @@ class Mdl_retailstock extends CI_Model
 		$num = $q->num_rows();
 		if ($num) {
 			$row = $q->row();
+
+			if ($row->rtd_list_id) {
+				$array_product = $this->product->decodeValue_focus($array['item'], $row->rtd_list_id);
+				$rowqty = intval($array_product['total']) * intval($row->rtd_qty);
+			}else{
+				$rowqty = $row->rtd_qty;
+			}
+
 			$result = array(
 				'num'		=> $num,
-				'row'		=> $q->row(),
+				'row'		=> $rowqty,
 				'result'	=> $q->result()
 			);
 		}
@@ -953,11 +972,12 @@ class Mdl_retailstock extends CI_Model
 		//	setting
 		$result = "";
 		$arrayset = array(
-			'query'	=> 'sum(retail_receivedetail.quantity) as rtd_qty'
+			'query'	=> 'sum(retail_receivedetail.quantity) as rtd_qty,retail_receivedetail.list_id as rtd_list_id'
 		);
 		$sql = $this->mdl_retailstock->sqlBillReceive($arrayset)
 			->where('date(retail_receive.date_starts) >=', $array['datecut'])
-			->where('if(retail_receivedetail.list_id is not null,retail_receivedetail.list_id =' . $array['item'] . ',retail_receivedetail.prolist_id =' . $array['item'] . ')', null, false);
+			// ->where('if(retail_receivedetail.list_id is not null,retail_receivedetail.list_id =' . $array['item'] . ',retail_receivedetail.prolist_id =' . $array['item'] . ')', null, false);
+			->where('if(retail_receivedetail.list_id is not null,retail_receivedetail.list_id like \'%"id":"' . $array['item'] . '"%\',retail_receivedetail.prolist_id =' . $array['item'] . ')', null, false);
 		if ($array['date']) {
 			$sql->where('date(retail_receive.date_starts) <', $array['date']);
 		}
@@ -966,9 +986,17 @@ class Mdl_retailstock extends CI_Model
 		$num = $q->num_rows();
 		if ($num) {
 			$row = $q->row();
+
+			if ($row->rtd_list_id) {
+				$array_product = $this->product->decodeValue_focus($array['item'], $row->rtd_list_id);
+				$rowqty = intval($array_product['total']) * intval($row->rtd_qty);
+			}else{
+				$rowqty = $row->rtd_qty;
+			}
+
 			$result = array(
 				'num'		=> $num,
-				'row'		=> $q->row(),
+				'row'		=> $rowqty,
 				'result'	=> $q->result()
 			);
 		}
@@ -1139,8 +1167,8 @@ class Mdl_retailstock extends CI_Model
 		);
 		$sql = $this->mdl_retailstock->sqlBillOrderDate($arrayset)
 			->where('date(retail_bill.date_starts)', $array['date'])
-			->where('if(retail_billdetail.list_id is not null,retail_billdetail.list_id =' . $array['item'] . ',retail_billdetail.prolist_id =' . $array['item'] . ')', null, false);
-
+			// ->where('if(retail_billdetail.list_id is not null,retail_billdetail.list_id =' . $array['item'] . ',retail_billdetail.prolist_id =' . $array['item'] . ')', null, false);
+			->where('if(retail_billdetail.list_id is not null,retail_billdetail.list_id like \'%"id":"' . $array['item'] . '"%\',retail_billdetail.prolist_id =' . $array['item'] . ')', null, false);
 		$q = $sql->get();
 		$num = $q->num_rows();
 		if ($num) {
@@ -1458,7 +1486,8 @@ class Mdl_retailstock extends CI_Model
 			'query' => 'retail_billdetail.PROLIST_ID as rt_prolist_id,retail_billdetail.LIST_ID as rt_list_id',
 		);
 		$sqlproductbill = $this->mdl_retailstock->sqlBillOrderDate($arrayquery)
-			->where('if(retail_billdetail.list_id is not null,retail_billdetail.list_id =' . $item_check_del . ',retail_billdetail.prolist_id =' . $item_check_del . ')', null, false)
+			// ->where('if(retail_billdetail.list_id is not null,retail_billdetail.list_id =' . $item_check_del . ',retail_billdetail.prolist_id =' . $item_check_del . ')', null, false)
+			->where('if(retail_billdetail.list_id is not null,retail_billdetail.list_id like \'%"id":"' . $item_check_del . '"%\',retail_billdetail.prolist_id =' . $item_check_del . ')', null, false)
 			->where('date(retail_bill.date_starts) >=', $array['datecut'])
 			// ->where('date(retail_bill.date_starts) <=', $this->set['datenow']);
 			->where('date(retail_bill.date_starts)', $this->set['datenow']);
@@ -1606,9 +1635,9 @@ exit; */
 		$total_billReceive = $this->mdl_retailstock->total_billReceive_starts($array);
 
 		$arraytotal = array(
-			'total_bill'	=> $total_billOrder['row']->rtd_qty,
-			'total_issue'	=> $total_billIssue['row']->rtd_qty,
-			'total_receive'	=> $total_billReceive['row']->rtd_qty
+			'total_bill'	=> $total_billOrder['row'],
+			'total_issue'	=> $total_billIssue['row'],
+			'total_receive'	=> $total_billReceive['row']
 		);
 		$total = $this->mdl_retailstock->cal_stock($arraytotal);
 
@@ -1656,7 +1685,10 @@ exit; */
 		$sql = $this->mdl_retailstock->sqlBillOrderDate($arrayset)
 			->join('retail_productlist', 'if(retail_billdetail.list_id is not null,retail_productlist.id = retail_billdetail.list_id,retail_productlist.id = retail_billdetail.prolist_id)', 'left', false)
 			->where('date(retail_bill.date_starts)', $date)
-			->where('if(retail_billdetail.list_id is not null,retail_billdetail.list_id =' . $item . ',retail_billdetail.prolist_id =' . $item . ')', null, false);
+			// ->where('if(retail_billdetail.list_id is not null,retail_billdetail.list_id =' . $item . ',retail_billdetail.prolist_id =' . $item . ')', null, false);
+			->where('if(retail_billdetail.list_id is not null,retail_billdetail.list_id like \'%"id":"' . $item . '"%\',retail_billdetail.prolist_id =' . $item . ')', null, false);
+
+			
 
 		$q = $sql->get();
 		$num = $q->num_rows();
