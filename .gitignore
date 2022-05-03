@@ -12,7 +12,7 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 
 #codeigniter 3
 application/logs/*
-application/asset/upload/*
+asset/upload/*
 application/config/database.php
 
 !application/logs/index.html
