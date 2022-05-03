@@ -73,8 +73,10 @@
 
                                                     <?php
                                                     $setlist = "";
+                                                    $disabled = "";
 
                                                     if ($UPproductlist->ID) {
+                                                        $disabled = "disabled";
                                                         //  check type promotion
                                                         if ($UPproductlist->PROMOTION == 1 || $UPproductlist->PRODUCTSET == 1) {
                                                             $setlist = "on";
@@ -244,7 +246,7 @@
                                             </div>
                                             <label class="form-group col-md-3 text-right" for="procatagory"> Catagory </label>
                                             <div class="form-group col-md-9 ">
-                                                <select id="select-productcatagory" name="select-productcatagory" class="selectpicker" data-live-search="true">
+                                                <select id="select-productcatagory" name="select-productcatagory" class="selectpicker" data-live-search="true" <?php echo $disabled; ?> >
                                                     <?php
                                                     if ($UPproductlist->ID) {
                                                         foreach ($Query_productcate->result() as $row) { ?>
