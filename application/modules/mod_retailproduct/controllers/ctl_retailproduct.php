@@ -155,6 +155,13 @@ class Ctl_retailproduct extends CI_Controller
 				if (!$row->RPL_LISTID) {
 					$promotionhook = "<span class='text-danger'>(ยังไม่ผูกสินค้า)</span>";
 				}
+			}else if ($row->RPL_SET) {
+				$type_product = "สินค้าเซ็ต";
+				$colormenu = 'text-primary';
+				$btn_proref = "";
+				if (!$row->RPL_LISTID) {
+					$promotionhook = "<span class='text-danger'>(ยังไม่ผูกสินค้า)</span>";
+				}
 			} else {
 				$type_product = "สินค้า";
 				$colormenu = "";

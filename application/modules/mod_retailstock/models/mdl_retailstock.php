@@ -45,8 +45,8 @@ class Mdl_retailstock extends CI_Model
 		$this->db->join('retail_productlist', "retail_productlist.id = retail_stock.retail_productlist_id", 'left');
 		$this->db->join('retail_stocksetting', 'retail_productlist.id=retail_stocksetting.retail_productlist_id', 'left');
 
-		// $this->db->where('retail_productlist.promain_id not in(6,12,14,15,16)');    //  14,15,16 dryeage
-		$this->db->where('retail_productlist.procate_id !=', 3);    //  not promotion
+		$this->db->where('retail_productlist.promotion',null);    //  not promotion
+		$this->db->where('retail_productlist.productset',null);    //  not product set
 
 		$this->db->where('retail_productlist.stock_view is null');
 		$this->db->where('retail_stock.date_cut', $date_cut);
@@ -91,8 +91,8 @@ class Mdl_retailstock extends CI_Model
 		$this->db->join('retail_productlist', "retail_productlist.id = retail_stock.retail_productlist_id", 'left');
 		$this->db->join('retail_stocksetting', 'retail_productlist.id=retail_stocksetting.retail_productlist_id', 'left');
 
-		// $this->db->where('retail_productlist.promain_id not in(6,12,14,15,16)');    //  14,15,16 dryeage
-		$this->db->where('retail_productlist.procate_id !=', 3);    //  not promotion
+		$this->db->where('retail_productlist.promotion',null);    //  not promotion
+		$this->db->where('retail_productlist.productset',null);    //  not product set
 
 		$this->db->where('retail_productlist.stock_view is null');
 		$this->db->where('retail_stock.date_cut', $date_cut);

@@ -28,6 +28,7 @@ class Mdl_retailproduct extends CI_Model
 
             retail_productlist.price AS RPL_PRICE,
             retail_productlist.promotion AS RPL_PRO,
+            retail_productlist.productset AS RPL_SET,
             retail_productlist.promain_id AS RPL_MAIN,
             retail_productlist.prosubmain_id AS RPL_SUBMAIN,
             retail_productlist.protype_id AS RPL_TYPE,
@@ -258,7 +259,9 @@ class Mdl_retailproduct extends CI_Model
                 }
 
                 //  ตรวจสอบสินค้าที่ผูกกับโปร
-                $sqlhook = $this->db->select('list_id')
+                $is_promotion = null;
+                $is_productset = null;
+                $sqlhook = $this->db->select('list_id,promotion,productset')
                     ->from('retail_productlist')
                     ->where('id', $this->input->post('prolist_id'));
                 $qhook = $sqlhook->get();
@@ -266,7 +269,9 @@ class Mdl_retailproduct extends CI_Model
                 if ($numhook) {
                     $rhook = $qhook->row();
 
-                    $list_old = $rhook->LIST_ID ? $rhook->LIST_ID : null;
+                    $list_old = $rhook->list_id ? $rhook->list_id : null;
+                    $is_promotion = $rhook->promotion ? $rhook->promotion : null;
+                    $is_productset = $rhook->productset ? $rhook->productset : null;
                 }
 
                 $status = $this->input->post('status');
@@ -284,11 +289,15 @@ class Mdl_retailproduct extends CI_Model
                 }
 
                 // ระบุ promotion
+                $promotion = "";
+                $productset = "";
                 if(trim($this->input->post('procate_id')) == 3){
                    $promotion = 1;
-                }else{
-                   $promotion = "";
                 }
+
+                if(trim($this->input->post('procate_id')) == 4){
+                    $productset = 1;
+                 }
 
                 if($this->input->post('product_cut')){
                     $product_cut = json_encode($_REQUEST['product_cut']);
@@ -305,7 +314,8 @@ class Mdl_retailproduct extends CI_Model
                     'PROTYPE_ID'             => get_valueNullToNull(trim($this->input->post('protype_id'))),
                     'PROCATE_ID'             => get_valueNullToNull(trim($this->input->post('procate_id'))),
 
-                    'PROMOTION'             => $promotion,
+                    'PROMOTION'             => get_valueNullToNull($promotion),
+                    'PRODUCTSET'             => get_valueNullToNull($productset),
 
                     'LIST_ID'             => get_valueNullToNull($product_cut),
                     'PRICE'             => (trim($this->input->post('price')) ? number_format(trim($this->input->post('price')),2) : '0.00') ,
@@ -320,16 +330,22 @@ class Mdl_retailproduct extends CI_Model
                 $this->db->where('id', $this->input->post('prolist_id'));
                 $this->db->update('retail_productlist', $data);
 
+                //
                 //  update bill
+                $dataupdate = array();
                 if ($list_old != $product_cut) {
-                    $dataupdate = array(
-                        'list_id'             => $product_cut
-                    );
+                    $dataupdate['list_id'] = $product_cut;
+                }
+                $dataupdate['promotion'] = $is_promotion;
+                $dataupdate['productset'] = $is_productset;
 
+                if($dataupdate){
                     $this->db->where('prolist_id', $this->input->post('prolist_id'));
                     $this->db->where('status', 1);
                     $this->db->update('retail_billdetail', $dataupdate);
                 }
+                //
+                //
 
                 // ============== Log_Detail ============== //
                 $log_query = $this->db->last_query();

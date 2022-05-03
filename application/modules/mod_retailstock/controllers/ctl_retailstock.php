@@ -564,7 +564,22 @@ class Ctl_retailstock extends CI_Controller
 				$key_lid = array_keys(array_column($result_cut['result'],'pid'),$productid);
 				if(count($key_lid)){
 					foreach($key_lid as $key => $value){
-						$totalcut = $result_cut['result'][$value]['qty'];
+
+						$arraytest = array(
+							'item'	=> $productid,
+							'date'	=> $date_full_begin,
+							'datecut'	=> $request['date_cut'],
+						);
+						$starts = $this->mdl_retailstock->find_total_stockproductstarts($arraytest);
+						/* echo "<pre>";
+						echo "id = ".$productid."<br>";
+						echo "cut = ".$arraytest['datecut']."--------".$arraytest['date']."<br>";
+						echo "cut total = ".$result_cut['result'][$value]['qty']."<br>";
+						print_r($starts);
+						echo "</pre>"; */
+						
+						// $totalcut = $result_cut['result'][$value]['qty'];
+						$totalcut = $starts['total'] + $result_cut['result'][$value]['qty'];
 					}
 					$total_cut = $totalcut;
 				}

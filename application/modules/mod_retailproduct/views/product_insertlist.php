@@ -76,7 +76,7 @@
 
                                                     if ($UPproductlist->ID) {
                                                         //  check type promotion
-                                                        if ($UPproductlist->PROMOTION == 1) {
+                                                        if ($UPproductlist->PROMOTION == 1 || $UPproductlist->PRODUCTSET == 1) {
                                                             $setlist = "on";
                                                         }
 
