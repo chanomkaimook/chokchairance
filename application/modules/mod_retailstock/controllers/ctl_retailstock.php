@@ -212,45 +212,66 @@ class Ctl_retailstock extends CI_Controller
 			 * * ค้นหาสินค้าที่อยู่บนสต็อคที่ยังเหลือ (ไม่มีการขาย ไม่มีกาารรับเข้า ไม่มีการเปิดทำงาน แต่มีแสดงผลบนสต็อค)
 			 */
 			if ($datestart) {
+				$countitem = ($item ? count($item) : 0);
 				$setitem_on = implode(',', $item);
+
 				$sqlst = $this->db->select('retail_stock.RETAIL_PRODUCTLIST_ID as productid')
 					->from('retail_stock')
 					->where('retail_stock.status', 1)
-					->where('retail_stock.date_cut >=', $datestart)
+					// ->where('retail_stock.date_cut >=', $datestart)	//code old
+					->where('retail_stock.date_cut >=', $datecut)
 					->where('retail_stock.retail_productlist_id not in(' . $setitem_on . ')', null, false)
 					->group_by('retail_stock.retail_productlist_id');
 				$qst = $sqlst->get();
 				$numst = $qst->num_rows();
-				if ($numst) {
 
-					foreach ($qst->result() as $rst) {
-						$arrayst = array(
-							'item'			=> $rst->productid,
-							'datestart'		=> $datestart,
-							'datecut'		=> $datecut
-						);
+				if ($numst < $countitem) {
+					//
+					//	กรณีพบว่าสินค้าที่ค้นหามีบางตัวไม่มีบน stock foreach เพื่อเพิ่มสินค้า
+					foreach($item as $keyitem => $valitem){
+						$sql_find_stocknewitem = $this->mdl_retailstock->sqlStock()
+						->where('retail_stock.date_cut >=', $datecut)
+						->where('retail_stock.retail_productlist_id',$valitem);
+						$q_f_stocknewitem = $sql_find_stocknewitem->get();
+						$num_f_stocknewitem = $q_f_stocknewitem->num_rows();
+						//
+						//	ถ้าไม่พบสินค้านี้ในระบบ stock ให้เพิ่มลงไป
+						if(!$num_f_stocknewitem){
 
-						$total_bill_order = $this->mdl_retailstock->total_start_billOrder($arrayst);
-						$total_bill_issue = $this->mdl_retailstock->total_start_billIssue($arrayst);
-						$total_bill_receive = $this->mdl_retailstock->total_start_billReceive($arrayst);
-
-						$arraycal = array(
-							'total_bill'	=> $total_bill_order['row'],
-							'total_issue'	=> $total_bill_issue['row'],
-							'total_receive'	=> $total_bill_receive['row']
-						);
-						$total = $this->mdl_retailstock->cal_stock($arraycal);
-
-						$insert = array(
-							'retail_productlist_id' => $rst->productid,
-							'total' 					=> get_valueNullToNull($total),
-							'date_cut' 					=> $datecut,
-							'date_starts' 				=> $this->set['datenow'],
-							'user_starts' 				=> $this->session->userdata('useradminid')
-						);
-						// echo "stockมี insert :".$val." = ".$total;
-						$this->db->insert('retail_stock', $insert);
-					}
+							$arrayst = array(
+								'item'			=> $valitem,
+								'datestart'		=> $datestart,
+								'datecut'		=> $datecut
+							);
+	
+							$total_bill_order = $this->mdl_retailstock->total_start_billOrder($arrayst);
+							$total_bill_issue = $this->mdl_retailstock->total_start_billIssue($arrayst);
+							$total_bill_receive = $this->mdl_retailstock->total_start_billReceive($arrayst);
+	
+							$arraycal = array(
+								'total_bill'	=> $total_bill_order['row'],
+								'total_issue'	=> $total_bill_issue['row'],
+								'total_receive'	=> $total_bill_receive['row']
+							);
+							$total = $this->mdl_retailstock->cal_stock($arraycal);
+	
+							$insert = array(
+								'retail_productlist_id' => $valitem,
+								'total' 					=> get_valueNullToNull($total),
+								'date_cut' 					=> $datecut,
+								'date_starts' 				=> $this->set['datenow'],
+								'user_starts' 				=> $this->session->userdata('useradminid')
+							);
+							/* echo "stockมี insert :".$valitem." = ".$total."<br>";
+							echo "(b=".$arraycal['total_bill'].")";
+							echo "(i=".$arraycal['total_issue'].")";
+							echo "(r=".$arraycal['total_receive'].")";
+							echo "<br>"; */
+							$this->db->insert('retail_stock', $insert);
+							
+						}
+					}	//	End foreach กรณีพบว่าสินค้าที่ค้นหามีบางตัวไม่มีบน stock 
+					
 				}
 			}
 			//	create value unique

@@ -5,7 +5,7 @@ class Mdl_retailproduct extends CI_Model
 {
 
     //---------------------------- DATATABLE ----------------------------//
-    var $order_column = array("ID", "RPL_NAME_TH", "RPL_NAME_US", null, null);
+    var $order_column = array(null,"RPL_PRICE", null , "RPM_NAME_TH", "RPS_NAME_TH", "RPT_NAME_TH", "RPC_NAME_TH",null);
     function make_query()
     {
 
@@ -74,6 +74,15 @@ class Mdl_retailproduct extends CI_Model
 
         if (!empty($_POST["selectproductmain"])) {
             $this->db->where('retail_productmain.ID', $_POST["selectproductmain"]);
+        }
+        if (!empty($_POST["selectproductsubmain"])) {
+            $this->db->where('product_submain.ID', $_POST["selectproductsubmain"]);
+        }
+        if (!empty($_POST["selectproducttype"])) {
+            $this->db->where('product_type.ID', $_POST["selectproducttype"]);
+        }
+        if (!empty($_POST["selectproductcate"])) {
+            $this->db->where('product_category.ID', $_POST["selectproductcate"]);
         }
 
         if (!empty($_POST["status"])) {

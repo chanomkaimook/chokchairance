@@ -562,7 +562,8 @@ class Mdl_retailstock extends CI_Model
 				$rowqty = intval($array_product['total']) * intval($rowqty);
 			}
 
-			if ($array['datestart']) {
+			$total = 0;
+			/* if ($array['datestart']) {
 				$sqlset = $this->mdl_retailstock->sqlStock()
 					->where('retail_stock.date_cut', $array['datestart']);
 				$qset = $sqlset->get();
@@ -572,7 +573,7 @@ class Mdl_retailstock extends CI_Model
 					$total = $rowset->TOTAL;
 					$rowqty = $total + $row->rtd_qty;
 				}
-			}
+			} */
 
 			$result = array(
 				'num'		=> $num,
@@ -616,7 +617,8 @@ class Mdl_retailstock extends CI_Model
 				$rowqty = intval($array_product['total']) * intval($row->rtd_qty);
 			}
 
-			if ($array['datestart']) {
+			$total = 0;
+			/* if ($array['datestart']) {
 				$sqlset = $this->mdl_retailstock->sqlStock()
 					->where('retail_stock.date_cut', $array['datestart']);
 				$qset = $sqlset->get();
@@ -626,7 +628,7 @@ class Mdl_retailstock extends CI_Model
 					$total = $rowset->TOTAL;
 					$rowqty = $total + $row->rtd_qty;
 				}
-			}
+			} */
 
 			$result = array(
 				'num'		=> $num,
@@ -671,16 +673,19 @@ class Mdl_retailstock extends CI_Model
 				$rowqty = intval($array_product['total']) * intval($row->rtd_qty);
 			}
 
-			if ($array['datestart']) {
+			$total = 0;
+			if($array['datestart']){
 				$sqlset = $this->mdl_retailstock->sqlStock()
-					->where('retail_stock.date_cut', $array['datestart']);
+				->where('retail_stock.retail_productlist_id',$array['item'])
+				->where('retail_stock.date_cut',$array['datestart']);
 				$qset = $sqlset->get();
 				$numset = $qset->num_rows();
-				if ($numset) {
+				if($numset){
 					$rowset = $qset->row();
 					$total = $rowset->TOTAL;
 					$rowqty = $total + $row->rtd_qty;
 				}
+				
 			}
 
 			$result = array(

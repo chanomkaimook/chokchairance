@@ -53,7 +53,7 @@ class Ctl_retailproduct extends CI_Controller
 			'submenu' 		=> $this->set['submenu']
 		);
 
-		$data['Query_productmain'] = $this->mdl_sql->get_WhereParaqry('retail_productmain', 'status', 1);
+		// $data['Query_productmain'] = $this->mdl_sql->get_WhereParaqry('retail_productmain', 'status', 1);
 		$data['base_bn'] = base_url() . BASE_BN;
 		$data['basepic'] = base_url() . BASE_PIC;
 		$this->load->view('product', $data);
