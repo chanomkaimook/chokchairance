@@ -103,6 +103,7 @@
                                                 $sql = $this->db->select('id,codemac,name_th')
                                                     ->from('retail_productlist')
                                                     ->where('retail_productlist.promotion is null')
+													->where('retail_productlist.productset is null')
                                                     ->where('status', 1);
                                                 $q = $sql->get();
                                                 $num = $q->num_rows();
