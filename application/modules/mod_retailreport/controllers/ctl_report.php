@@ -30,7 +30,7 @@ class Ctl_report extends CI_Controller
 		parent::__construct();
 		$this->load->model(array('mdl_report'));
 		$this->load->library('session');
-		$this->load->library(array('Permiss'));
+		$this->load->library(array('Permiss','Product'));
 		$this->load->helper(array('form', 'url', 'myfunction_helper', 'sql_helper', 'permiss_helper', 'array_helper'));
 
 		$this->set	= array(

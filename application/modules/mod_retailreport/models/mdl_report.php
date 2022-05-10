@@ -865,6 +865,7 @@ class Mdl_report extends CI_Model
 					' . $this->tablesecond . '.protype_id as bill_ptype_id,
 					' . $this->tablesecond . '.procate_id as bill_pcate_id,
 					' . $this->tablesecond . '.prolist_id as bill_pid,
+					' . $this->tablesecond . '.list_id as bill_lid,
 					' . $this->tablesecond . '.quantity as bill_qty,
 					' . $this->tablesecond . '.prounit as bill_unit,
 					' . $this->tablesecond . '.total_price as bill_prototalprice,

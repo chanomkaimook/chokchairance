@@ -100,11 +100,39 @@ foreach ($query as $row => $val) {
 		$r_type->NAME_TH,
 		$r_cate->NAME_TH,
 		date('M-y', strtotime($val->bill_datetime))
-		// '1/3/2022'
 
 	);
+	$array_list = array();
+	if($val->bill_lid){
+		//
+		//	อ่านข้อมูลของสินค้าที่มีรายการตัด
+		$array_list = $this->product->decodeValue($val->bill_lid);
+		if ($array_list) {
+			foreach($array_list as $key => $valin){
+				$write_array[] = array(
+
+					date('d-m-Y', strtotime($val->bill_datetime)),
+					$val->bill_gateway,
+					$val->bill_code,
+					$val->bill_pos,
+					$valin['id'],
+					$valin['name'],
+					$valin['total'],
+					$val->bill_unit,
+					$val->bill_prototalprice,
+			
+					$r_main->NAME_TH,
+					$r_submain->NAME_TH,
+					$r_type->NAME_TH,
+					$r_cate->NAME_TH,
+					date('M-y', strtotime($val->bill_datetime))
+				);
+				
+			}
+		}
+	}
 }
-// echo "<pre>";print_r($write_array);echo "</pre>";die();
+
 $row++;
 $last_row = $row;
 
