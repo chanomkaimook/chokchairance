@@ -37,7 +37,7 @@ class Mdl_retailproduct extends CI_Model
         $this->db->from('retail_productlist');
         $this->db->join('retail_productmain', "retail_productlist.PROMAIN_ID = retail_productmain.ID", 'left');
         $this->db->join('product_submain', "retail_productlist.PROSUBMAIN_ID = product_submain.ID", 'left');
-        $this->db->join('product_type', "retail_productlist.PROSUBMAIN_ID = product_type.ID", 'left');
+        $this->db->join('product_type', "retail_productlist.PROTYPE_ID = product_type.ID", 'left');
         $this->db->join('product_category', "retail_productlist.PROCATE_ID = product_category.ID", 'left');
         $this->db->where('retail_productlist.STATUS_VIEW', 1);    //  for show 
 

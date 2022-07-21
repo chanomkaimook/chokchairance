@@ -138,6 +138,8 @@ class Ctl_retailstock extends CI_Controller
 				'query' => 'retail_billdetail.PROLIST_ID as rt_prolist_id,retail_billdetail.LIST_ID as rt_list_id',
 			);
 			$sqlproductbill = $this->mdl_retailstock->sqlBillOrderDate($arrayquery)
+				->where('retail_billdetail.promotion',null)    //  not promotion
+				->where('retail_billdetail.productset',null)    //  not product set
 				->where('date(retail_bill.date_starts) >=', $datecut);
 			// ->where('if(retail_billdetail.list_id is not null,retail_billdetail.list_id =' . $item_check_del . ',retail_billdetail.prolist_id =' . $item_check_del . ')', null, false)
 			// ->where('date(retail_bill.date_starts) <', $this->set['datenow']);
@@ -209,7 +211,7 @@ class Ctl_retailstock extends CI_Controller
 			exit; */
 
 			/**
-			 * * ค้นหาสินค้าที่อยู่บนสต็อคที่ยังเหลือ (ไม่มีการขาย ไม่มีกาารรับเข้า ไม่มีการเปิดทำงาน แต่มีแสดงผลบนสต็อค)
+			 * * ค้นหาจำนวนสินค้าที่ไม่มีบน stock ในรอบตัดปัจจุบัน
 			 */
 			if ($datestart) {
 				$countitem = ($item ? count($item) : 0);
@@ -220,7 +222,7 @@ class Ctl_retailstock extends CI_Controller
 					->where('retail_stock.status', 1)
 					// ->where('retail_stock.date_cut >=', $datestart)	//code old
 					->where('retail_stock.date_cut >=', $datecut)
-					->where('retail_stock.retail_productlist_id not in(' . $setitem_on . ')', null, false)
+					->where('retail_stock.retail_productlist_id in(' . $setitem_on . ')', null, false)
 					->group_by('retail_stock.retail_productlist_id');
 				$qst = $sqlst->get();
 				$numst = $qst->num_rows();

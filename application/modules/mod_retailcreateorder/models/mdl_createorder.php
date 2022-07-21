@@ -494,7 +494,7 @@ class Mdl_createorder extends CI_Model {
                     }
                 } else {
                     $dateY = (date('Y') + 543);
-                    $codeDB = 'Jerky 1_'.$dateY;
+                    $codeDB = 'ccr_1_'.$dateY;
                 }
                 
                 // Insert bill //
@@ -543,13 +543,13 @@ class Mdl_createorder extends CI_Model {
                         'TEXT_NUMBER'       => trim($this->input->post('text_nameber')) ,
                         'METHODORDER_ID'    => trim($this->input->post('method_order')) ,
     
-                        'TOTAL_PRICE'       => trim($TBLtotalprice)  ,
+                        'TOTAL_PRICE'       => trim($this->input->post('TBLtotalprice'))  ,
                         'PARCEL_COST'       => trim($this->input->post('total-Parcelcost')) ,
                         'DELIVERY_FEE'      => trim($this->input->post('total-Shippingcost')) ,
                         'DISCOUNT_PRICE'    => trim($this->input->post('discount')) ,
                         'SHOR_MONEY'        => trim($this->input->post('shor_money'))  ,
                         'TAX'               => trim($this->input->post('tax'))  ,
-                        'NET_TOTAL'         => trim($NET_TOTAL)  ,
+                        'NET_TOTAL'         => trim($net_total)  ,
      
                         'TRANSFERED_BANIK_ID'   => trim($this->input->post('bankID')) ,
                         'TRANSFERED_DAYTIME'    => $TRANSFEREDDAYTIME,

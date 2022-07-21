@@ -49,6 +49,7 @@ $write_array[] = array(
 $totalarray = array_sum(array_map("count", $write_array)) - 1;
 $columnfirst = get_columnExcelNameFromNumber(0);
 $columnlast = get_columnExcelNameFromNumber($totalarray);
+
 //
 foreach ($query as $row => $val) {
 	//	number
@@ -103,6 +104,7 @@ foreach ($query as $row => $val) {
 
 	);
 	$array_list = array();
+
 	if($val->bill_lid){
 		//
 		//	อ่านข้อมูลของสินค้าที่มีรายการตัด
@@ -134,7 +136,8 @@ foreach ($query as $row => $val) {
 }
 
 $row++;
-$last_row = $row;
+// $last_row = $row;
+$last_row = ($write_array ? count($write_array) : 0);
 
 // echo  count($write_array)."<br>"."<pre>";print_r($write_array);echo "</pre>";die();
 //	

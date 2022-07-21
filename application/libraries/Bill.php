@@ -33,7 +33,7 @@ class Bill
 			}
 		} else {
 			$dateY = (date('Y') + 543);
-			$codeDB = 'Jerky 1_' . $dateY;
+			$codeDB = 'ccr_1_' . $dateY;
 		}
 
 		return $codeDB;
@@ -189,7 +189,7 @@ class Bill
 				return $result;
 			}
 
-			$ci->load->library('bill');
+			$ci->load->library(array('bill','order'));
 
 			$i = 0;
 			if ($array) {
@@ -220,6 +220,9 @@ class Bill
 				$delivery_fee = get_ValueNullToNull(trim($array['bill_logis']));
 				$discount_price = get_ValueNullToNull(trim($array['bill_discount']));
 				$net_total = get_ValueNullToNull(trim($array['totalamount']));
+				if(get_ValueNullToNull(trim($array['totalamount']))){
+					$nettotal = ($total_price + ($delivery_fee + $parcel_cost + $shor_money + $tax) + $discount_price);
+				}
 
 				//	bank id
 				$transfered_banik_id = get_ValueNullToNull(trim($array['bankid']));
@@ -239,14 +242,42 @@ class Bill
 				$status_complete = $statuscomplete;
 				$status_approve1 = 0;
 				$status_approve2 = 0;
-
+	
 				if ($billstatus == 'F') {
-					$status_approve1 = 2;
-					$status_approve2 = 2;
+					$status_approve1 = 1;
+					$status_approve2 = 1;
 				} else if ($billstatus == 'C') {
-					$status_approve1 = 2;
+					$status_approve1 = 1;
 				}
+				
+				//  status
+				if($statuscomplete == 5){ 
+					$status_approve1 = 1;
 
+					$billstatus = 'C'; 
+				} else if($statuscomplete == 6){
+					$statuscomplete = 2; 
+					$status_approve1 = 1;
+					$status_approve2 = 1; 
+					$billstatus = 'F';
+					
+					$total_price = 0;
+					$net_total = 0;
+					
+					$transfered_date = date('Y-m-d H:i:s');
+				} else { 
+					$billstatus = 'T';
+				}
+				
+				//	if approve 2 set date update for show bill approve time
+				$date_update = null;
+				$user_update = null;
+				if($status_approve2 == 1){
+					$date_update = date('Y-m-d H:i:s');
+					$user_update = $ci->session->userdata('useradminid');
+					$ci->session->userdata('useradminid');
+				}
+				
 				$datainsert = array(
 					'code'	=> $code,
 
@@ -283,6 +314,9 @@ class Bill
 					'billref_id'	=> $bill_id,
 					'billref_code'	=> $bill_code,
 
+					'date_update'	=> $date_update,
+					'user_update'	=> $user_update,
+				
 					'date_starts'	=> $bill_date . " " . date('H:i:s'),
 					'user_starts'	=> $ci->session->userdata('useradminid')
 				);
@@ -291,14 +325,21 @@ class Bill
 				if ($id) {
 					$i++;	// count 
 					foreach ($item as $keydetail => $subdetail) {
-
+						
+						//	list id
+						if(get_ValueNullToNull(trim($subdetail['prolist']))){
+							$listid = $ci->order->get_checkProductIdPro($row['prolist']);
+						}else{
+							$listid = "";
+						}
+						
 						$datainsertdetail = array(
 							'code'	=> $code,
 							'bill_id'	=> $id,
 
 							'promain_id'	=> get_ValueNullToNull(trim($subdetail['promain'])),
 							'prolist_id'	=> get_ValueNullToNull(trim($subdetail['prolist'])),
-							'list_id'		=> get_ValueNullToNull(trim($subdetail['list'])),
+							'list_id'		=> $listid,
 							'quantity'		=> get_ValueNullToNull(trim($subdetail['qty'])),
 							'total_price'	=> get_ValueNullToNull(trim($subdetail['totalprice'])),
 
@@ -313,7 +354,7 @@ class Bill
 			// ============== Log_Detail ============== //
 			$log_query = $ci->db->last_query();
 			$last_id = $ci->session->userdata('log_id');
-			$detail = "Insert billnew Code : " . $ci->session->userdata('useradminid') . " Name : " . $ci->session->userdata('useradminname');
+			$detail = "Insert billnew Code : " . $ci->session->userdata('useradminid') . " Name : " . $ci->session->userdata('useradminname')." data-bill :".$datainsert." data-billdetail :".$datainsertdetail;
 			$type = "Insert";
 			$arraylog = array(
 				'log_id'  		 => $last_id,

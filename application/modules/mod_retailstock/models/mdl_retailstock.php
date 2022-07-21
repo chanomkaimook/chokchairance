@@ -229,7 +229,9 @@ class Mdl_retailstock extends CI_Model
 		$this->db->join('staff', 'retail_stocksetting.user_update=staff.code', 'left');
 
 		// $this->db->where('retail_productlist.promain_id not in(6,12,14,15,16)');    //  14,15,16 dryeage
-		$this->db->where('retail_productlist.procate_id !=', 3);    //  not promotion
+		$this->db->where('retail_productlist.promotion',null);    //  not promotion
+		$this->db->where('retail_productlist.productset',null);    //  not product set
+		
 		$this->db->where('retail_productlist.stock_view is null');
 		$this->db->where('retail_productlist.status', 1);
 		$this->db->where('retail_productlist.id not in(279,278,277)');
@@ -548,7 +550,7 @@ class Mdl_retailstock extends CI_Model
 			->where('if(retail_billdetail.list_id is not null,retail_billdetail.list_id like \'%"id":"' . $array['item'] . '"%\',retail_billdetail.prolist_id =' . $array['item'] . ')', null, false);
 
 		if ($array['datestart']) {
-			$sql->where('date(retail_bill.date_start) >=', $array['datestart']);
+			$sql->where('date(retail_bill.date_starts) >=', $array['datestart']);
 		}
 
 		$q = $sql->get();
@@ -1808,7 +1810,8 @@ exit; */
 			->from('retail_productlist')
 			->join('retail_stock', 'retail_productlist.id=retail_stock.retail_productlist_id')
 			// ->where('retail_productlist.promain_id not in(6,12,14,15,16)')    //  14,15,16 dryeage
-			->where('retail_productlist.procate_id !=', 3)    //  not promotion
+			->where('retail_productlist.promotion',null)    //  not promotion
+			->where('retail_productlist.productset',null)    //  not product set
 			->where('retail_productlist.stock_view is null')
 			->where('retail_stock.date_starts >=', $array['datecut'])
 			->where('if(retail_stock.date_end is not null,date(retail_stock.date_end) >= "' . $this->set['datenow'] . '",retail_stock.date_end is null)', null, false)
@@ -1824,7 +1827,8 @@ exit; */
 		return $this->db->select($array['query'])
 			->from('retail_productlist')
 			// ->where('retail_productlist.promain_id not in(6,12,14,15,16)')    //  14,15,16 dryeage
-			->where('retail_productlist.procate_id !=', 3)    //  not promotion
+			->where('retail_productlist.promotion',null)    //  not promotion
+			->where('retail_productlist.productset',null)    //  not product set
 			->where('retail_productlist.stock_view is null')
 			->where('retail_productlist.status', 1);
 	}
